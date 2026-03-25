@@ -3,8 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Event;
-use App\Models\PriceCategory;
-use App\Models\Seat;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
