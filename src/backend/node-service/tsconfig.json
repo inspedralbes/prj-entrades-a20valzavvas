@@ -15,7 +15,8 @@
     "noImplicitAny": true,
     "paths": {
       "@shared/*": ["../../shared/types/*"]
-    }
+    },
+    "types": ["vitest/globals"]
   },
   "ts-node": {
     "require": ["tsconfig-paths/register"]
