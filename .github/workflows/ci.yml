@@ -29,6 +29,12 @@ jobs:
     env:
       # Ephemeral CI database — credentials match the service container above.
       DATABASE_URL: postgresql://entrades:${{ secrets.CI_POSTGRES_PASSWORD || 'entrades' }}@localhost:5432/entrades
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: entrades
+      DB_USERNAME: entrades
+      DB_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD || 'entrades' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -42,14 +48,45 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
 
-      - name: Install dependencies
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, mbstring
+
+      - name: PHP version
+        run: php --version
+
+      - name: Install Node dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
+        working-directory: src/backend/laravel-service
+
+      - name: Setup Laravel environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+        working-directory: src/backend/laravel-service
+
+      - name: Lint (JS/TS)
         run: pnpm lint
+
+      - name: Lint (PHP — Pint)
+        run: vendor/bin/pint --test
+        working-directory: src/backend/laravel-service
 
       - name: Type-check
         run: pnpm type-check
+
+      - name: Run Laravel migrations
+        run: php artisan migrate --force
+        working-directory: src/backend/laravel-service
+
+      - name: Laravel migration status
+        run: php artisan migrate:status
+        working-directory: src/backend/laravel-service
 
       # Uncomment when Prisma is configured (EP-08 / backend schema tasks)
       # - name: Run database migrations
@@ -59,8 +96,12 @@ jobs:
       - name: Test frontend
         run: pnpm --filter frontend test
 
-      - name: Test backend
+      - name: Test backend (Node)
         run: pnpm --filter node-service test
 
       - name: Test shared
         run: pnpm --filter shared test
+
+      - name: Test backend (Laravel)
+        run: php artisan test
+        working-directory: src/backend/laravel-service
