@@ -1,0 +1,49 @@
+services:
+
+  # ── PostgreSQL 16 ──────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── NestJS backend ─────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: src/backend/node-service/Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      PORT: ${BACKEND_PORT:-3001}
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── Nuxt 3 frontend ────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: src/frontend/Dockerfile
+    environment:
+      NITRO_PORT: ${FRONTEND_PORT:-3000}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - backend
+
+# ── Named volumes ──────────────────────────────────────────────────────────
+volumes:
+  db-data:

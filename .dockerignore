@@ -1,0 +1,21 @@
+# Dependencies — installed inside the container via pnpm install
+node_modules/
+**/node_modules/
+
+# Build outputs — rebuilt inside the container
+dist/
+.output/
+.nuxt/
+.nitro/
+*.tsbuildinfo
+
+# Environment secrets
+.env
+.env.*
+
+# Dev / IDE
+.git/
+.DS_Store
+*.log
+coverage/
+.vitest-cache/
