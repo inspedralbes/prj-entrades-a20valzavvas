@@ -1,0 +1,42 @@
+# ─── Dependencies ────────────────────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+pnpm-debug.log*
+
+# ─── Build outputs ───────────────────────────────────────────────────────────
+dist/
+build/
+.output/
+.nuxt/
+.nitro/
+*.tsbuildinfo
+
+# ─── Environment & secrets ───────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Laravel ─────────────────────────────────────────────────────────────────
+src/backend/laravel-service/vendor/
+src/backend/laravel-service/storage/logs/*
+src/backend/laravel-service/storage/framework/cache/*
+src/backend/laravel-service/storage/framework/sessions/*
+src/backend/laravel-service/storage/framework/views/*
+src/backend/laravel-service/bootstrap/cache/*
+!src/backend/laravel-service/storage/.gitkeep
+!src/backend/laravel-service/bootstrap/cache/.gitkeep
+
+# ─── Test & coverage ─────────────────────────────────────────────────────────
+coverage/
+.vitest-cache/
+
+# ─── IDE & OS ────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+logs/

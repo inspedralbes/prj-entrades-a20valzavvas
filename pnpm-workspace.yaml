@@ -1,0 +1,8 @@
+packages:
+  - 'src/frontend'
+  - 'src/backend/node-service'
+  - 'src/shared'
+allowBuilds:
+  '@nestjs/core': false
+  '@parcel/watcher': false
+  esbuild: false

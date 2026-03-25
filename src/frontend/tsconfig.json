@@ -1,0 +1,11 @@
+// Nuxt generates .nuxt/tsconfig.json at `nuxi prepare` / `nuxi dev`.
+// This extends the generated file which includes auto-import types.
+// Run `pnpm --filter frontend exec nuxi prepare` before typechecking on a fresh clone.
+{
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@shared/*": ["../shared/types/*"]
+    }
+  }
+}
