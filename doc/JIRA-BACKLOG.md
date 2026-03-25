@@ -11,55 +11,55 @@
 
 > **v2.0 — Pivotatge arquitectural:** S'afegeix EP-00 (Auth) i nous tickets d'infraestructura (US-01-05 a US-01-08) per al backend dual Node+Laravel i el proxy Nginx. US-01-03 passa de Prisma a Eloquent (Laravel).
 
-| ID       | Títol                                        | Depèn de                                              | Bloqueja                                                                          |
-| -------- | -------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------- |
-| US-01-01 | Inicialització del monorepo pnpm             | —                                                     | Totes les altres                                                                  |
-| US-01-02 | Entorn local Docker Compose (5 serveis)      | US-01-01                                              | US-01-03, US-01-04 i tot el dev                                                   |
-| US-01-05 | Scaffold Node Service (NestJS temps real)    | US-01-01                                              | US-01-08, US-03-02, US-04-01                                                      |
-| US-01-06 | Scaffold Laravel Service (API + BD)          | US-01-02                                              | US-01-03, US-00-01, US-02-01                                                      |
-| US-01-07 | Configuració Nginx proxy invers              | US-01-02                                              | US-01-08, US-00-01                                                                |
-| US-01-08 | Client HTTP intern Node → Laravel            | US-01-05, US-01-06                                    | US-03-02, US-04-01, US-04-05                                                      |
-| US-01-03 | Esquema BD amb Eloquent (Laravel migrations) | US-01-06                                              | US-01-04, US-02-01, US-03-01, US-04-01, US-05-01, US-06-01                        |
-| US-01-04 | Seed de dades inicials (Laravel seeder)      | US-01-03                                              | US-03-01, US-04-01, US-07-01                                                      |
-| US-00-01 | Configuració Laravel Sanctum JWT             | US-01-06, US-01-03                                    | US-00-02, US-00-03, US-00-06                                                      |
-| US-00-02 | Endpoint register (POST /api/auth/register)  | US-00-01                                              | US-00-04                                                                          |
-| US-00-03 | Endpoint login (POST /api/auth/login)        | US-00-01                                              | US-00-04                                                                          |
-| US-00-04 | Middleware auth frontend (Nuxt)              | US-00-02, US-00-03                                    | US-04-06, US-05-01, US-02-01                                                      |
-| US-00-05 | Pàgines /auth/login i /auth/register (Nuxt) | US-00-02, US-00-03                                    | US-00-04                                                                          |
-| US-00-06 | Validació JWT al Node Service (WS guard)     | US-00-01, US-01-05                                    | US-03-02, US-04-01                                                                |
-| US-02-01 | Llistat d'esdeveniments (admin)              | US-01-03, US-00-04                                    | US-02-02, US-02-03, US-02-04, US-02-05                                            |
-| US-02-02 | Crear esdeveniment                           | US-02-01                                              | US-02-03, US-02-05, US-03-01, US-07-03                                            |
-| US-02-03 | Editar esdeveniment                          | US-02-02                                              | —                                                                                 |
-| US-02-04 | Eliminar esdeveniment                        | US-02-01                                              | —                                                                                 |
-| US-02-05 | Publicar / despublicar                       | US-02-02                                              | US-03-01 (requereix event publicat)                                               |
-| US-03-01 | Visualització del mapa de seients            | US-01-03, US-01-04, US-02-02                          | US-03-02, US-04-01, US-07-01                                                      |
-| US-03-02 | Sincronització d'estat en temps real         | US-03-01, US-01-08, US-00-06                          | US-03-03, US-04-01, US-04-08, US-06-01, US-09-03, US-09-04                        |
-| US-03-03 | Indicador de connexió WS                     | US-03-02                                              | —                                                                                 |
-| US-04-01 | Reserva temporal d'un seient                 | US-03-01, US-03-02, US-00-06                          | US-04-02, US-04-03, US-04-04, US-04-05, US-04-06, US-04-08, US-07-01, US-07-04   |
-| US-04-02 | Límit de seients per usuari                  | US-04-01                                              | —                                                                                 |
-| US-04-03 | Temporitzador visible de reserva             | US-04-01                                              | US-04-05, US-07-02                                                                |
-| US-04-04 | Alliberament voluntari d'una reserva         | US-04-01                                              | —                                                                                 |
-| US-04-05 | Expiració automàtica al servidor (cron)      | US-04-01, US-04-03, US-01-08                          | US-09-04                                                                          |
-| US-04-06 | Formulari de checkout                        | US-04-01, US-00-04                                    | US-04-07                                                                          |
-| US-04-07 | Confirmació de compra                        | US-04-06                                              | US-05-01, US-06-01, US-06-02, US-09-02                                            |
-| US-04-08 | Gestió de conflicte concurrent               | US-04-01, US-03-02                                    | —                                                                                 |
-| US-05-01 | Consulta d'entrades de l'usuari              | US-04-07, US-00-04                                    | —                                                                                 |
-| US-06-01 | Dashboard admin en temps real                | US-03-02, US-04-07                                    | US-06-02, US-09-01                                                                |
-| US-06-02 | Informe de vendes per categoria              | US-04-07, US-06-01                                    | US-09-02                                                                          |
-| US-07-01 | Tests unitaris stores Pinia                  | US-03-01, US-04-01                                    | US-08-01                                                                          |
-| US-07-02 | Tests unitaris composables                   | US-04-03                                              | US-08-01                                                                          |
-| US-07-03 | Tests de rutes i navegació                   | US-02-02                                              | US-08-01                                                                          |
-| US-07-04 | Test de concurrència                         | US-04-01                                              | US-08-01                                                                          |
-| US-07-05 | Configuració ESLint i Prettier               | US-01-01                                              | US-08-01                                                                          |
-| US-08-01 | Pipeline CI (GitHub Actions)                 | US-07-01, US-07-02, US-07-03, US-07-04, US-07-05     | US-08-02, US-08-03, US-08-05                                                      |
-| US-08-02 | Workflow deploy Node Service                 | US-08-01                                              | —                                                                                 |
-| US-08-03 | Workflow deploy frontend                     | US-08-01                                              | —                                                                                 |
-| US-08-04 | Migració automàtica BD en deploy             | US-08-01                                              | —                                                                                 |
-| US-08-05 | Workflow deploy Laravel Service              | US-08-01                                              | US-08-04                                                                          |
-| US-09-01 | Gràfic d'ocupació en temps real              | US-06-01                                              | —                                                                                 |
-| US-09-02 | Gràfic d'evolució de vendes                  | US-06-02                                              | —                                                                                 |
-| US-09-03 | Animacions de canvi d'estat de seients       | US-03-02                                              | —                                                                                 |
-| US-09-04 | Reconnexió WS amb recuperació d'estat        | US-04-05, US-03-02                                    | —                                                                                 |
+| ID       | Títol                                        | Depèn de                                         | Bloqueja                                                                       |
+| -------- | -------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------ |
+| US-01-01 | Inicialització del monorepo pnpm             | —                                                | Totes les altres                                                               |
+| US-01-02 | Entorn local Docker Compose (5 serveis)      | US-01-01                                         | US-01-03, US-01-04 i tot el dev                                                |
+| US-01-05 | Scaffold Node Service (NestJS temps real)    | US-01-01                                         | US-01-08, US-03-02, US-04-01                                                   |
+| US-01-06 | Scaffold Laravel Service (API + BD)          | US-01-02                                         | US-01-03, US-00-01, US-02-01                                                   |
+| US-01-07 | Configuració Nginx proxy invers              | US-01-02                                         | US-01-08, US-00-01                                                             |
+| US-01-08 | Client HTTP intern Node → Laravel            | US-01-05, US-01-06                               | US-03-02, US-04-01, US-04-05                                                   |
+| US-01-03 | Esquema BD amb Eloquent (Laravel migrations) | US-01-06                                         | US-01-04, US-02-01, US-03-01, US-04-01, US-05-01, US-06-01                     |
+| US-01-04 | Seed de dades inicials (Laravel seeder)      | US-01-03                                         | US-03-01, US-04-01, US-07-01                                                   |
+| US-00-01 | Configuració Laravel Sanctum JWT             | US-01-06, US-01-03                               | US-00-02, US-00-03, US-00-06                                                   |
+| US-00-02 | Endpoint register (POST /api/auth/register)  | US-00-01                                         | US-00-04                                                                       |
+| US-00-03 | Endpoint login (POST /api/auth/login)        | US-00-01                                         | US-00-04                                                                       |
+| US-00-04 | Middleware auth frontend (Nuxt)              | US-00-02, US-00-03                               | US-04-06, US-05-01, US-02-01                                                   |
+| US-00-05 | Pàgines /auth/login i /auth/register (Nuxt)  | US-00-02, US-00-03                               | US-00-04                                                                       |
+| US-00-06 | Validació JWT al Node Service (WS guard)     | US-00-01, US-01-05                               | US-03-02, US-04-01                                                             |
+| US-02-01 | Llistat d'esdeveniments (admin)              | US-01-03, US-00-04                               | US-02-02, US-02-03, US-02-04, US-02-05                                         |
+| US-02-02 | Crear esdeveniment                           | US-02-01                                         | US-02-03, US-02-05, US-03-01, US-07-03                                         |
+| US-02-03 | Editar esdeveniment                          | US-02-02                                         | —                                                                              |
+| US-02-04 | Eliminar esdeveniment                        | US-02-01                                         | —                                                                              |
+| US-02-05 | Publicar / despublicar                       | US-02-02                                         | US-03-01 (requereix event publicat)                                            |
+| US-03-01 | Visualització del mapa de seients            | US-01-03, US-01-04, US-02-02                     | US-03-02, US-04-01, US-07-01                                                   |
+| US-03-02 | Sincronització d'estat en temps real         | US-03-01, US-01-08, US-00-06                     | US-03-03, US-04-01, US-04-08, US-06-01, US-09-03, US-09-04                     |
+| US-03-03 | Indicador de connexió WS                     | US-03-02                                         | —                                                                              |
+| US-04-01 | Reserva temporal d'un seient                 | US-03-01, US-03-02, US-00-06                     | US-04-02, US-04-03, US-04-04, US-04-05, US-04-06, US-04-08, US-07-01, US-07-04 |
+| US-04-02 | Límit de seients per usuari                  | US-04-01                                         | —                                                                              |
+| US-04-03 | Temporitzador visible de reserva             | US-04-01                                         | US-04-05, US-07-02                                                             |
+| US-04-04 | Alliberament voluntari d'una reserva         | US-04-01                                         | —                                                                              |
+| US-04-05 | Expiració automàtica al servidor (cron)      | US-04-01, US-04-03, US-01-08                     | US-09-04                                                                       |
+| US-04-06 | Formulari de checkout                        | US-04-01, US-00-04                               | US-04-07                                                                       |
+| US-04-07 | Confirmació de compra                        | US-04-06                                         | US-05-01, US-06-01, US-06-02, US-09-02                                         |
+| US-04-08 | Gestió de conflicte concurrent               | US-04-01, US-03-02                               | —                                                                              |
+| US-05-01 | Consulta d'entrades de l'usuari              | US-04-07, US-00-04                               | —                                                                              |
+| US-06-01 | Dashboard admin en temps real                | US-03-02, US-04-07                               | US-06-02, US-09-01                                                             |
+| US-06-02 | Informe de vendes per categoria              | US-04-07, US-06-01                               | US-09-02                                                                       |
+| US-07-01 | Tests unitaris stores Pinia                  | US-03-01, US-04-01                               | US-08-01                                                                       |
+| US-07-02 | Tests unitaris composables                   | US-04-03                                         | US-08-01                                                                       |
+| US-07-03 | Tests de rutes i navegació                   | US-02-02                                         | US-08-01                                                                       |
+| US-07-04 | Test de concurrència                         | US-04-01                                         | US-08-01                                                                       |
+| US-07-05 | Configuració ESLint i Prettier               | US-01-01                                         | US-08-01                                                                       |
+| US-08-01 | Pipeline CI (GitHub Actions)                 | US-07-01, US-07-02, US-07-03, US-07-04, US-07-05 | US-08-02, US-08-03, US-08-05                                                   |
+| US-08-02 | Workflow deploy Node Service                 | US-08-01                                         | —                                                                              |
+| US-08-03 | Workflow deploy frontend                     | US-08-01                                         | —                                                                              |
+| US-08-04 | Migració automàtica BD en deploy             | US-08-01                                         | —                                                                              |
+| US-08-05 | Workflow deploy Laravel Service              | US-08-01                                         | US-08-04                                                                       |
+| US-09-01 | Gràfic d'ocupació en temps real              | US-06-01                                         | —                                                                              |
+| US-09-02 | Gràfic d'evolució de vendes                  | US-06-02                                         | —                                                                              |
+| US-09-03 | Animacions de canvi d'estat de seients       | US-03-02                                         | —                                                                              |
+| US-09-04 | Reconnexió WS amb recuperació d'estat        | US-04-05, US-03-02                               | —                                                                              |
 
 ### Ordre de desenvolupament recomanat
 
@@ -829,7 +829,7 @@ L'administradora necessita un punt d'entrada per veure i gestionar tota la progr
 
 **Requisits no funcionals**
 
-- Seguretat: l'endpoint `/api/admin/*` ha de quedar restringit. En fase inicial, protecció via middleware simple (capçalera `X-Admin-Token`). No se'n requereix autenticació completa fins que escali.
+- Seguretat: l'endpoint `/api/admin/*` requereix autenticació JWT vàlida i rol `admin`. El middleware `admin.ts` del frontend redirigeix a `/` si el token no és present o el rol no és `admin`. El backend Laravel aplica `auth:sanctum` + validació de rol a tots els endpoints `/api/admin/*`.
 - Consideració: la ruta `/admin` ha de ser `ssr: false` per evitar exposar dades d'admin en el HTML inicial
 
 #### ALCANCE
@@ -843,11 +843,11 @@ L'administradora necessita un punt d'entrada per veure i gestionar tota la progr
 **Fora d'abast**
 
 - Formulari de creació (US-02-02)
-- Autenticació real (fora d'abast del projecte)
 
 #### DEPENDÈNCIES
 
 - **US-01-03**: l'entitat `Event` ha d'existir a la BD
+- **US-00-04**: el middleware `admin.ts` al frontend ha d'estar configurat
 
 #### ÍNDEX DE RETRABAJO
 
@@ -900,7 +900,7 @@ La principal funcionalitat de l'admin és afegir noves projeccions a la cartelle
 
 **Requisits no funcionals**
 
-- La creació de l'Event + categories + seients s'ha de fer en una sola transacció Prisma (si falla la creació de seients, no es crea l'Event)
+- La creació de l'Event + categories + seients s'ha de fer en una sola transacció Eloquent (si falla la creació de seients, no es crea l'Event)
 
 #### ALCANCE
 
@@ -1208,7 +1208,8 @@ El requisit central del projecte és que múltiples usuaris vegin els mateixos s
 
 **Requisits funcionals**
 
-- En carregar la pàgina `/events/[slug]`, el plugin `socket.client.ts` connecta al Socket.IO i emet `event:unir` amb `{ eventId, sessionToken }`
+- En carregar la pàgina `/events/[slug]`, el plugin `socket.client.ts` connecta al Socket.IO amb el JWT de la store `auth` i emet `event:unir` amb `{ eventId }` (el `userId` s'extreu del token al servidor)
+- El servidor (`JwtGuard`) valida el JWT al handshake; connexions sense token vàlid reben `disconnect 401`
 - El servidor afegeix el socket a la room `event:{eventId}`
 - L'event `seient:canvi-estat` rebut executa `seients.actualitzarEstat(seatId, estat)` a la store Pinia
 - El canvi es reflecteix immediatament al component `Seient.vue` per reactivitat de Vue
@@ -1218,7 +1219,7 @@ El requisit central del projecte és que múltiples usuaris vegin els mateixos s
 **Requisits no funcionals**
 
 - Latència objectiu: < 200ms entre emissió del broadcast al servidor i actualització visual al client
-- El `sessionToken` és un UUID generat al client i persistit a `localStorage` per identificar l'usuari entre sessions
+- El JWT s'envia al connectar: `io(url, { auth: { token } })`; el servidor no consulta la BD per validar-lo (secret compartit)
 
 #### ALCANCE
 
@@ -1333,10 +1334,11 @@ La reserva temporal és el mecanisme central del sistema i on rau tota la comple
 
 **Requisits funcionals**
 
-- En clicar un seient `DISPONIBLE`, el frontend emet `seient:reservar { seatId, sessionToken }` via Socket.IO
-- El backend executa `SeatsService.reservar()` dins d'una `prisma.$transaction` amb `SELECT ... FOR UPDATE`
-- Si `estat != DISPONIBLE`: llança `ConflictException` → el client rep `reserva:rebutjada { seatId, motiu }`
-- Si ok: `UPDATE seat SET estat=RESERVAT`, `INSERT reservation { seatId, sessionToken, expires_at: NOW() + 5min }`, `COMMIT`
+- En clicar un seient `DISPONIBLE`, el frontend emet `seient:reservar { seatId }` via Socket.IO (el `userId` s'extreu del JWT validat al `JwtGuard`)
+- El Node Service delega a Laravel via `LaravelClientService.reserveSeat(seatId, userId)` (POST `/internal/seats/reserve`)
+- Laravel executa la reserva dins d'una transacció Eloquent amb `SELECT ... FOR UPDATE`
+- Si `estat != DISPONIBLE`: retorna error, el Node Service emet `reserva:rebutjada { seatId, motiu }` al client
+- Si ok: `UPDATE seat SET estat=RESERVAT`, `INSERT reservation { seatId, user_id, expires_at: NOW() + TTL }`, `COMMIT`; Laravel retorna `{ ok: true, expira_en }`
 - El client que reserva rep `reserva:confirmada { seatId, expira_en }`
 - Broadcast a tota la room: `seient:canvi-estat { seatId, estat: RESERVAT }`
 - La store `seients.ts` marca el seient com `SELECCIONAT PER MI` (estat local del client propietari)
@@ -1348,15 +1350,15 @@ La reserva temporal és el mecanisme central del sistema i on rau tota la comple
 **Requisits no funcionals**
 
 - Seguretat: el servidor mai confia en l'estat del seient reportat pel client; sempre consulta la BD
-- El `sessionToken` es valida com a UUID vàlid; peticions sense token vàlid retornen `400`
+- El `userId` s'extreu del JWT al `JwtGuard`; connexions sense JWT vàlid reben `disconnect 401` (US-00-06)
 
 #### ALCANCE
 
 **Inclòs**
 
-- `SeatsGateway` handler `seient:reservar`
-- `SeatsService.reservar()` amb transacció `SELECT FOR UPDATE`
-- `ReservationsService.crear()`
+- `SeatsGateway` handler `seient:reservar` al Node Service (NestJS)
+- `LaravelClientService.reserveSeat()` al Node Service
+- `SeatReservationController` a Laravel amb transacció Eloquent `SELECT FOR UPDATE`
 - Actualització de les stores Pinia `seients` i `reserva`
 
 **Fora d'abast**
@@ -1376,13 +1378,13 @@ La reserva temporal és el mecanisme central del sistema i on rau tota la comple
 
 **Criteri 1 — Reserva exitosa**
 
-- DONAT que el seient B5 té `estat: DISPONIBLE`
-- QUAN l'usuari emet `seient:reservar { seatId: B5, sessionToken: uuid-A }`
-- ALESHORES el client rep `reserva:confirmada`, la BD mostra `estat: RESERVAT` i `reservation.expires_at` és en 5 minuts
+- DONAT que el seient B5 té `estat: DISPONIBLE` i l'usuari té un JWT vàlid
+- QUAN l'usuari emet `seient:reservar { seatId: B5 }`
+- ALESHORES el client rep `reserva:confirmada`, la BD mostra `estat: RESERVAT`, `reservation.user_id` conté l'ID de l'usuari i `reservation.expires_at` és en `RESERVATION_TTL_MINUTES` minuts
 
 **Criteri 2 — Conflicte simultani (el nucli del sistema)**
 
-- DONAT que dos clients emeten `seient:reservar { seatId: B5 }` simultàniament
+- DONAT que dos clients autenticats emeten `seient:reservar { seatId: B5 }` simultàniament
 - QUAN el servidor processa ambdues peticions
 - ALESHORES exactament un client rep `reserva:confirmada` i l'altre rep `reserva:rebutjada`; la BD conté exactament una reserva per B5
 
@@ -1392,7 +1394,7 @@ La reserva temporal és el mecanisme central del sistema i on rau tota la comple
 
 #### CONTEXT
 
-Per evitar l'acaparament d'entrades (un comportament detectat a molts sistemes de venda d'entrades de concerts), l'administrador de Sala Onirica configura un màxim de N seients per `sessionToken` per a cada projecció.
+Per evitar l'acaparament d'entrades (un comportament detectat a molts sistemes de venda d'entrades de concerts), l'administrador de Sala Onirica configura un màxim de N seients per usuari autenticat per a cada projecció.
 
 #### USER STORY
 
@@ -1405,8 +1407,8 @@ Per evitar l'acaparament d'entrades (un comportament detectat a molts sistemes d
 **Requisits funcionals**
 
 - `max_seients_per_usuari` és un camp de l'Event configurat en creació
-- El `SeatsService.reservar()` comprova el nombre de reserves actives del `sessionToken` per a aquell Event abans de la transacció
-- Si el límit és assolit: `reserva:rebutjada { motiu: "Has assolit el màxim de N entrades per a aquesta sessió" }`
+- Laravel comprova el nombre de reserves actives del `user_id` per a aquell Event abans d'executar la transacció
+- Si el límit és assolit: Laravel retorna error → el Node Service emet `reserva:rebutjada { motiu: "Has assolit el màxim de N entrades per a aquesta sessió" }`
 - El frontend desactiva visualment els seients disponibles quan s'ha assolit el límit (via getter de la store `reserva`)
 
 **Requisits no funcionals**
@@ -1431,13 +1433,13 @@ Per evitar l'acaparament d'entrades (un comportament detectat a molts sistemes d
 
 #### ÍNDEX DE RETRABAJO
 
-**Baix.** La validació s'afegeix al service existent. Si en el futur s'implementa auth, el `sessionToken` es substitueix per `userId` sense canviar la lògica.
+**Baix.** La validació s'afegeix al service existent. El `user_id` extret del JWT identifica l'usuari sense cap canvi addicional a la lògica de negoci.
 
 #### CRITERIS D'ACCEPTACIÓ
 
 **Criteri 1 — Bloqueig en assolir el límit**
 
-- DONAT que l'Event té `max_seients_per_usuari: 4` i el `sessionToken` ja té 4 reserves actives
+- DONAT que l'Event té `max_seients_per_usuari: 4` i l'usuari autenticat ja té 4 reserves actives
 - QUAN l'usuari emet `seient:reservar` per a un cinquè seient
 - ALESHORES el servidor retorna `reserva:rebutjada` amb el motiu de límit assolit, sense modificar la BD
 
@@ -1527,9 +1529,10 @@ Un usuari pot canviar d'opinió i voler un seient diferent. Sense la possibilita
 
 **Requisits funcionals**
 
-- En clicar un seient `SELECCIONAT PER MI`, el frontend emet `seient:alliberar { seatId, sessionToken }`
-- El backend valida que `reservation.session_token === sessionToken`; si no coincideix: `error:general { codi: 403 }`
-- Si ok: `UPDATE seat SET estat=DISPONIBLE`, `DELETE reservation`, broadcast `seient:canvi-estat { DISPONIBLE }` a la room
+- En clicar un seient `SELECCIONAT PER MI`, el frontend emet `seient:alliberar { seatId }` (el `userId` s'extreu del JWT al `JwtGuard`)
+- El Node Service crida `LaravelClientService.releaseSeat(seatId)` → DELETE `/internal/seats/{id}/reserve`
+- Laravel valida que `reservation.user_id === userId` extret del JWT; si no coincideix: retorna `403`
+- Si ok: `UPDATE seat SET estat=DISPONIBLE`, `DELETE reservation`, el Node Service emet broadcast `seient:canvi-estat { DISPONIBLE }` a la room
 - La store `reserva.ts` elimina el seient alliberat
 
 **Requisits no funcionals**
@@ -1559,15 +1562,14 @@ Un usuari pot canviar d'opinió i voler un seient diferent. Sense la possibilita
 
 **Criteri 1 — Alliberament correcte**
 
-- DONAT que el `sessionToken A` té reservat el seient C3
-- QUAN emet `seient:alliberar { seatId: C3, sessionToken: A }`
+- DONAT que l'usuari A té reservat el seient C3 i emet `seient:alliberar { seatId: C3 }` amb el seu JWT
 - ALESHORES la BD mostra `C3.estat: DISPONIBLE`, la reserva s'elimina i tots els clients veuen el seient verd
 
 **Criteri 2 — Protecció de propietat**
 
-- DONAT que el `sessionToken B` intenta alliberar el seient C3 que pertany a `sessionToken A`
-- QUAN emet `seient:alliberar { seatId: C3, sessionToken: B }`
-- ALESHORES el servidor retorna `error:general { codi: 403 }` i la reserva de C3 no es modifica
+- DONAT que l'usuari B intenta alliberar el seient C3 que pertany a l'usuari A
+- QUAN emet `seient:alliberar { seatId: C3 }` amb el JWT de l'usuari B
+- ALESHORES Laravel retorna `403` i la reserva de C3 no es modifica
 
 ---
 
@@ -1588,11 +1590,9 @@ Si un usuari tanca el navegador o perd la connexió amb seients reservats, sense
 **Requisits funcionals**
 
 - `ReservationsScheduler` (NestJS `@Cron`) s'executa cada 30 segons
-- Cerca reserves amb `expires_at < NOW()`: `SELECT * FROM reservations WHERE expires_at < NOW()`
-- Per cada reserva expirada (en una transacció):
-  1. `UPDATE seats SET estat=DISPONIBLE WHERE id=reservation.seat_id`
-  2. `DELETE FROM reservations WHERE id=reservation.id`
-  3. Emet `seient:canvi-estat { seatId, estat: DISPONIBLE }` via el Gateway a la room de l'Event
+- Crida `LaravelClientService.expireReservations()` → POST `/internal/seats/expire`
+- Laravel cerca reserves amb `expires_at < NOW()`, i per cada una (en transacció): `UPDATE seats SET estat=DISPONIBLE`, `DELETE reservation`; retorna la llista de `seatId` i `eventId` alliberats
+- El Node Service emet `seient:canvi-estat { seatId, estat: DISPONIBLE }` via el Gateway a la room `event:{eventId}` per cada seient alliberat
 - El cron funciona encara que el servidor s'hagi reiniciat (no `setTimeout`)
 
 **Requisits no funcionals**
@@ -1702,7 +1702,7 @@ Quan un usuari de Sala Onirica ha seleccionat els seus seients, necessita un for
 
 #### CONTEXT
 
-La confirmació és el moment en què els seients passen de `RESERVAT` a `VENUT` permanentment. El servidor ha de validar que la reserva segueix vigent i que pertany al `sessionToken` del comprador, i tot ha de passar en una sola transacció per evitar inconsistències.
+La confirmació és el moment en què els seients passen de `RESERVAT` a `VENUT` permanentment. El servidor ha de validar que la reserva segueix vigent i que pertany al `user_id` del token JWT del comprador, i tot ha de passar en una sola transacció per evitar inconsistències.
 
 #### USER STORY
 
@@ -1714,18 +1714,19 @@ La confirmació és el moment en què els seients passen de `RESERVAT` a `VENUT`
 
 **Requisits funcionals**
 
-- `POST /api/orders { session_token, client_nom, client_email }`:
-  1. Cerca totes les `reservations` del `session_token` que no hagin expirat
-  2. Valida que els `seats` associats tenen `estat: RESERVAT`
-  3. En transacció: `UPDATE seats SET estat=VENUT`, `INSERT order`, `INSERT order_items`, `DELETE reservations`
-  4. Retorna `201 { order_id, seients[], total }`
-  5. Broadcast `seient:canvi-estat { estat: VENUT }` per cada seient a la room
+- `POST /api/orders { client_nom, client_email }` (requereix JWT — `Authorization: Bearer <token>`):
+  1. Extreu `user_id` del JWT
+  2. Cerca totes les `reservations` del `user_id` que no hagin expirat
+  3. Valida que els `seats` associats tenen `estat: RESERVAT`
+  4. En transacció Eloquent: `UPDATE seats SET estat=VENUT`, `INSERT order`, `INSERT order_items`, `DELETE reservations`
+  5. Retorna `201 { order_id, seients[], total }`
+  6. El Node Service emet broadcast `seient:canvi-estat { estat: VENUT }` per cada seient a la room
 - Si qualsevol seient ha expirat durant el checkout: `409 Conflict { message, seients_expirats[] }`
-- Pàgina de confirmació amb: resum de seients, event, total, instrucció de consulta per email
+- Pàgina de confirmació amb: resum de seients, event, total
 
 **Requisits no funcionals**
 
-- Tot el procés de validació + escriptura és una sola transacció Prisma
+- Tot el procés de validació + escriptura és una sola transacció Eloquent (Laravel)
 
 #### ALCANCE
 
@@ -1752,13 +1753,13 @@ La confirmació és el moment en què els seients passen de `RESERVAT` a `VENUT`
 
 **Criteri 1 — Compra exitosa**
 
-- DONAT que el `sessionToken A` té 2 reserves actives (B5, B6), no expirades
-- QUAN `POST /api/orders` amb dades vàlides
+- DONAT que l'usuari autenticat té 2 reserves actives (B5, B6), no expirades
+- QUAN `POST /api/orders` amb JWT vàlid i dades vàlides
 - ALESHORES la resposta és `201`, B5 i B6 passen a `estat: VENUT`, s'ha creat una `Order` amb 2 `OrderItems` i els altres clients veuen els seients en gris (venuts)
 
 **Criteri 2 — Reserva expirada durant checkout**
 
-- DONAT que el `sessionToken A` tenia reservat B5, però el cron l'ha alliberat durant el procés
+- DONAT que l'usuari autenticat tenia reservat B5, però el cron l'ha alliberat durant el procés
 - QUAN s'envia `POST /api/orders`
 - ALESHORES la resposta és `409` amb `{ seients_expirats: ["B5"] }` i no es crea cap `Order`
 
@@ -1823,38 +1824,38 @@ Quan un usuari intenta reservar un seient que acaba de ser agafat per un altre, 
 
 ---
 
-### US-05-01 — Consulta d'entrades per email
+### US-05-01 — Consulta d'entrades de l'usuari autenticat
 
 #### CONTEXT
 
-Un cop comprades les entrades, l'usuari necessita poder recuperar-les. Com el sistema no té login, l'email és l'únic identificador persistent. És el mecanisme de "recuperació" per si l'usuari tanca el navegador o vol imprimir les entrades.
+Un cop comprades les entrades, l'usuari autenticat necessita poder consultar-les des de la pàgina `/entrades`. Com el sistema té autenticació JWT, les comandes s'associen al `user_id` i l'endpoint retorna només les del token actiu, sense necessitat d'introduir cap email.
 
 #### USER STORY
 
-**Com a** comprador de Sala Onirica que ha realitzat una compra prèviament,  
-**vull** poder consultar les meves entrades introduint el meu email,  
+**Com a** comprador de Sala Onirica autenticat que ha realitzat una compra prèviament,  
+**vull** poder veure les meves entrades a la pàgina `/entrades`,  
 **per tal de** accedir als detalls de les meves compres en qualsevol moment i des de qualsevol dispositiu.
 
 #### ESPECIFICACIONS
 
 **Requisits funcionals**
 
-- `GET /api/orders?email=:email` retorna totes les `Order` del email
+- `GET /api/orders` (requereix JWT) retorna totes les `Order` de l'usuari autenticat
 - Camps per `Order`: nom de la projecció, data, hora, recinte, llista de seients (`[fila][numero]`), preu total, data de compra
-- Si no hi ha entrades: resposta `[]` (no `404`) i el frontend mostra "No hem trobat entrades per a aquest email"
-- Validació de format d'email al frontend i al backend (`400` si format invàlid)
+- Si no hi ha entrades: resposta `[]` (no `404`) i el frontend mostra "No tens cap entrada comprada"
+- La pàgina `/entrades` és protegida pel middleware `auth.ts` (requereix JWT vàlid)
 
 **Requisits no funcionals**
 
-- Seguretat: no es retorna el `session_token` ni cap dada sensible a la resposta pública
-- Limitació: si el email té més de 50 comandes (improbable en context acadèmic), retornar les 50 més recents
+- Seguretat: l'endpoint usa el `user_id` del JWT per filtrar les comandes; cap usuari pot veure les comandes d'un altre
+- Limitació: si l'usuari té més de 50 comandes (improbable en context acadèmic), retornar les 50 més recents
 
 #### ALCANCE
 
 **Inclòs**
 
-- Endpoint `GET /api/orders?email=:email`
-- Pàgina `/entrades` amb formulari i resultat
+- Endpoint `GET /api/orders` (protegit per JWT)
+- Pàgina `/entrades` amb llistat de les comandes de l'usuari
 
 **Fora d'abast**
 
@@ -1874,15 +1875,15 @@ Un cop comprades les entrades, l'usuari necessita poder recuperar-les. Com el si
 
 **Criteri 1 — Consulta amb resultats**
 
-- DONAT que `maria@example.com` ha comprat entrades per a _Dune 4K_
-- QUAN s'envia `GET /api/orders?email=maria@example.com`
-- ALESHORES la resposta conté almenys una Order amb els seients comprats i el total correcte
+- DONAT que l'usuari autenticat ha comprat entrades per a _Dune 4K_
+- QUAN accedeix a la pàgina `/entrades` amb JWT vàlid
+- ALESHORES la resposta conté les seves comandes amb els seients comprats i el total correcte
 
-**Criteri 2 — Email sense resultats**
+**Criteri 2 — Usuàri sense compres**
 
-- DONAT que `desconegut@example.com` no té cap compra
-- QUAN es consulta a la pàgina `/entrades`
-- ALESHORES es mostra el missatge "No hem trobat entrades per a aquest email" (no una pàgina d'error)
+- DONAT que l'usuari autenticat no té cap compra
+- QUAN accedeix a la pàgina `/entrades`
+- ALESHORES es mostra el missatge "No tens cap entrada comprada" (no una pàgina d'error)
 
 ---
 
@@ -2149,7 +2150,7 @@ Les rutes dinàmiques de Nuxt i les redireccions condicionals (checkout sense re
 
 - Test 1: `GET /events/dune-4k-dolby-2026` → el paràmetre `slug` és `"dune-4k-dolby-2026"` al component
 - Test 2: accedir a `/checkout` amb la store `reserva.seients` buida → redirigeix a `/`
-- Test 3: accedir a `/admin` sense la capçalera `X-Admin-Token` (simulat) → redirigeix a `/`
+- Test 3: accedir a `/admin` sense JWT vàlid o amb rol diferent d'`admin` → redirigeix a `/`
 - Tests usen Nuxt Testing Utils (`@nuxt/test-utils`)
 
 **Requisits no funcionals**
@@ -2477,37 +2478,96 @@ El frontend i el backend es despleguen de manera independent, cosa que permet ac
 
 ---
 
+### US-08-05 — Workflow de desplegament del Laravel Service
+
+#### CONTEXT
+
+El Laravel Service és el responsable de tota la capa de persistència i autenticació. Cal desplegar-lo de manera independent del Node Service i del frontend, amb la seva pròpia imatge Docker, per poder aplicar migracions i actualitzar l'API sense afectar la capa de temps real.
+
+#### USER STORY
+
+**Com a** enginyera del projecte,
+**vull** un workflow que construeixi i desplegui el Laravel Service al VPS automàticament en fer push a `main`,
+**per tal de** garantir que el servei d'API i autenticació sempre executa el codi verificat sense desplegament manual.
+
+#### ESPECIFICACIONS
+
+**Requisits funcionals**
+
+- `.github/workflows/deploy-laravel.yml` s'activa en push a `main` (i requereix que `ci.yml` hagi passat)
+- Passos:
+  1. Build de la imatge Docker de Laravel (multi-stage: composer install + runtime PHP-FPM o Octane)
+  2. Push de la imatge a GHCR (`ghcr.io/{owner}/{repo}-laravel:latest`)
+  3. SSH al VPS: `docker compose pull laravel-service && docker compose up -d laravel-service`
+- Variables sensibles (SSH key, host, user, `LARAVEL_APP_KEY`, `JWT_SECRET`) guardades com a GitHub Secrets
+
+**Requisits no funcionals**
+
+- La imatge Docker no conté `.env` ni secrets hardcodats; variables d'entorn injectades en runtime
+- La migració automàtica s'executa via `docker-entrypoint.sh` (US-08-04), no al workflow
+
+#### ALCANCE
+
+**Inclòs**
+
+- `.github/workflows/deploy-laravel.yml`
+- Dockerfile de producció del Laravel Service (multi-stage)
+
+**Fora d'abast**
+
+- Zero-downtime deploy (N/A en VPS acadèmic)
+
+#### DEPENDÈNCIES
+
+- **US-08-01**: el CI ha de passar
+- **US-08-04**: el `docker-entrypoint.sh` amb `php artisan migrate --force` ha d'existir
+
+#### ÍNDEX DE RETRABAJO
+
+**Baix.** Quan es proporcioni la IP del VPS, s'afegeix als Secrets sense canviar el workflow.
+
+#### CRITERIS D'ACCEPTACIÓ
+
+**Criteri 1 — Deploy automàtic del Laravel Service**
+
+- DONAT que tots els tests del CI passen en push a `main`
+- QUAN el workflow de deploy-laravel s'activa
+- ALESHORES el VPS executa la nova versió del Laravel Service en menys de 5 minuts, les migracions s'han aplicat i `GET /api/health` retorna `200`
+
+---
+
 ### US-08-04 — Migració automàtica de BD en desplegament
 
 #### CONTEXT
 
-Si el backend es desplegua amb un esquema de BD nou però sense executar la migració, el servidor falla en arrancar. Automatitzar `prisma migrate deploy` com a pas previ a l'inici del servidor garanteix la consistència BD-codi en tot moment.
+Si el Laravel Service es desplegua amb un esquema de BD nou però sense executar les migracions, el servidor falla en arrancar. Automatitzar `php artisan migrate --force` com a pas previ a l'inici del servidor garanteix la consistència BD-codi en tot moment.
 
 #### USER STORY
 
 **Com a** enginyera del projecte,  
-**vull** que les migracions de Prisma s'apliquin automàticament cada vegada que el backend es desplegua,  
+**vull** que les migracions Eloquent s'apliquin automàticament cada vegada que el Laravel Service es desplegua,  
 **per tal de** que l'esquema de BD estigui sempre sincronitzat amb el codi sense intervenció manual.
 
 #### ESPECIFICACIONS
 
 **Requisits funcionals**
 
-- El Dockerfile del backend executa com a `ENTRYPOINT`:
-  1. `prisma migrate deploy` (aplica migracions pendents)
-  2. `node dist/main.js` (arrenca el servidor)
-- Si `prisma migrate deploy` falla (BD no accessible o migració amb error), el contenidor no arrenca (fail-fast)
+- El `docker-entrypoint.sh` del contenidor `laravel-service` executa, en ordre:
+  1. `php artisan migrate --force` (aplica migracions pendents en producció)
+  2. `php artisan serve --host=0.0.0.0 --port=8000` (arrenca el servidor)
+- Si `php artisan migrate --force` falla (BD no accessible o migració amb error), el contenidor no arrenca (fail-fast)
 
 **Requisits no funcionals**
 
-- `prisma migrate deploy` és segur per a producció (a diferència de `migrate dev`)
+- `--force` és obligatori en producció amb Laravel per acceptar migracions sense prompt interactiu
 - No executa el seed en producció
 
 #### ALCANCE
 
 **Inclòs**
 
-- `ENTRYPOINT` al Dockerfile del backend
+- `docker-entrypoint.sh` al `backend/laravel-service/`
+- `ENTRYPOINT` al Dockerfile de `laravel-service` apuntant a l'script
 
 **Fora d'abast**
 
@@ -2515,7 +2575,7 @@ Si el backend es desplegua amb un esquema de BD nou però sense executar la migr
 
 #### DEPENDÈNCIES
 
-- **US-08-02**: el Dockerfile de producció ha d'existir
+- **US-08-05**: el Dockerfile de producció del Laravel Service ha d'existir
 
 #### ÍNDEX DE RETRABAJO
 
@@ -2525,9 +2585,9 @@ Si el backend es desplegua amb un esquema de BD nou però sense executar la migr
 
 **Criteri 1 — Migració automàtica en deploy**
 
-- DONAT que hi ha una nova migració Prisma al repositori
-- QUAN el contenidor del backend s'inicia al VPS
-- ALESHORES `prisma migrate deploy` s'executa primer i aplica la migració; el servidor arrenca correctament
+- DONAT que hi ha una nova migració Eloquent al repositori
+- QUAN el contenidor `laravel-service` s'inicia al VPS
+- ALESHORES `php artisan migrate --force` s'executa primer i aplica la migració; el servidor arrenca correctament
 
 ---
 
@@ -2701,8 +2761,8 @@ Un usuari de Sala Onirica que perd la connexió wifi momentàniament durant el p
 
 **Requisits funcionals**
 
-- El handler `connect` de Socket.IO (s'activa en reconnexió) re-emet automàticament `event:unir { eventId, sessionToken }`
-- El backend, en rebre `event:unir` per a un `sessionToken` que ja té reserva activa, retorna l'estat de les reserves amb els `expira_en` actuals
+- El handler `connect` de Socket.IO (s'activa en reconnexió) re-emet automàticament `event:unir { eventId }` amb el JWT existent a la store `auth`
+- El backend, en rebre `event:unir` per a un `user_id` que ja té reserva activa, retorna l'estat de les reserves amb els `expira_en` actuals
 - El frontend re-sincronitza la store `reserva.ts` (actualitza `expira_en` sense reiniciar el timer a 5 minuts)
 - El frontend demana l'estat actual de tots els seients (`GET /api/events/:slug/seats`) i actualitza la store `seients.ts`
 - L'usuari veu el banner "Connexió recuperada" durant 3 segons
@@ -2719,7 +2779,7 @@ Un usuari de Sala Onirica que perd la connexió wifi momentàniament durant el p
 
 **Fora d'abast**
 
-- Persistència de l'estat en `localStorage` més enllà del `sessionToken`
+- Persistència de l'estat en `localStorage` més enllà del JWT (N/A)
 
 #### DEPENDÈNCIES
 
@@ -2744,17 +2804,20 @@ Un usuari de Sala Onirica que perd la connexió wifi momentàniament durant el p
 
 | Èpica | Títol                               | User Stories        | Prioritat    |
 | ----- | ----------------------------------- | ------------------- | ------------ |
-| EP-01 | Infraestructura i monorepo          | US-01-01 a US-01-04 | Must Have    |
+| EP-00 | Autenticació i seguretat (JWT)      | US-00-01 a US-00-06 | Must Have    |
+| EP-01 | Infraestructura i monorepo          | US-01-01 a US-01-08 | Must Have    |
 | EP-02 | Gestió d'esdeveniments (Admin CRUD) | US-02-01 a US-02-05 | Must Have    |
 | EP-03 | Mapa de seients en temps real       | US-03-01 a US-03-03 | Must Have    |
 | EP-04 | Flux de reserva i compra            | US-04-01 a US-04-08 | Must Have    |
 | EP-05 | Consulta d'entrades                 | US-05-01            | Must Have    |
 | EP-06 | Panell d'administració i informes   | US-06-01 a US-06-02 | Must Have    |
 | EP-07 | Testing i qualitat                  | US-07-01 a US-07-05 | Must Have    |
-| EP-08 | Infraestructura i CI/CD             | US-08-01 a US-08-04 | Must Have    |
+| EP-08 | Infraestructura i CI/CD             | US-08-01 a US-08-05 | Must Have    |
 | EP-09 | Funcionals opcionals                | US-09-01 a US-09-04 | Nice to Have |
 
-**Total: 9 èpiques · 33 user stories**
+**Total: 10 èpiques · 39 user stories**
+
+> **v2.0** — S'han afegit EP-00 (6 US d'autenticació JWT) i US-01-05 a US-01-08 (scaffold Node Service, scaffold Laravel Service, Nginx proxy i client HTTP intern). US-08-05 cobreix el deploy del Laravel Service. Totes les referències a `sessionToken`, `prisma.$transaction` i `X-Admin-Token` han estat substituïdes per JWT, Eloquent i middleware `admin.ts`.
 
 ---
 
