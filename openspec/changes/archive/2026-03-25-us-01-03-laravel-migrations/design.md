@@ -33,10 +33,10 @@ Ordre d'aplicació:
 6. `orders` (FK → users)
 7. `order_items` (FK → orders, seats)
 
-### D2 — UUID com a PK amb `$table->uuid('id')->primary()`
-**Decisió**: Totes les PKs son UUID generats per Laravel (`Str::uuid()` al model amb `static::creating()`).
-**Alternativa considerada**: Auto-increment integer PKs.
-**Raó**: Consistència amb la convenció del projecte; evita exposar seqüències predibles a l'API.
+### D2 — UUID com a PK amb `$table->uuid('id')->primary()` i trait `HasUuids`
+**Decisió**: Totes les PKs son UUID via el trait `HasUuids` (`Illuminate\Database\Eloquent\Concerns\HasUuids`) als models Eloquent, i `$table->uuid('id')->primary()` a les migrations.
+**Alternativa considerada**: Auto-increment integer PKs; generació manual via `Str::uuid()` al `static::creating()`.
+**Raó**: `HasUuids` és la manera idiomàtica de Laravel 9+ — gestiona automàticament la generació UUID, `$keyType = 'string'` i `$incrementing = false`. Consistència amb la convenció del projecte; evita exposar seqüències predibles a l'API.
 
 ### D3 — `SeatStatus` com a string + check constraint
 **Decisió**: La columna `estat` de `seats` és `string` amb un check constraint PostgreSQL que limita els valors a `DISPONIBLE`, `RESERVAT`, `VENUT`.
