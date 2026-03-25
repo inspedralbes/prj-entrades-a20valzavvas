@@ -44,6 +44,28 @@ services:
     depends_on:
       - backend
 
+  # ── Laravel Service ────────────────────────────────────────────────────────
+  laravel-service:
+    build:
+      context: ./src/backend/laravel-service
+      dockerfile: Dockerfile
+    environment:
+      APP_ENV: local
+      APP_KEY: ${LARAVEL_APP_KEY}
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: http://localhost:${FRONTEND_PORT:-3000}
+    ports:
+      - "${LARAVEL_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
 # ── Named volumes ──────────────────────────────────────────────────────────
 volumes:
   db-data:
