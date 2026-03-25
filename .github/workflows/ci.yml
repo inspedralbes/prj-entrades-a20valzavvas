@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: entrades
+          POSTGRES_USER: entrades
+          # Ephemeral CI-only password — not a production credential.
+          # Override via CI_POSTGRES_PASSWORD secret if required by org policy.
+          POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD || 'entrades' }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Ephemeral CI database — credentials match the service container above.
+      DATABASE_URL: postgresql://entrades:${{ secrets.CI_POSTGRES_PASSWORD || 'entrades' }}@localhost:5432/entrades
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type-check
+        run: pnpm type-check
+
+      # Uncomment when Prisma is configured (EP-08 / backend schema tasks)
+      # - name: Run database migrations
+      #   run: pnpm --filter node-service exec prisma migrate deploy
+
+      # Note: frontend uses --passWithNoTests until EP-07 frontend tests are implemented
+      - name: Test frontend
+        run: pnpm --filter frontend test
+
+      - name: Test backend
+        run: pnpm --filter node-service test
+
+      - name: Test shared
+        run: pnpm --filter shared test

@@ -75,12 +75,11 @@ describe("ErrorGeneralPayload", () => {
 
 describe("SeientReservarPayload (client → server)", () => {
   it("accepts a valid client payload", () => {
+    // Auth is handled at WS connection handshake — no sessionToken per message
     const payload: SeientReservarPayload = {
       seatId: "uuid-seat-a1",
-      sessionToken: "tok_abc123",
     };
 
     expect(payload.seatId).toBeDefined();
-    expect(payload.sessionToken).toBeDefined();
   });
 });
