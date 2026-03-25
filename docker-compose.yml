@@ -26,8 +26,6 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL}
       PORT: ${BACKEND_PORT:-3001}
-    ports:
-      - "${BACKEND_PORT:-3001}:3001"
     depends_on:
       db:
         condition: service_healthy
@@ -39,8 +37,6 @@ services:
       dockerfile: src/frontend/Dockerfile
     environment:
       NITRO_PORT: ${FRONTEND_PORT:-3000}
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"
     depends_on:
       - backend
 
@@ -60,11 +56,21 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       FRONTEND_URL: http://localhost:${FRONTEND_PORT:-3000}
-    ports:
-      - "${LARAVEL_PORT:-8000}:8000"
     depends_on:
       db:
         condition: service_healthy
+
+  # ── Nginx reverse proxy ─────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+      - laravel-service
 
 # ── Named volumes ──────────────────────────────────────────────────────────
 volumes:

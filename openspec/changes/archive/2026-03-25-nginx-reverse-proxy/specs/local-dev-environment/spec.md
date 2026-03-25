@@ -1,10 +1,4 @@
-# Capability: local-dev-environment
-
-## Purpose
-
-Defineix els requisits per a l'entorn de desenvolupament local basat en Docker Compose, incloent l'arrencada dels serveis, la gestió de secrets i la documentació de variables d'entorn.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: docker-compose.yml a l'arrel arrenca tots els serveis
 
@@ -49,51 +43,3 @@ El sistema SHALL disposar d'un `docker-compose.yml` a l'arrel del repositori que
 - **THEN** `curl http://localhost/ws/socket.io/?EIO=4&transport=polling` retorna HTTP 200 (WebSocket via Nginx)
 
 > **Known limitation**: La verificació de l'endpoint `/ws` retornarà 404 fins que el `GatewayModule` de NestJS (Socket.IO) estigui implementat en un ticket posterior. Nginx enruta correctament cap a `backend:3001`; el 404 és del servei backend, no de Nginx.
-
-### Requirement: Sense credencials hardcoded al docker-compose.yml
-
-El `docker-compose.yml` NO SHALL contenir cap contrasenya, token o secret directament; totes les variables sensibles SHALL referenciar `${VAR}` llegit del fitxer `.env`.
-
-#### Scenario: Inspecció del docker-compose.yml no revela secrets
-
-- **WHEN** s'inspecciona el fitxer `docker-compose.yml` al repositori
-- **THEN** no conté cap valor literal de contrasenya, token ni credencial
-- **THEN** totes les variables sensibles (com `POSTGRES_PASSWORD`) usen la sintaxi `${VARIABLE_NAME}`
-
-#### Scenario: Fitxer .env no commitejat
-
-- **WHEN** s'executa `git status` en un repositori clonat
-- **THEN** el fitxer `.env` no apareix com a fitxer tractat per git
-- **THEN** el fitxer `.env` està inclòs al `.gitignore`
-
-#### Scenario: Arrencada sense .env falla amb missatge clar
-
-- **GIVEN** que no existeix cap fitxer `.env` a l'arrel
-- **WHEN** s'executa `docker compose up`
-- **THEN** Docker Compose mostra un avís de variables sense definir o el servei falla amb un missatge que indica quina variable manca
-
-### Requirement: .env.example documenta JWT_SECRET i LARAVEL_APP_KEY
-
-El `.env.example` SHALL incloure les variables `JWT_SECRET` i `LARAVEL_APP_KEY` amb descripcions que indiquin com generar-les, a més de les variables existents.
-
-#### Scenario: .env.example conté les noves variables
-
-- **WHEN** s'inspecciona `.env.example`
-- **THEN** conté `JWT_SECRET` amb una descripció o valor d'exemple
-- **THEN** conté `LARAVEL_APP_KEY` amb instruccions per generar-la via `php artisan key:generate --show`
-- **THEN** cap dels valors d'exemple no és un secret real de producció
-
-### Requirement: .env.example documenta totes les variables necessàries
-
-El repositori SHALL incloure un `.env.example` a l'arrel que documenti totes les variables d'entorn requerides pel `docker-compose.yml`, amb valors d'exemple o descripcions.
-
-#### Scenario: .env.example conté totes les variables del docker-compose
-
-- **WHEN** s'inspecciona `.env.example`
-- **THEN** conté almenys: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `BACKEND_PORT` (3001), `FRONTEND_PORT` (3000)
-- **THEN** tots els valors d'exemple no són secrets reals
-
-#### Scenario: .env.example és versionat al repositori
-
-- **WHEN** s'executa `git log --oneline .env.example`
-- **THEN** el fitxer existeix al repositori i té almenys un commit
