@@ -1,0 +1,153 @@
+schema: spec-driven
+
+context: |
+  Project: Sala Onirica — Plataforma de Venda d'Entrades en Temps Real
+  Description: >
+    Web platform for real-time ticket sales handling high-concurrency scenarios:
+    multiple users competing for the same seats simultaneously. The server is the
+    single source of truth. Two users can never buy the same seat.
+
+  Roles:
+    - Visitant: browses the homepage and event pages without reserving
+    - Comprador: reserves seats and completes purchase (identified by session_token + email)
+    - Administrador: admin panel — CRUD events, real-time dashboard, reports (protected via X-Admin-Token header)
+
+  Backend:
+    Framework: NestJS (Node.js)
+    Language: TypeScript
+    ORM: Prisma (PostgreSQL)
+    Realtime: Socket.IO Gateway
+    Port: 3001
+    Base path: /api
+    Modules:
+      - events (EventsController, EventsService, EventsModule)
+      - seats (SeatsController, SeatsService, SeatsGateway, SeatsModule)
+      - reservations (ReservationsService, ReservationsScheduler — cron every 30s, ReservationsModule)
+      - orders (OrdersController, OrdersService, OrdersModule)
+      - admin (AdminController, AdminModule — protected by X-Admin-Token middleware)
+      - prisma (PrismaService — registered as global module)
+    DB Entities: Event, PriceCategory, Seat, Reservation, Order, OrderItem
+    DB Enums: SeatStatus (DISPONIBLE, RESERVAT, VENUT)
+    Concurrency: PostgreSQL pessimistic lock (SELECT FOR UPDATE inside prisma.$transaction)
+    Seat expiry: cron scheduler checks every 30s, releases expired reservations and broadcasts state change
+    Reservation TTL: 5 minutes
+
+  Frontend:
+    Framework: Nuxt 3 (Vue 3, Composition API)
+    Language: TypeScript
+    State: Pinia stores (seients.ts, reserva.ts, event.ts, connexio.ts)
+    Realtime: Socket.IO client plugin (plugins/socket.client.ts)
+    Port: 3000
+    Key components:
+      - MapaSeients.vue (seat grid, reads from seients store)
+      - Seient.vue (individual seat with visual state)
+      - TemporitzadorReserva.vue (countdown timer, uses useTemporitzador composable)
+      - LlegendaEstats.vue
+      - NotificacioEstat.vue
+    Key composables: useSocket.ts, useTemporitzador.ts, useConflicte.ts
+    Routes:
+      - / (SSR) — public event listing
+      - /events/[slug] (CSR + WS) — seat map with real-time state
+      - /checkout (CSR) — purchase form (name + email)
+      - /entrades (CSR) — query tickets by email
+      - /admin (CSR, ssr:false) — real-time dashboard
+      - /admin/events (CSR) — event listing
+      - /admin/events/new (CSR) — create event
+      - /admin/events/[id] (CSR) — edit event
+
+  Shared:
+    Package: shared/ (TypeScript types shared between frontend and backend)
+    Import alias: @shared/*
+    Files:
+      - shared/types/seat.types.ts (EstatSeient enum)
+      - shared/types/event.types.ts
+      - shared/types/socket.types.ts
+
+  Infrastructure:
+    Monorepo: pnpm workspaces (frontend/, backend/, shared/)
+    Database: PostgreSQL 16 (port 5432, db: entrades, user: entrades)
+    Local env: Docker Compose (docker-compose.yml at root)
+    Node version: fixed via .nvmrc / engines field
+    Credentials: never hardcoded — all via .env (gitignored), .env.example documented
+    CI/CD: GitHub Actions (ci.yml, deploy-frontend.yml, deploy-backend.yml)
+    Deploy target: VPS
+
+  Socket.IO Protocol:
+    Rooms: event:{eventId} — all users on an event page join this room
+    Client→Server events: event:unir, seient:reservar, seient:alliberar, compra:confirmar
+    Server→Room broadcasts: seient:canvi-estat, stats:actualitzacio
+    Server→Client private: reserva:confirmada, reserva:rebutjada, compra:completada, error:general
+
+  Epics:
+    EP-01: Infraestructura i configuració inicial del monorepo
+    EP-02: Gestió d'esdeveniments (CRUD Admin)
+    EP-03: Mapa de seients en temps real
+    EP-04: Flux de reserva i compra
+    EP-05: Consulta d'entrades
+    EP-06: Panell d'administració i informes
+    EP-07: Testing i qualitat de codi
+    EP-08: Infraestructura, CI/CD i desplegament
+    EP-09: Funcionalitats opcionals (gràfics i UX avançada)
+
+  Testing:
+    Backend: Vitest (replaces NestJS default Jest for consistency across the monorepo)
+    Frontend: Vitest via @nuxt/test-utils
+    Shared: Vitest (type integrity and enum value tests)
+    Test file convention:
+      - Backend: co-located at src/**/*.spec.ts
+      - Frontend: co-located at components/**/*.spec.ts, stores/**/*.spec.ts, composables/**/*.spec.ts
+      - Shared: shared/types/**/*.spec.ts
+    E2E: EP-07 user stories serve as the E2E and integration verification gate for the CI pipeline
+    CI gate: pnpm test (all workspaces) must pass before any PR can merge
+
+  Definition of Done:
+    - All acceptance criteria scenarios from the spec pass
+    - Unit tests written and passing for every new function, service method, store action, or composable (pnpm test)
+    - TypeScript compilation passes with no errors (pnpm type-check)
+    - Lint passes with no errors (pnpm lint)
+    - No hardcoded secrets or credentials
+    - PR reviewed and merged to main
+
+  Conventions:
+    - Conventional commits, trunk-based development
+    - All documentation written in Catalan; code and comments in English
+    - All PKs are UUID (@default(uuid()))
+    - createdAt / updatedAt auto-managed by Prisma where applicable
+    - DATABASE_URL always injected via environment variable, never hardcoded
+    - Admin routes: ssr:false to avoid leaking admin data in initial HTML
+    - Every US must include its own unit tests — EP-07 stories add E2E/integration coverage on top
+
+rules:
+  proposal:
+    - Keep proposals concise but include a Non-goals section
+    - Always list impacted capabilities
+    - Reference the affected module(s) explicitly (events, seats, reservations, orders, admin, shared)
+    - Note cross-module side effects (e.g. seat expiry triggers broadcast; order creation marks seats as VENUT)
+    - Link to the relevant Jira ticket (e.g. PE-10) when applicable
+    - If the change introduces new services, store actions, or composables, include a `vitest-setup` or testing note in the capabilities or impact section
+  specs:
+    - Use GIVEN/WHEN/THEN format for all acceptance criteria scenarios
+    - Cover edge cases and error conditions (e.g. duplicate slug → 409, reserved seat → conflict)
+    - Include at least 3 scenarios per requirement if possible
+    - Specify role-based access for each scenario (Visitant, Comprador, Administrador)
+    - Include Socket.IO events and payloads for real-time scenarios
+    - Specify HTTP status codes for all API scenarios
+    - Every spec file MUST include at least one testability scenario verifying that the feature can be exercised via a unit or integration test
+  design:
+    - Include at least one Mermaid diagram (sequence, flowchart, or ER)
+    - Document all architectural decisions with alternatives and rationale
+    - Include API request/response schemas (JSON examples) and NestJS DTO definitions
+    - Specify Prisma schema additions/modifications when new entities are introduced
+    - Note which shared types in shared/types/ are affected or need updating
+    - Document Socket.IO events used (client→server and server→client)
+    - For concurrency-sensitive changes, describe the transaction strategy explicitly
+    - Include a testing strategy section: which units will be tested, with which framework, and what will be mocked
+  tasks:
+    - Break tasks into chunks of max 2 hours
+    - Every task group that implements logic MUST have a corresponding test task in the same group
+    - Include a dedicated "Tests" section at the end listing all test files to create
+    - Include verification tasks (pnpm lint, pnpm type-check, pnpm test, pnpm build)
+    - Separate backend and frontend tasks explicitly
+    - Include Prisma migration tasks when DB schema changes (prisma migrate dev)
+    - Include seed updates if new entities or test data are needed
+    - Always mark tasks as "Done" as you progress to reflect ongoing work

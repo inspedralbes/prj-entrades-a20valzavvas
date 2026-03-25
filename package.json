@@ -1,0 +1,16 @@
+{
+  "name": "prj-entrades",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "build": "pnpm -r build",
+    "type-check": "pnpm -r type-check"
+  }
+}
