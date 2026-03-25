@@ -35,7 +35,7 @@ El `package.json` arrel SHALL definir almenys els scripts `dev`, `lint`, `test` 
 
 - **WHEN** s'executa `pnpm dev` des de l'arrel
 - **THEN** el procés arrenca el servidor de Nuxt 3 (port 3000) i el servidor NestJS node-service (port 3001) simultàniament
-- **NOTA**: laravel-service s'arrenca via Docker Compose (US-01-02), no via `pnpm dev`
+- **NOTA**: l'entorn complet amb PostgreSQL s'arrenca via `docker compose up --build`; `pnpm dev` és per a development ràpid sense contenidors
 
 #### Scenario: Script lint cobreix tots els workspaces
 
