@@ -50,7 +50,20 @@ return [
     |
     */
 
-    'expiration' => null,
+    'expiration' => env('SANCTUM_TOKEN_TTL', 60),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Shared JWT Secret
+    |--------------------------------------------------------------------------
+    |
+    | This secret is shared with the Node Service so both services can verify
+    | tokens without querying the database on every request. Must match the
+    | JWT_SECRET environment variable in the Node Service.
+    |
+    */
+
+    'secret' => env('JWT_SECRET'),
 
     /*
     |--------------------------------------------------------------------------

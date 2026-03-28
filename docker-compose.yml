@@ -54,7 +54,9 @@ services:
       DB_DATABASE: ${POSTGRES_DB}
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
+      # Shared with the Node Service — must be identical in both services
       JWT_SECRET: ${JWT_SECRET}
+      SANCTUM_TOKEN_TTL: ${SANCTUM_TOKEN_TTL:-60}
       FRONTEND_URL: http://localhost:${FRONTEND_PORT:-3000}
     depends_on:
       db:
