@@ -9,9 +9,9 @@ class RegisterTest extends TestCase
     private function validPayload(array $overrides = []): array
     {
         return array_merge([
-            'name'                  => 'Test User',
-            'email'                 => 'test@example.com',
-            'password'              => 'password123',
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password123',
             'password_confirmation' => 'password123',
         ], $overrides);
     }
@@ -30,7 +30,7 @@ class RegisterTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
-            'role'  => 'comprador',
+            'role' => 'comprador',
         ]);
     }
 
@@ -65,7 +65,7 @@ class RegisterTest extends TestCase
     public function test_password_shorter_than_8_characters_returns_422(): void
     {
         $response = $this->postJson('/api/auth/register', $this->validPayload([
-            'password'              => '1234567',
+            'password' => '1234567',
             'password_confirmation' => '1234567',
         ]));
 
