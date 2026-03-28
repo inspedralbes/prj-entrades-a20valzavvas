@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  modules: ["@pinia/nuxt"],
 
   // @shared/* alias: resolves to ../shared/types for Vite bundler and auto-imports
   alias: {
