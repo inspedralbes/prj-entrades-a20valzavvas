@@ -146,7 +146,7 @@ rules:
     - Break tasks into chunks of max 2 hours
     - Every task group that implements logic MUST have a corresponding test task in the same group
     - Include a dedicated "Tests" section at the end listing all test files to create
-    - Include verification tasks (pnpm lint, pnpm type-check, pnpm test, pnpm build)
+    - Include verification tasks (pnpm lint, pnpm type-check, pnpm test, pnpm build, Pint)
     - Separate backend and frontend tasks explicitly
     - Include Prisma migration tasks when DB schema changes (prisma migrate dev)
     - Include seed updates if new entities or test data are needed
