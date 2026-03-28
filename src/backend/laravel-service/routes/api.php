@@ -8,6 +8,7 @@ Route::get('/health', function () {
     return response()->json(['status' => 'ok']);
 });
 
+Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 
 Route::get('/user', function (Request $request) {
