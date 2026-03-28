@@ -141,7 +141,7 @@ rules:
     - Note which shared types in shared/types/ are affected or need updating
     - Document Socket.IO events used (client→server and server→client)
     - For concurrency-sensitive changes, describe the transaction strategy explicitly
-    - Include a testing strategy section: which units will be tested, with which framework, and what will be mocked
+    - Include a testing strategy section, which units will be tested, with which framework, and what will be mocked
   tasks:
     - Break tasks into chunks of max 2 hours
     - Every task group that implements logic MUST have a corresponding test task in the same group
