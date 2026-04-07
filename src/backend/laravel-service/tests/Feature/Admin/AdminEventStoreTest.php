@@ -146,7 +146,7 @@ class AdminEventStoreTest extends TestCase
 
         $this->app->bind(AdminEventService::class, function () {
             $mock = $this->createMock(AdminEventService::class);
-            $mock->method('store')->willThrow(
+            $mock->method('store')->willThrowException(
                 new UniqueConstraintViolationException('pgsql', 'INSERT ...', [], new \Exception)
             );
 
@@ -166,7 +166,7 @@ class AdminEventStoreTest extends TestCase
 
         $this->app->bind(AdminEventService::class, function () {
             $mock = $this->createMock(AdminEventService::class);
-            $mock->method('store')->willThrow(new \RuntimeException('Unexpected error'));
+            $mock->method('store')->willThrowException(new \RuntimeException('Unexpected error'));
 
             return $mock;
         });
