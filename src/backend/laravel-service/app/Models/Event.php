@@ -18,12 +18,14 @@ class Event extends Model
         'date',
         'venue',
         'total_capacity',
+        'published',
     ];
 
     protected function casts(): array
     {
         return [
             'date' => 'datetime',
+            'published' => 'boolean',
         ];
     }
 

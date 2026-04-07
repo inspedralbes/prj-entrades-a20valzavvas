@@ -1,8 +1,4 @@
-## Purpose
-
-Middleware Nuxt per protegir les rutes d'administració, permetent l'accés únicament als usuaris amb rol `admin`.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Middleware d'autorització per a rutes d'administració
 
