@@ -90,7 +90,7 @@ class AdminEventController extends Controller
             return match ($e->getMessage()) {
                 'not_found' => response()->json(['message' => 'Event not found'], 404),
                 'has_active_reservations' => response()->json([
-                    'message' => "No és possible modificar les categories mentre hi ha reserves actives",
+                    'message' => 'No és possible modificar les categories mentre hi ha reserves actives',
                 ], 422),
                 'duplicate_slug' => response()->json(['message' => 'Slug already exists'], 409),
                 default => throw $e,
@@ -120,4 +120,3 @@ class AdminEventController extends Controller
         ];
     }
 }
-

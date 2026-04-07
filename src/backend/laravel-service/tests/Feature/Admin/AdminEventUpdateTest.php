@@ -145,7 +145,7 @@ class AdminEventUpdateTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonPath('message', "No és possible modificar les categories mentre hi ha reserves actives");
+            ->assertJsonPath('message', 'No és possible modificar les categories mentre hi ha reserves actives');
     }
 
     public function test_update_returns_422_when_price_categories_sent_with_order_items(): void
@@ -179,7 +179,7 @@ class AdminEventUpdateTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonPath('message', "No és possible modificar les categories mentre hi ha reserves actives");
+            ->assertJsonPath('message', 'No és possible modificar les categories mentre hi ha reserves actives');
     }
 
     public function test_update_allows_metadata_change_without_price_categories_when_reservations_exist(): void

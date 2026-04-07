@@ -14,11 +14,11 @@ class UpdateEventRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => ['sometimes', 'string', 'max:255'],
-            'slug'        => ['sometimes', 'nullable', 'string', 'max:255', 'regex:/^[a-z0-9-]+$/'],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'slug' => ['sometimes', 'nullable', 'string', 'max:255', 'regex:/^[a-z0-9-]+$/'],
             'description' => ['sometimes', 'nullable', 'string'],
-            'date'        => ['sometimes', 'date', 'after:now'],
-            'venue'       => ['sometimes', 'string', 'max:255'],
+            'date' => ['sometimes', 'date', 'after:now'],
+            'venue' => ['sometimes', 'string', 'max:255'],
             'price_categories' => ['sometimes', 'array', 'min:1'],
         ];
     }
