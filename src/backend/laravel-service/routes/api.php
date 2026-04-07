@@ -18,4 +18,5 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     Route::get('/events', [AdminEventController::class, 'index']);
+    Route::post('/events', [AdminEventController::class, 'store']);
 });
