@@ -18,14 +18,14 @@ class AdminEventStoreTest extends TestCase
     private function validPayload(array $overrides = []): array
     {
         return array_merge([
-            'name'  => 'Test Event',
-            'date'  => now()->addYear()->toIso8601String(),
+            'name' => 'Test Event',
+            'date' => now()->addYear()->toIso8601String(),
             'venue' => 'Sala Test',
             'price_categories' => [
                 [
-                    'name'          => 'General',
-                    'price'         => 10.00,
-                    'rows'          => ['A', 'B'],
+                    'name' => 'General',
+                    'price' => 10.00,
+                    'rows' => ['A', 'B'],
                     'seats_per_row' => 5,
                 ],
             ],
@@ -147,8 +147,9 @@ class AdminEventStoreTest extends TestCase
         $this->app->bind(AdminEventService::class, function () {
             $mock = $this->createMock(AdminEventService::class);
             $mock->method('store')->willThrow(
-                new UniqueConstraintViolationException('pgsql', 'INSERT ...', [], new \Exception())
+                new UniqueConstraintViolationException('pgsql', 'INSERT ...', [], new \Exception)
             );
+
             return $mock;
         });
 
@@ -166,6 +167,7 @@ class AdminEventStoreTest extends TestCase
         $this->app->bind(AdminEventService::class, function () {
             $mock = $this->createMock(AdminEventService::class);
             $mock->method('store')->willThrow(new \RuntimeException('Unexpected error'));
+
             return $mock;
         });
 

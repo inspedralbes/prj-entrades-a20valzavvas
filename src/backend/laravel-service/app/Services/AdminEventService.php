@@ -27,13 +27,13 @@ class AdminEventService
             ));
 
             $event = Event::create([
-                'name'           => $data['name'],
-                'slug'           => $slug,
-                'description'    => $data['description'] ?? null,
-                'date'           => $data['date'],
-                'venue'          => $data['venue'],
+                'name' => $data['name'],
+                'slug' => $slug,
+                'description' => $data['description'] ?? null,
+                'date' => $data['date'],
+                'venue' => $data['venue'],
                 'total_capacity' => $totalCapacity,
-                'published'      => false,
+                'published' => false,
             ]);
 
             $now = now();
@@ -41,22 +41,22 @@ class AdminEventService
             foreach ($data['price_categories'] as $catData) {
                 $category = PriceCategory::create([
                     'event_id' => $event->id,
-                    'name'     => $catData['name'],
-                    'price'    => $catData['price'],
+                    'name' => $catData['name'],
+                    'price' => $catData['price'],
                 ]);
 
                 $seats = [];
                 foreach ($catData['rows'] as $row) {
                     for ($number = 1; $number <= $catData['seats_per_row']; $number++) {
                         $seats[] = [
-                            'id'                => (string) Str::uuid(),
-                            'event_id'          => $event->id,
+                            'id' => (string) Str::uuid(),
+                            'event_id' => $event->id,
                             'price_category_id' => $category->id,
-                            'row'               => $row,
-                            'number'            => $number,
-                            'estat'             => 'DISPONIBLE',
-                            'created_at'        => $now,
-                            'updated_at'        => $now,
+                            'row' => $row,
+                            'number' => $number,
+                            'estat' => 'DISPONIBLE',
+                            'created_at' => $now,
+                            'updated_at' => $now,
                         ];
                     }
                 }
