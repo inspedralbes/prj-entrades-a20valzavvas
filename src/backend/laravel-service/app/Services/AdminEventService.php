@@ -23,6 +23,33 @@ class AdminEventService
     }
 
     /**
+     * @throws \RuntimeException 'not_found' | 'has_active_reservations_or_orders'
+     */
+    public function deleteEvent(string $id): void
+    {
+        $event = Event::find($id);
+
+        if (! $event) {
+            throw new \RuntimeException('not_found');
+        }
+
+        $hasActiveReservations = Reservation::where('expires_at', '>', now())
+            ->whereHas('seat', fn ($q) => $q->where('event_id', $event->id))
+            ->exists();
+
+        $hasOrderItems = OrderItem::whereHas(
+            'seat',
+            fn ($q) => $q->where('event_id', $event->id)
+        )->exists();
+
+        if ($hasActiveReservations || $hasOrderItems) {
+            throw new \RuntimeException('has_active_reservations_or_orders');
+        }
+
+        $event->delete();
+    }
+
+    /**
      * @throws \RuntimeException 'not_found' | 'has_active_reservations' | 'duplicate_slug'
      */
     public function update(string $id, array $data): Event

@@ -100,6 +100,23 @@ class AdminEventController extends Controller
         return response()->json($this->formatEvent($event));
     }
 
+    public function destroy(string $id): \Illuminate\Http\Response|JsonResponse
+    {
+        try {
+            $this->eventService->deleteEvent($id);
+        } catch (\RuntimeException $e) {
+            return match ($e->getMessage()) {
+                'not_found' => response()->json(['message' => 'Event not found'], 404),
+                'has_active_reservations_or_orders' => response()->json([
+                    'message' => 'has_active_reservations_or_orders',
+                ], 422),
+                default => throw $e,
+            };
+        }
+
+        return response()->noContent();
+    }
+
     private function formatEvent(Event $event): array
     {
         return [

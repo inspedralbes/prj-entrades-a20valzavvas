@@ -1,7 +1,24 @@
 <script setup lang="ts">
-definePageMeta({ middleware: "auth" });
+import { useAuthStore } from "~/stores/auth";
+
+definePageMeta({ middleware: "auth", ssr: false });
+
+const authStore = useAuthStore();
 </script>
 
 <template>
-  <div><!-- TODO: implementar contingut (PE-05) --></div>
+  <div>
+    <button
+      type="button"
+      @click="
+        () => {
+          authStore.logout();
+          navigateTo('/auth/login');
+        }
+      "
+    >
+      Tancar sessió
+    </button>
+    <!-- TODO: implementar contingut (PE-05) -->
+  </div>
 </template>

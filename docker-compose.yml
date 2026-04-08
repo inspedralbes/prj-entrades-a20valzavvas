@@ -58,6 +58,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       SANCTUM_TOKEN_TTL: ${SANCTUM_TOKEN_TTL:-60}
       FRONTEND_URL: http://localhost:${FRONTEND_PORT:-3000}
+      SESSION_DRIVER: file
     depends_on:
       db:
         condition: service_healthy
