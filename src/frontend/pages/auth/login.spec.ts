@@ -22,14 +22,15 @@ describe("pages/auth/login", () => {
 
     vi.mocked(useAuthStore).mockReturnValue({
       isAuthenticated: false,
+      user: { role: "comprador" },
       login: mockLogin,
     } as any);
 
     useRouteMock.mockReturnValue({ query: {} });
   });
 
-  // 2.2 submit amb credencials vàlides → authStore.login() cridat + redirecció a /
-  it("submit amb credencials vàlides crida authStore.login() i redirigeix a /", async () => {
+  // 2.2 submit amb credencials vàlides → authStore.login() cridat + redirecció a /entrades (rol comprador)
+  it("submit amb credencials vàlides crida authStore.login() i redirigeix a /entrades", async () => {
     const wrapper = await mountSuspended(LoginPage);
 
     await wrapper.find("#email").setValue("user@example.com");
@@ -40,7 +41,7 @@ describe("pages/auth/login", () => {
       email: "user@example.com",
       password: "password123",
     });
-    expect(navigateToMock).toHaveBeenCalledWith("/");
+    expect(navigateToMock).toHaveBeenCalledWith("/entrades");
   });
 
   // 2.3 submit amb ?redirect=/checkout → redirecció a /checkout en èxit
@@ -97,16 +98,17 @@ describe("pages/auth/login", () => {
     resolveLogin();
   });
 
-  // 2.6 usuari autenticat → redirecció a / sense cridar authStore.login()
-  it("redirigeix a / si l'usuari ja és autenticat sense cridar login()", async () => {
+  // 2.6 usuari autenticat → redirecció a /entrades (comprador) sense cridar authStore.login()
+  it("redirigeix a /entrades si l'usuari ja és autenticat (comprador) sense cridar login()", async () => {
     vi.mocked(useAuthStore).mockReturnValue({
       isAuthenticated: true,
+      user: { role: "comprador" },
       login: mockLogin,
     } as any);
 
     await mountSuspended(LoginPage);
 
-    expect(navigateToMock).toHaveBeenCalledWith("/");
+    expect(navigateToMock).toHaveBeenCalledWith("/entrades");
     expect(mockLogin).not.toHaveBeenCalled();
   });
 });

@@ -41,9 +41,9 @@ describe("middleware/admin", () => {
     expect(navigateToMock).toHaveBeenCalledWith("/auth/login");
   });
 
-  it("redirigeix a / si l'usuari té rol comprador", async () => {
+  it("redirigeix a /auth/login si l'usuari té rol comprador", async () => {
     await runMiddleware(true, "comprador");
-    expect(navigateToMock).toHaveBeenCalledWith("/");
+    expect(navigateToMock).toHaveBeenCalledWith("/auth/login");
   });
 
   it("no redirigeix si l'usuari té rol admin", async () => {
@@ -51,9 +51,9 @@ describe("middleware/admin", () => {
     expect(navigateToMock).not.toHaveBeenCalled();
   });
 
-  it("redirigeix a / des de subruta /admin/events amb rol comprador", async () => {
+  it("redirigeix a /auth/login des de subruta /admin/events amb rol comprador", async () => {
     await runMiddleware(true, "comprador");
-    expect(navigateToMock).toHaveBeenCalledWith("/");
+    expect(navigateToMock).toHaveBeenCalledWith("/auth/login");
   });
 
   it("no redirigeix a subrutes admin amb rol admin", async () => {

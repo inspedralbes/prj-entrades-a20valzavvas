@@ -11,9 +11,13 @@ const password = ref("");
 const isLoading = ref(false);
 const errors = ref<Record<string, string>>({});
 
+function homeForRole() {
+  return authStore.user?.role === "admin" ? "/admin/events" : "/entrades";
+}
+
 onMounted(() => {
   if (authStore.isAuthenticated) {
-    navigateTo("/");
+    navigateTo(homeForRole());
   }
 });
 
@@ -23,7 +27,7 @@ async function submit() {
   try {
     await authStore.login({ email: email.value, password: password.value });
     const redirect = route.query.redirect as string | undefined;
-    await navigateTo(redirect || "/");
+    await navigateTo(redirect || homeForRole());
   } catch (err: any) {
     const serverErrors: Record<string, string[]> = err?.data?.errors ?? {};
     const mapped: Record<string, string> = {};

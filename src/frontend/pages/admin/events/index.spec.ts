@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ref } from "vue";
 import { mountSuspended, mockNuxtImport } from "@nuxt/test-utils/runtime";
 import AdminEventsPage from "./index.vue";
@@ -73,5 +73,96 @@ describe("pages/admin/events/index", () => {
     const draftBadges = wrapper.findAll(".badge--draft");
     expect(draftBadges).toHaveLength(1);
     expect(draftBadges[0]!.text()).toBe("Esborrany");
+  });
+});
+
+describe("pages/admin/events/index — modal d'eliminació", () => {
+  let mockFetch: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    mockFetch = vi.fn();
+    vi.stubGlobal("$fetch", mockFetch);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("clic 'Eliminar' obre el modal amb el nom de l'event", async () => {
+    const wrapper = await mountSuspended(AdminEventsPage);
+
+    const eliminarButtons = wrapper
+      .findAll("button")
+      .filter((b) => b.text() === "Eliminar");
+    await eliminarButtons[0]!.trigger("click");
+
+    expect(wrapper.find(".modal").exists()).toBe(true);
+    expect(wrapper.find(".modal").text()).toContain("Concert Rock");
+  });
+
+  it("confirmació exitosa elimina l'event de la llista i tanca el modal", async () => {
+    mockFetch.mockResolvedValueOnce(undefined);
+
+    const wrapper = await mountSuspended(AdminEventsPage);
+
+    const eliminarButtons = wrapper
+      .findAll("button")
+      .filter((b) => b.text() === "Eliminar");
+    await eliminarButtons[0]!.trigger("click");
+
+    const confirmarButton = wrapper
+      .findAll("button")
+      .find((b) => b.text() === "Confirmar");
+    await confirmarButton!.trigger("click");
+    await wrapper.vm.$nextTick();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/admin/events/1"),
+      expect.objectContaining({ method: "DELETE" }),
+    );
+    expect(wrapper.find(".modal").exists()).toBe(false);
+    const rows = wrapper.findAll("tbody tr");
+    expect(rows).toHaveLength(2);
+  });
+
+  it("error 422 mostra missatge d'error dins el modal", async () => {
+    mockFetch.mockRejectedValueOnce({ statusCode: 422 });
+
+    const wrapper = await mountSuspended(AdminEventsPage);
+
+    const eliminarButtons = wrapper
+      .findAll("button")
+      .filter((b) => b.text() === "Eliminar");
+    await eliminarButtons[0]!.trigger("click");
+
+    const confirmarButton = wrapper
+      .findAll("button")
+      .find((b) => b.text() === "Confirmar");
+    await confirmarButton!.trigger("click");
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find(".modal").exists()).toBe(true);
+    expect(wrapper.find(".modal-error").text()).toContain("No es pot eliminar");
+    expect(wrapper.findAll("tbody tr")).toHaveLength(3);
+  });
+
+  it("clic 'Cancel·lar' tanca el modal sense fer cap petició", async () => {
+    const wrapper = await mountSuspended(AdminEventsPage);
+
+    const eliminarButtons = wrapper
+      .findAll("button")
+      .filter((b) => b.text() === "Eliminar");
+    await eliminarButtons[0]!.trigger("click");
+
+    expect(wrapper.find(".modal").exists()).toBe(true);
+
+    const cancelButton = wrapper
+      .findAll("button")
+      .find((b) => b.text() === "Cancel·lar");
+    await cancelButton!.trigger("click");
+
+    expect(wrapper.find(".modal").exists()).toBe(false);
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(wrapper.findAll("tbody tr")).toHaveLength(3);
   });
 });
