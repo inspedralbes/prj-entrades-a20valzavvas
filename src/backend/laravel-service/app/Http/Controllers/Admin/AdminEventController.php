@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Services\AdminEventService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class AdminEventController extends Controller
 {
@@ -100,7 +101,7 @@ class AdminEventController extends Controller
         return response()->json($this->formatEvent($event));
     }
 
-    public function destroy(string $id): \Illuminate\Http\Response|JsonResponse
+    public function destroy(string $id): Response|JsonResponse
     {
         try {
             $this->eventService->deleteEvent($id);
