@@ -10,6 +10,12 @@ export default defineNuxtConfig({
     "@shared": fileURLToPath(new URL("../shared/types", import.meta.url)),
   },
 
+  runtimeConfig: {
+    public: {
+      wsUrl: "http://localhost/ws",
+    },
+  },
+
   typescript: {
     typeCheck: false, // Run explicitly via `pnpm type-check`
     strict: true,

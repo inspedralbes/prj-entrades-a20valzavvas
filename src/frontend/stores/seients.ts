@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { EstatSeient } from "@shared/seat.types";
+import type { SeientCanviEstatPayload } from "@shared/socket.types";
 
 export interface SeatState {
   estat: EstatSeient;
@@ -98,6 +99,39 @@ export const useSeientStore = defineStore("seients", {
       if (seat) {
         seat.estat = estat;
       }
+    },
+
+    connectar() {
+      const { $socket } = useNuxtApp();
+      const socket = $socket as {
+        connect: () => void;
+        emit: (event: string, data: unknown) => void;
+        on: (
+          event: string,
+          handler: (payload: SeientCanviEstatPayload) => void,
+        ) => void;
+      };
+
+      socket.connect();
+
+      socket.on("seient:canvi-estat", (payload: SeientCanviEstatPayload) => {
+        this.actualitzarEstat(payload.seatId, payload.estat);
+      });
+
+      if (this.event) {
+        socket.emit("event:unir", { eventId: this.event.id });
+      }
+    },
+
+    desconnectar() {
+      const { $socket } = useNuxtApp();
+      const socket = $socket as {
+        off: (event: string) => void;
+        disconnect: () => void;
+      };
+
+      socket.off("seient:canvi-estat");
+      socket.disconnect();
     },
   },
 });
