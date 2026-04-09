@@ -4,6 +4,7 @@ import { JwtService } from "@nestjs/jwt";
 import { WsException } from "@nestjs/websockets";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { JwtWsGuard } from "./jwt-ws.guard";
+import { LaravelClientService } from "../laravel-client/laravel-client.service";
 
 function buildContext(token: string | undefined): ExecutionContext {
   const client = {
@@ -40,9 +41,11 @@ function buildContextWithQueryToken(token: string): ExecutionContext {
 describe("JwtWsGuard", () => {
   let guard: JwtWsGuard;
   let mockVerifyAsync: ReturnType<typeof vi.fn>;
+  let mockGetUserByToken: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     mockVerifyAsync = vi.fn();
+    mockGetUserByToken = vi.fn();
 
     const mockJwtService = {
       verifyAsync: mockVerifyAsync,
@@ -50,8 +53,15 @@ describe("JwtWsGuard", () => {
     const mockConfigService = {
       get: vi.fn().mockReturnValue("test_secret"),
     } as unknown as ConfigService;
+    const mockLaravelClient = {
+      getUserByToken: mockGetUserByToken,
+    } as unknown as LaravelClientService;
 
-    guard = new JwtWsGuard(mockJwtService, mockConfigService);
+    guard = new JwtWsGuard(
+      mockJwtService,
+      mockConfigService,
+      mockLaravelClient,
+    );
   });
 
   it("should return true and set socket.data when token is valid", async () => {
@@ -111,5 +121,39 @@ describe("JwtWsGuard", () => {
     await expect(guard.canActivate(ctx)).rejects.toThrow(
       new WsException("Unauthorized"),
     );
+  });
+
+  describe("Sanctum opaque token fallback", () => {
+    it("should authenticate with a valid Sanctum opaque token via Laravel", async () => {
+      mockGetUserByToken.mockResolvedValue({
+        id: "user-uuid-789",
+        role: "comprador",
+      });
+
+      const ctx = buildContext("11|sanctumOpaqueTokenAbc123");
+      const result = await guard.canActivate(ctx);
+
+      expect(result).toBe(true);
+      expect(mockGetUserByToken).toHaveBeenCalledWith(
+        "11|sanctumOpaqueTokenAbc123",
+      );
+      expect(mockVerifyAsync).not.toHaveBeenCalled();
+      const client = ctx
+        .switchToWs()
+        .getClient<{ data: Record<string, string> }>();
+      expect(client.data.userId).toBe("user-uuid-789");
+      expect(client.data.role).toBe("comprador");
+    });
+
+    it("should throw WsException when Laravel rejects the Sanctum token", async () => {
+      mockGetUserByToken.mockResolvedValue(null);
+
+      const ctx = buildContext("99|invalidOrExpiredToken");
+
+      await expect(guard.canActivate(ctx)).rejects.toThrow(
+        new WsException("Unauthorized"),
+      );
+      expect(mockVerifyAsync).not.toHaveBeenCalled();
+    });
   });
 });

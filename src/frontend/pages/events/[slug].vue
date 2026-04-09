@@ -1,13 +1,25 @@
 <script setup lang="ts">
 import { useSeientStore } from "~/stores/seients";
+import { useConnexioStore } from "~/stores/connexio";
 
 definePageMeta({ ssr: false });
 
 const route = useRoute();
 const seients = useSeientStore();
+const connexio = useConnexioStore();
+
+const slug = route.params.slug as string;
 
 onMounted(async () => {
-  await seients.inicialitzar(route.params.slug as string);
+  connexio.inicialitzar();
+  await seients.inicialitzar(slug);
+  if (seients.event) {
+    seients.connectar();
+  }
+});
+
+onUnmounted(() => {
+  seients.desconnectar();
 });
 </script>
 

@@ -58,6 +58,21 @@ export class LaravelClientService implements OnModuleInit {
     }
   }
 
+  async getUserByToken(
+    token: string,
+  ): Promise<{ id: string; role: string } | null> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<{ id: string; role: string }>("/api/user", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      );
+      return response.data;
+    } catch {
+      return null;
+    }
+  }
+
   async reserveSeat(seatId: string, userId: string): Promise<any> {
     throw new NotImplementedException(
       "reserveSeat will be implemented in US-03-02",

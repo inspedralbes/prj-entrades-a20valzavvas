@@ -6,6 +6,26 @@ import { EstatSeient } from "@shared/seat.types";
 const mockFetch = vi.fn();
 vi.stubGlobal("$fetch", mockFetch);
 
+import { mockNuxtImport } from "@nuxt/test-utils/runtime";
+
+const useNuxtAppMock = vi.hoisted(() => vi.fn());
+mockNuxtImport("useNuxtApp", () => useNuxtAppMock);
+
+function makeSocketMock() {
+  const handlers: Record<string, (payload: unknown) => void> = {};
+  return {
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+    emit: vi.fn(),
+    on: vi.fn((event: string, handler: (payload: unknown) => void) => {
+      handlers[event] = handler;
+    }),
+    off: vi.fn(),
+    triggerEvent: (event: string, payload: unknown) =>
+      handlers[event]?.(payload),
+  };
+}
+
 const mockApiResponse = {
   event: {
     id: "evt-1",
@@ -48,9 +68,15 @@ const mockApiResponse = {
 };
 
 describe("useSeientStore", () => {
+  let socketMock: ReturnType<typeof makeSocketMock>;
+
   beforeEach(() => {
     setActivePinia(createPinia());
     mockFetch.mockReset();
+    socketMock = makeSocketMock();
+    useNuxtAppMock.mockReturnValue({
+      $socket: socketMock,
+    });
   });
 
   describe("inicialitzar", () => {
@@ -152,6 +178,91 @@ describe("useSeientStore", () => {
       store.actualitzarEstat("seat-1", EstatSeient.RESERVAT);
 
       expect(store.llistat.get("seat-1")?.estat).toBe(EstatSeient.RESERVAT);
+    });
+
+    it("no fa res si el seatId no existeix al Map", async () => {
+      mockFetch.mockResolvedValueOnce(mockApiResponse);
+      const store = useSeientStore();
+      await store.inicialitzar("dune-4k-dolby-2026");
+
+      expect(() =>
+        store.actualitzarEstat("seat-inexistent", EstatSeient.VENUT),
+      ).not.toThrow();
+      expect(store.llistat.size).toBe(3);
+    });
+
+    it("no modifica els altres camps del seient", async () => {
+      mockFetch.mockResolvedValueOnce(mockApiResponse);
+      const store = useSeientStore();
+      await store.inicialitzar("dune-4k-dolby-2026");
+
+      store.actualitzarEstat("seat-1", EstatSeient.RESERVAT);
+
+      expect(store.llistat.get("seat-1")).toMatchObject({
+        estat: EstatSeient.RESERVAT,
+        fila: "A",
+        numero: 1,
+        categoria: "cat-1",
+        preu: 12.5,
+      });
+    });
+  });
+
+  describe("connectar", () => {
+    it("crida socket.connect() i socket.emit('event:unir') amb l'eventId correcte", async () => {
+      mockFetch.mockResolvedValueOnce(mockApiResponse);
+      const store = useSeientStore();
+      await store.inicialitzar("dune-4k-dolby-2026");
+
+      store.connectar();
+
+      expect(socketMock.connect).toHaveBeenCalledOnce();
+      expect(socketMock.emit).toHaveBeenCalledWith("event:unir", {
+        eventId: "evt-1",
+      });
+    });
+
+    it("subscriu el listener seient:canvi-estat", async () => {
+      mockFetch.mockResolvedValueOnce(mockApiResponse);
+      const store = useSeientStore();
+      await store.inicialitzar("dune-4k-dolby-2026");
+
+      store.connectar();
+
+      expect(socketMock.on).toHaveBeenCalledWith(
+        "seient:canvi-estat",
+        expect.any(Function),
+      );
+    });
+
+    it("actualitzarEstat és cridat automàticament quan el socket emet seient:canvi-estat", async () => {
+      mockFetch.mockResolvedValueOnce(mockApiResponse);
+      const store = useSeientStore();
+      await store.inicialitzar("dune-4k-dolby-2026");
+      store.connectar();
+
+      socketMock.triggerEvent("seient:canvi-estat", {
+        seatId: "seat-1",
+        estat: EstatSeient.RESERVAT,
+        fila: "A",
+        numero: 1,
+      });
+
+      expect(store.llistat.get("seat-1")?.estat).toBe(EstatSeient.RESERVAT);
+    });
+  });
+
+  describe("desconnectar", () => {
+    it("crida socket.off('seient:canvi-estat') i socket.disconnect()", async () => {
+      mockFetch.mockResolvedValueOnce(mockApiResponse);
+      const store = useSeientStore();
+      await store.inicialitzar("dune-4k-dolby-2026");
+      store.connectar();
+
+      store.desconnectar();
+
+      expect(socketMock.off).toHaveBeenCalledWith("seient:canvi-estat");
+      expect(socketMock.disconnect).toHaveBeenCalledOnce();
     });
   });
 });
