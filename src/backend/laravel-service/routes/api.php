@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventSeatsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -11,6 +12,7 @@ Route::get('/health', function () {
 });
 
 Route::get('/events', [EventController::class, 'index']);
+Route::get('/events/{slug}/seats', [EventSeatsController::class, 'show']);
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
