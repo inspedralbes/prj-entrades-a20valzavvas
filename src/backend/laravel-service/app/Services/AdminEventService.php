@@ -83,7 +83,7 @@ class AdminEventService
             }
         }
 
-        $fillable = array_intersect_key($data, array_flip(['name', 'slug', 'description', 'date', 'venue']));
+        $fillable = array_intersect_key($data, array_flip(['name', 'slug', 'description', 'date', 'venue', 'published']));
         $event->update($fillable);
 
         return $event->fresh(['priceCategories' => fn ($q) => $q->withCount('seats')]);

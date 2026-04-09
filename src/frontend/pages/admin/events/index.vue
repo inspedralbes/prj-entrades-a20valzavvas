@@ -69,6 +69,27 @@ async function confirmDelete() {
     }
   }
 }
+
+const toggleError = ref("");
+
+async function togglePublish(event: AdminEvent) {
+  toggleError.value = "";
+  try {
+    const updated = await $fetch<{ published: boolean }>(
+      `/api/admin/events/${event.id}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+        },
+        body: { published: !event.publicat },
+      },
+    );
+    event.publicat = updated.published;
+  } catch {
+    toggleError.value = "Error en canviar l'estat de publicació de l'event.";
+  }
+}
 </script>
 
 <template>
@@ -128,7 +149,7 @@ async function confirmDelete() {
             <button type="button" @click="openDeleteModal(event)">
               Eliminar
             </button>
-            <button type="button">
+            <button type="button" @click="togglePublish(event)">
               {{ event.publicat ? "Despublicar" : "Publicar" }}
             </button>
           </td>
@@ -156,6 +177,10 @@ async function confirmDelete() {
         </div>
       </div>
     </div>
+
+    <p v-if="toggleError" class="toggle-error" role="alert">
+      {{ toggleError }}
+    </p>
   </div>
 </template>
 
@@ -227,5 +252,10 @@ async function confirmDelete() {
 
 .btn-logout:hover {
   background: #f3f4f6;
+}
+
+.toggle-error {
+  color: #b91c1c;
+  margin-top: 0.75rem;
 }
 </style>

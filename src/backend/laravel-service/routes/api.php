@@ -2,12 +2,15 @@
 
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', function () {
     return response()->json(['status' => 'ok']);
 });
+
+Route::get('/events', [EventController::class, 'index']);
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);

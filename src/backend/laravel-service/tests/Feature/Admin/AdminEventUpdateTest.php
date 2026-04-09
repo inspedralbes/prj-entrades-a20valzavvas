@@ -253,4 +253,34 @@ class AdminEventUpdateTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_update_publishes_event(): void
+    {
+        $admin = $this->adminUser();
+        $event = Event::factory()->draft()->create();
+
+        $response = $this->actingAs($admin)->putJson("/api/admin/events/{$event->id}", [
+            'published' => true,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('published', true);
+
+        $this->assertDatabaseHas('events', ['id' => $event->id, 'published' => true]);
+    }
+
+    public function test_update_unpublishes_event(): void
+    {
+        $admin = $this->adminUser();
+        $event = Event::factory()->create(['published' => true]);
+
+        $response = $this->actingAs($admin)->putJson("/api/admin/events/{$event->id}", [
+            'published' => false,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('published', false);
+
+        $this->assertDatabaseHas('events', ['id' => $event->id, 'published' => false]);
+    }
 }
