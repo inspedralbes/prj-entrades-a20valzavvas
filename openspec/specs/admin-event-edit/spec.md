@@ -34,7 +34,7 @@ El sistema SHALL exposar `GET /api/admin/events/:id` al backend Laravel, protegi
 
 ### Requirement: Endpoint PUT /api/admin/events/:id actualitza les metadades d'un event existent
 
-El sistema SHALL exposar `PUT /api/admin/events/:id` al backend Laravel, protegit per `auth:sanctum` i el middleware `admin`. L'endpoint SHALL acceptar un body parcial amb els camps `name`, `slug`, `description`, `date` i `venue`. La resposta SHALL ser `200 OK` amb el cos de l'event actualitzat. L'endpoint SHALL retornar `404 Not Found` si l'event no existeix.
+El sistema SHALL exposar `PUT /api/admin/events/:id` al backend Laravel, protegit per `auth:sanctum` i el middleware `admin`. L'endpoint SHALL acceptar un body parcial amb els camps `name`, `slug`, `description`, `date`, `venue` i `published`. La resposta SHALL ser `200 OK` amb el cos de l'event actualitzat. L'endpoint SHALL retornar `404 Not Found` si l'event no existeix.
 
 #### Scenario: Actualització exitosa de descripció
 
@@ -50,6 +50,14 @@ El sistema SHALL exposar `PUT /api/admin/events/:id` al backend Laravel, protegi
 - **WHEN** s'envia `PUT /api/admin/events/:id`
 - **THEN** la resposta té status `200 OK`
 - **THEN** l'event a la BD té la nova `date`
+
+#### Scenario: Actualització exitosa del camp published
+
+- **GIVEN** que l'administradora envia el payload `{ "published": true }` amb token vàlid
+- **WHEN** s'envia `PUT /api/admin/events/:id`
+- **THEN** la resposta té status `200 OK`
+- **THEN** el cos JSON conté `"published": true`
+- **THEN** l'event a la BD té `published = true`
 
 #### Scenario: Event no trobat retorna 404
 

@@ -20,6 +20,7 @@ class UpdateEventRequest extends FormRequest
             'date' => ['sometimes', 'date', 'after:now'],
             'venue' => ['sometimes', 'string', 'max:255'],
             'price_categories' => ['sometimes', 'array', 'min:1'],
+            'published' => ['sometimes', 'boolean'],
         ];
     }
 }
