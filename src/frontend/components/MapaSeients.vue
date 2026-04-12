@@ -28,7 +28,6 @@ function handleReservar(seatId: string) {
     { seatId },
   );
 }
-}
 </script>
 
 <template>
