@@ -3,6 +3,7 @@
 // Run `pnpm --filter frontend exec nuxi prepare` before typechecking on a fresh clone.
 {
   "extends": "./.nuxt/tsconfig.json",
+  "exclude": ["../shared/**/*.spec.ts"],
   "compilerOptions": {
     "paths": {
       "@shared/*": ["../shared/types/*"],
