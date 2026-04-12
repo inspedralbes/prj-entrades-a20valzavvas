@@ -12,7 +12,7 @@ const isLoading = ref(false);
 const errors = ref<Record<string, string>>({});
 
 function homeForRole() {
-  return authStore.user?.role === "admin" ? "/admin/events" : "/entrades";
+  return authStore.user?.role === "admin" ? "/admin/events" : "/";
 }
 
 onMounted(() => {
