@@ -4,10 +4,6 @@ import { useConnexioStore } from "~/stores/connexio";
 
 definePageMeta({ ssr: false });
 
-useHead({
-  style: [{ innerHTML: "body { background: #0f0f23; margin: 0; }" }],
-});
-
 const route = useRoute();
 const seients = useSeientStore();
 const connexio = useConnexioStore();

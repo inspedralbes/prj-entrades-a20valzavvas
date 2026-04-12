@@ -3,5 +3,14 @@ definePageMeta({ middleware: "admin", ssr: false });
 </script>
 
 <template>
-  <div><!-- TODO: implementar contingut (PE-06) --></div>
+  <div class="page-dark"><!-- TODO: implementar contingut (PE-06) --></div>
 </template>
+
+<style scoped>
+.page-dark {
+  min-height: 100dvh;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  padding: 1.5rem;
+}
+</style>
