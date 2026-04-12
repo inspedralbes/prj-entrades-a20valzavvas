@@ -118,6 +118,21 @@ describe("pages/auth/register", () => {
     expect(mockRegister).not.toHaveBeenCalled();
   });
 
+  // Cross-links de navegació
+  it("mostra link NuxtLink cap a /auth/login", async () => {
+    const wrapper = await mountSuspended(RegisterPage);
+    const links = wrapper.findAllComponents({ name: "NuxtLink" });
+    const loginLink = links.find((l) => l.props("to") === "/auth/login");
+    expect(loginLink).toBeDefined();
+  });
+
+  it("mostra link NuxtLink cap a / (tornar a la portada)", async () => {
+    const wrapper = await mountSuspended(RegisterPage);
+    const links = wrapper.findAllComponents({ name: "NuxtLink" });
+    const homeLink = links.find((l) => l.props("to") === "/");
+    expect(homeLink).toBeDefined();
+  });
+
   // 5.6 centrat vertical aplicat dins de <main> — .auth-page usa flex:1 i min-height:100%
   // (no min-height:100dvh que solapava amb la navbar global)
   it("renderitza .auth-page sense min-height 100dvh per centrar dins del <main>", async () => {

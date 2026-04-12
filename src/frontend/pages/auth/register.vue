@@ -113,6 +113,15 @@ async function submit() {
           {{ isLoading ? "Carregant..." : "Registrar-se" }}
         </button>
       </form>
+      <template v-if="!authStore.isAuthenticated">
+        <p class="auth-link">
+          Ja tens compte?
+          <NuxtLink to="/auth/login">Inicia sessió</NuxtLink>
+        </p>
+        <p class="auth-link auth-link--back">
+          <NuxtLink to="/">← Tornar a la portada</NuxtLink>
+        </p>
+      </template>
     </div>
   </div>
 </template>
@@ -200,5 +209,27 @@ button[type="submit"]:hover:not(:disabled) {
 button[type="submit"]:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.auth-link a {
+  color: var(--color-accent-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+}
+
+.auth-link a:hover {
+  color: var(--color-accent-primary-hover);
+  text-decoration: underline;
+}
+
+.auth-link--back {
+  opacity: 0.7;
 }
 </style>

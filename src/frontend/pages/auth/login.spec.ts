@@ -112,6 +112,50 @@ describe("pages/auth/login", () => {
     expect(mockLogin).not.toHaveBeenCalled();
   });
 
+  // homeForRole() — admin → /admin/events, comprador → /
+  it("homeForRole retorna /admin/events per al rol admin", async () => {
+    vi.mocked(useAuthStore).mockReturnValue({
+      isAuthenticated: false,
+      user: { role: "admin" },
+      login: mockLogin,
+    } as any);
+
+    const wrapper = await mountSuspended(LoginPage);
+
+    await wrapper.find("#email").setValue("admin@example.com");
+    await wrapper.find("#password").setValue("password123");
+    await wrapper.find("form").trigger("submit");
+
+    expect(navigateToMock).toHaveBeenCalledWith("/admin/events");
+  });
+
+  it("homeForRole retorna / per al rol comprador", async () => {
+    const wrapper = await mountSuspended(LoginPage);
+
+    await wrapper.find("#email").setValue("user@example.com");
+    await wrapper.find("#password").setValue("password123");
+    await wrapper.find("form").trigger("submit");
+
+    expect(navigateToMock).toHaveBeenCalledWith("/");
+  });
+
+  // Cross-links de navegació
+  it("mostra link NuxtLink cap a /auth/register", async () => {
+    const wrapper = await mountSuspended(LoginPage);
+    const links = wrapper.findAllComponents({ name: "NuxtLink" });
+    const registerLink = links.find(
+      (l) => l.props("to") === "/auth/register",
+    );
+    expect(registerLink).toBeDefined();
+  });
+
+  it("mostra link NuxtLink cap a / (tornar a la portada)", async () => {
+    const wrapper = await mountSuspended(LoginPage);
+    const links = wrapper.findAllComponents({ name: "NuxtLink" });
+    const homeLink = links.find((l) => l.props("to") === "/");
+    expect(homeLink).toBeDefined();
+  });
+
   // 5.5 centrat vertical aplicat dins de <main> — .auth-page usa flex:1 i min-height:100%
   // (no min-height:100dvh que solapava amb la navbar global)
   it("renderitza .auth-page sense min-height 100dvh per centrar dins del <main>", async () => {
