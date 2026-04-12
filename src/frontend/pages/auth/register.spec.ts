@@ -117,4 +117,15 @@ describe("pages/auth/register", () => {
     expect(navigateToMock).toHaveBeenCalledWith("/");
     expect(mockRegister).not.toHaveBeenCalled();
   });
+
+  // 5.6 centrat vertical aplicat dins de <main> — .auth-page usa flex:1 i min-height:100%
+  // (no min-height:100dvh que solapava amb la navbar global)
+  it("renderitza .auth-page sense min-height 100dvh per centrar dins del <main>", async () => {
+    const wrapper = await mountSuspended(RegisterPage);
+    // Verifica que el contenidor .auth-page existeix (el CSS usa flex:1 + min-height:100%)
+    expect(wrapper.find(".auth-page").exists()).toBe(true);
+    // Verifica que el contingut HTML renderitzat no inclou 100dvh
+    const html = wrapper.html();
+    expect(html).not.toContain("100dvh");
+  });
 });
