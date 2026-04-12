@@ -3,6 +3,13 @@ import { setActivePinia, createPinia } from "pinia";
 import { useSeientStore } from "./seients";
 import { EstatSeient } from "@shared/seat.types";
 
+const mockConfirmarReserva = vi.fn();
+vi.mock("~/stores/reserva", () => ({
+  useReservaStore: vi.fn(() => ({
+    confirmarReserva: mockConfirmarReserva,
+  })),
+}));
+
 const mockFetch = vi.fn();
 vi.stubGlobal("$fetch", mockFetch);
 
@@ -250,10 +257,36 @@ describe("useSeientStore", () => {
 
       expect(store.llistat.get("seat-1")?.estat).toBe(EstatSeient.RESERVAT);
     });
-  });
+
+    it("subscriu el listener reserva:confirmada i crida confirmarReserva del store", async () => {
+      mockFetch.mockResolvedValueOnce(mockApiResponse);
+      const store = useSeientStore();
+      await store.inicialitzar("dune-4k-dolby-2026");
+      store.connectar();
+
+      const payload = { seatId: "seat-1", expiraEn: "2026-04-12T10:05:00Z" };
+      socketMock.triggerEvent("reserva:confirmada", payload);
+
+      expect(mockConfirmarReserva).toHaveBeenCalledWith(payload);
+    });
+
+    it("subscriu el listener reserva:rebutjada sense llançar errors", async () => {
+      mockFetch.mockResolvedValueOnce(mockApiResponse);
+      const store = useSeientStore();
+      await store.inicialitzar("dune-4k-dolby-2026");
+      store.connectar();
+
+      expect(() =>
+        socketMock.triggerEvent("reserva:rebutjada", {
+          seatId: "seat-1",
+          motiu: "no_disponible",
+        }),
+      ).not.toThrow();
+    });
+  }); // end describe("connectar")
 
   describe("desconnectar", () => {
-    it("crida socket.off('seient:canvi-estat') i socket.disconnect()", async () => {
+    it("crida socket.off per als tres events i socket.disconnect()", async () => {
       mockFetch.mockResolvedValueOnce(mockApiResponse);
       const store = useSeientStore();
       await store.inicialitzar("dune-4k-dolby-2026");
@@ -262,6 +295,8 @@ describe("useSeientStore", () => {
       store.desconnectar();
 
       expect(socketMock.off).toHaveBeenCalledWith("seient:canvi-estat");
+      expect(socketMock.off).toHaveBeenCalledWith("reserva:confirmada");
+      expect(socketMock.off).toHaveBeenCalledWith("reserva:rebutjada");
       expect(socketMock.disconnect).toHaveBeenCalledOnce();
     });
   });

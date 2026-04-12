@@ -12,6 +12,10 @@ const props = withDefaults(
   },
 );
 
+const emit = defineEmits<{
+  reservar: [seatId: string];
+}>();
+
 const cssClass = computed(() => {
   if (props.miSeat) return "seient--seleccionat-per-mi";
   switch (props.seat.estat) {
@@ -25,6 +29,11 @@ const cssClass = computed(() => {
       return "seient--disponible";
   }
 });
+
+function handleClick() {
+  if (props.seat.estat !== EstatSeient.DISPONIBLE) return;
+  emit("reservar", props.seat.id);
+}
 </script>
 
 <template>
@@ -36,6 +45,7 @@ const cssClass = computed(() => {
     :disabled="
       seat.estat === EstatSeient.VENUT || seat.estat === EstatSeient.RESERVAT
     "
+    @click="handleClick"
   >
     {{ seat.numero }}
   </button>

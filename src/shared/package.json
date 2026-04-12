@@ -2,7 +2,13 @@
   "name": "shared",
   "version": "0.0.1",
   "description": "Shared TypeScript types for Sala Onirica",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./types/*": "./dist/*.js"
+  },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "type-check": "tsc --noEmit",
     "test": "vitest run"
   },

@@ -26,5 +26,14 @@ class UserSeeder extends Seeder
                 'role' => 'comprador',
             ]
         );
+
+        User::updateOrCreate(
+            ['email' => 'comprador2@salaonirica.cat'],
+            [
+                'name' => 'Comprador Prova 2',
+                'password' => 'password',
+                'role' => 'comprador',
+            ]
+        );
     }
 }

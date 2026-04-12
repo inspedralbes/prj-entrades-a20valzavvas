@@ -37,6 +37,7 @@ describe("pages/auth/register", () => {
       name: "Joan Doe",
       email: "joan@example.com",
       password: "password123",
+      password_confirmation: "password123",
     });
     expect(navigateToMock).toHaveBeenCalledWith("/");
   });

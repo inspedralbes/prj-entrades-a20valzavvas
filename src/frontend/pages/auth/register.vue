@@ -34,6 +34,7 @@ async function submit() {
       name: name.value,
       email: email.value,
       password: password.value,
+      password_confirmation: passwordConfirmation.value,
     });
     await navigateTo("/");
   } catch (err: any) {

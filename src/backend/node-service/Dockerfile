@@ -20,6 +20,9 @@ RUN pnpm install --frozen-lockfile
 COPY src/shared/ ./src/shared/
 COPY src/backend/node-service/ ./src/backend/node-service/
 
+# ── Build shared package first (produces dist/types/*.js for runtime) ──────
+RUN pnpm --filter shared build
+
 # ── Build NestJS ──────────────────────────────────────────────────────────
 # Use pnpm filter from workspace root so hoisted node_modules are on the PATH
 RUN pnpm --filter node-service build

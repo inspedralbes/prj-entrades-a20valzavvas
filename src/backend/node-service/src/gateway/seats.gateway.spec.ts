@@ -2,9 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { SeatsGateway } from "./seats.gateway";
 import type { SeientCanviEstatPayload } from "shared/types/socket.types";
 import { EstatSeient } from "shared/types/seat.types";
+import type { LaravelClientService } from "../laravel-client/laravel-client.service";
 
-function makeSocketMock() {
-  return { join: vi.fn(), data: { userId: "user-1", role: "comprador" } };
+function makeSocketMock(rooms: string[] = []) {
+  return {
+    join: vi.fn(),
+    emit: vi.fn(),
+    rooms: new Set(["socket-id", ...rooms]),
+    data: { userId: "user-1", role: "comprador", token: "tok-abc" },
+  };
 }
 
 function makeServerMock() {
@@ -13,11 +19,19 @@ function makeServerMock() {
   return { server: { to }, emit, to };
 }
 
+function makeLaravelClientMock(): LaravelClientService {
+  return {
+    reserveSeat: vi.fn(),
+  } as unknown as LaravelClientService;
+}
+
 describe("SeatsGateway", () => {
   let gateway: SeatsGateway;
+  let laravelClient: LaravelClientService;
 
   beforeEach(() => {
-    gateway = new SeatsGateway();
+    laravelClient = makeLaravelClientMock();
+    gateway = new SeatsGateway(laravelClient);
   });
 
   describe("handleUnirEvent", () => {
@@ -76,6 +90,73 @@ describe("SeatsGateway", () => {
 
       expect(to).toHaveBeenCalledWith("event:evt-abc");
       expect(to).not.toHaveBeenCalledWith("event:evt-xyz");
+    });
+  });
+
+  describe("handleSeientReservar", () => {
+    it("emet reserva:confirmada i seient:canvi-estat quan la reserva prospera", async () => {
+      const { server, to, emit: roomEmit } = makeServerMock();
+      (gateway as unknown as { server: typeof server }).server = server;
+      const socket = makeSocketMock(["event:evt-1"]);
+
+      vi.mocked(laravelClient.reserveSeat).mockResolvedValue({
+        ok: true,
+        reservation: { id: "res-1", expires_at: "2026-04-12T10:05:00.000Z" },
+        seat: { id: "seat-B5", fila: "B", numero: 5, estat: "RESERVAT" },
+      });
+
+      await gateway.handleSeientReservar(socket as never, { seatId: "seat-B5" });
+
+      expect(laravelClient.reserveSeat).toHaveBeenCalledWith("seat-B5", "tok-abc");
+
+      expect(socket.emit).toHaveBeenCalledWith("reserva:confirmada", {
+        seatId: "seat-B5",
+        expiraEn: "2026-04-12T10:05:00.000Z",
+      });
+
+      expect(to).toHaveBeenCalledWith("event:evt-1");
+      expect(roomEmit).toHaveBeenCalledWith("seient:canvi-estat", {
+        seatId: "seat-B5",
+        estat: EstatSeient.RESERVAT,
+        fila: "B",
+        numero: 5,
+      });
+    });
+
+    it("emet reserva:rebutjada sense broadcast quan el seient no és disponible", async () => {
+      const { server, to } = makeServerMock();
+      (gateway as unknown as { server: typeof server }).server = server;
+      const socket = makeSocketMock(["event:evt-1"]);
+
+      vi.mocked(laravelClient.reserveSeat).mockResolvedValue({
+        ok: false,
+        motiu: "no_disponible",
+      });
+
+      await gateway.handleSeientReservar(socket as never, { seatId: "seat-B5" });
+
+      expect(socket.emit).toHaveBeenCalledWith("reserva:rebutjada", {
+        seatId: "seat-B5",
+        motiu: "no_disponible",
+      });
+      expect(to).not.toHaveBeenCalled();
+    });
+
+    it("no fa broadcast si el socket no és en cap event room", async () => {
+      const { server, to } = makeServerMock();
+      (gateway as unknown as { server: typeof server }).server = server;
+      const socket = makeSocketMock(); // no event room
+
+      vi.mocked(laravelClient.reserveSeat).mockResolvedValue({
+        ok: true,
+        reservation: { id: "res-1", expires_at: "2026-04-12T10:05:00.000Z" },
+        seat: { id: "seat-C3", fila: "C", numero: 3, estat: "RESERVAT" },
+      });
+
+      await gateway.handleSeientReservar(socket as never, { seatId: "seat-C3" });
+
+      expect(socket.emit).toHaveBeenCalledWith("reserva:confirmada", expect.any(Object));
+      expect(to).not.toHaveBeenCalled();
     });
   });
 });
