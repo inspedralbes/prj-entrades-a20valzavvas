@@ -102,7 +102,12 @@ describe("useAuthStore", () => {
 
       expect(mockFetch).toHaveBeenNthCalledWith(1, "/api/auth/register", {
         method: "POST",
-        body: { name: "Test", email: "user@example.com", password: "pass", password_confirmation: "pass" },
+        body: {
+          name: "Test",
+          email: "user@example.com",
+          password: "pass",
+          password_confirmation: "pass",
+        },
       });
       expect(store.isAuthenticated).toBe(true);
       expect(store.token).toBe("tok-new");
