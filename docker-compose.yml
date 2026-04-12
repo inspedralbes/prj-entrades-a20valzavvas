@@ -37,6 +37,7 @@ services:
       dockerfile: src/frontend/Dockerfile
     environment:
       NITRO_PORT: ${FRONTEND_PORT:-3000}
+      NUXT_LARAVEL_BASE_URL: http://laravel-service:8000
     depends_on:
       - backend
 

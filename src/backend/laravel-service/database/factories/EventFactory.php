@@ -16,6 +16,7 @@ class EventFactory extends Factory
             'name' => fake()->sentence(3),
             'slug' => fake()->unique()->slug(3),
             'description' => fake()->paragraph(),
+            'image_url' => fake()->imageUrl(640, 480, 'cinema'),
             'date' => fake()->dateTimeBetween('now', '+1 year'),
             'venue' => fake()->company(),
             'total_capacity' => fake()->numberBetween(50, 500),

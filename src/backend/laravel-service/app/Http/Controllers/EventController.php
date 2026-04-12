@@ -10,6 +10,7 @@ class EventController extends Controller
     public function index(): JsonResponse
     {
         $events = Event::where('published', true)
+            ->withCount(['seats as available_seats' => fn ($q) => $q->where('estat', 'DISPONIBLE')])
             ->orderBy('date')
             ->get()
             ->map(fn (Event $event) => [
@@ -18,6 +19,9 @@ class EventController extends Controller
                 'slug' => $event->slug,
                 'date' => $event->date->toDateTimeString(),
                 'venue' => $event->venue,
+                'description' => $event->description,
+                'image_url' => $event->image_url,
+                'available_seats' => $event->available_seats,
             ]);
 
         return response()->json($events);

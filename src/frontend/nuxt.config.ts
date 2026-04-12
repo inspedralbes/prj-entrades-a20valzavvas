@@ -11,6 +11,7 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    laravelBaseUrl: "", // overridden by NUXT_LARAVEL_BASE_URL env var (e.g. http://laravel-service:8000 in Docker)
     public: {
       wsUrl: "http://localhost/ws",
     },

@@ -7,6 +7,8 @@ context: |
     multiple users competing for the same seats simultaneously. The server is the
     single source of truth. Two users can never buy the same seat.
 
+    IMPORTANT: ALWAYS EXECUTE THE CI STEPS IN LOCAL WHEN ASKING FOR VERIFYICATION.
+
   Roles:
     - Visitant: browses the homepage and event pages without reserving
     - Comprador: reserves seats and completes purchase (identified by session_token + email)
