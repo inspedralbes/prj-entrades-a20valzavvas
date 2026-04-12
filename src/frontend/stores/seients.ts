@@ -1,6 +1,11 @@
 import { defineStore } from "pinia";
 import { EstatSeient } from "@shared/seat.types";
-import type { SeientCanviEstatPayload } from "@shared/socket.types";
+import type {
+  SeientCanviEstatPayload,
+  ReservaConfirmadaPayload,
+  ReservaRebutjadaPayload,
+} from "@shared/socket.types";
+import { useReservaStore } from "~/stores/reserva";
 
 export interface SeatState {
   estat: EstatSeient;
@@ -106,16 +111,25 @@ export const useSeientStore = defineStore("seients", {
       const socket = $socket as {
         connect: () => void;
         emit: (event: string, data: unknown) => void;
-        on: (
-          event: string,
-          handler: (payload: SeientCanviEstatPayload) => void,
-        ) => void;
+        on: (event: string, handler: (payload: unknown) => void) => void;
+        off: (event: string) => void;
       };
 
       socket.connect();
 
-      socket.on("seient:canvi-estat", (payload: SeientCanviEstatPayload) => {
-        this.actualitzarEstat(payload.seatId, payload.estat);
+      socket.on("seient:canvi-estat", (payload: unknown) => {
+        const p = payload as SeientCanviEstatPayload;
+        this.actualitzarEstat(p.seatId, p.estat);
+      });
+
+      socket.on("reserva:confirmada", (payload: unknown) => {
+        const p = payload as ReservaConfirmadaPayload;
+        useReservaStore().confirmarReserva(p);
+      });
+
+      socket.on("reserva:rebutjada", (payload: unknown) => {
+        const p = payload as ReservaRebutjadaPayload;
+        console.warn(`[reserva] Rebutjada: ${p.seatId} — ${p.motiu}`);
       });
 
       if (this.event) {
@@ -131,6 +145,8 @@ export const useSeientStore = defineStore("seients", {
       };
 
       socket.off("seient:canvi-estat");
+      socket.off("reserva:confirmada");
+      socket.off("reserva:rebutjada");
       socket.disconnect();
     },
   },

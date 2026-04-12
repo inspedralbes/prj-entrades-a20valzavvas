@@ -64,4 +64,37 @@ describe("Seient.vue", () => {
     // All four classes must be unique (each state → different class)
     expect(new Set(assignedClasses).size).toBe(4);
   });
+
+  describe("click handler", () => {
+    it("emet l'event reservar amb seatId quan el seient és DISPONIBLE", async () => {
+      const wrapper = await mountSuspended(Seient, {
+        props: { seat: makeSeat(EstatSeient.DISPONIBLE, "seat-B5") },
+      });
+
+      await wrapper.trigger("click");
+
+      expect(wrapper.emitted("reservar")).toBeDefined();
+      expect(wrapper.emitted("reservar")?.[0]).toEqual(["seat-B5"]);
+    });
+
+    it("no emet l'event reservar quan el seient és RESERVAT", async () => {
+      const wrapper = await mountSuspended(Seient, {
+        props: { seat: makeSeat(EstatSeient.RESERVAT, "seat-B5") },
+      });
+
+      await wrapper.trigger("click");
+
+      expect(wrapper.emitted("reservar")).toBeUndefined();
+    });
+
+    it("no emet l'event reservar quan el seient és VENUT", async () => {
+      const wrapper = await mountSuspended(Seient, {
+        props: { seat: makeSeat(EstatSeient.VENUT, "seat-B5") },
+      });
+
+      await wrapper.trigger("click");
+
+      expect(wrapper.emitted("reservar")).toBeUndefined();
+    });
+  });
 });

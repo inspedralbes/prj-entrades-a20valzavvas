@@ -7,7 +7,6 @@ import {
   ConflictException,
   UnprocessableEntityException,
   InternalServerErrorException,
-  NotImplementedException,
 } from "@nestjs/common";
 import { of, throwError } from "rxjs";
 import { AxiosResponse, AxiosError, AxiosHeaders } from "axios";
@@ -148,29 +147,75 @@ describe("LaravelClientService", () => {
     });
   });
 
-  describe("stub methods", () => {
-    it("reserveSeat should throw NotImplementedException", async () => {
-      await expect(
-        service.reserveSeat("seat-1", "user-1"),
-      ).rejects.toThrow(NotImplementedException);
-    });
+  describe("reserveSeat", () => {
+    it("retorna ok:true amb les dades de la reserva quan Laravel respon 200", async () => {
+      const responseData = {
+        reservation: { id: "res-1", expires_at: "2026-04-12T10:05:00.000Z" },
+        seat: { id: "seat-B5", fila: "B", numero: 5, estat: "RESERVAT" },
+      };
+      const response: AxiosResponse = {
+        data: responseData,
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config: { headers: new AxiosHeaders() },
+      };
+      vi.mocked(httpService.post).mockReturnValue(of(response));
 
-    it("releaseSeat should throw NotImplementedException", async () => {
-      await expect(service.releaseSeat("seat-1")).rejects.toThrow(
-        NotImplementedException,
+      const result = await service.reserveSeat("seat-B5", "tok-abc");
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.reservation.id).toBe("res-1");
+        expect(result.seat.fila).toBe("B");
+      }
+      expect(httpService.post).toHaveBeenCalledWith(
+        "/api/seats/seat-B5/reserve",
+        {},
+        { headers: { Authorization: "Bearer tok-abc" } },
       );
     });
 
-    it("expireReservations should throw NotImplementedException", async () => {
-      await expect(service.expireReservations()).rejects.toThrow(
-        NotImplementedException,
+    it("retorna ok:false motiu:no_disponible quan Laravel respon 409", async () => {
+      vi.mocked(httpService.post).mockReturnValue(
+        throwError(() => makeAxiosError(409, "Seat already reserved")),
       );
+      service.onModuleInit();
+
+      const result = await service.reserveSeat("seat-B5", "tok-abc");
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.motiu).toBe("no_disponible");
+      }
     });
 
-    it("getStats should throw NotImplementedException", async () => {
-      await expect(service.getStats("event-1")).rejects.toThrow(
-        NotImplementedException,
+    it("retorna ok:false motiu:seient_no_trobat quan Laravel respon 404", async () => {
+      vi.mocked(httpService.post).mockReturnValue(
+        throwError(() => makeAxiosError(404, "Seat not found")),
       );
+      service.onModuleInit();
+
+      const result = await service.reserveSeat("seat-X", "tok-abc");
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.motiu).toBe("seient_no_trobat");
+      }
+    });
+
+    it("retorna ok:false motiu:error_intern quan hi ha un error inesperat", async () => {
+      vi.mocked(httpService.post).mockReturnValue(
+        throwError(() => makeAxiosError(500, "Server error")),
+      );
+      service.onModuleInit();
+
+      const result = await service.reserveSeat("seat-B5", "tok-abc");
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.motiu).toBe("error_intern");
+      }
     });
   });
 });

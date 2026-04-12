@@ -42,7 +42,12 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    async register(payload: { name: string; email: string; password: string }) {
+    async register(payload: {
+      name: string;
+      email: string;
+      password: string;
+      password_confirmation: string;
+    }) {
       await $fetch("/api/auth/register", {
         method: "POST",
         body: payload,

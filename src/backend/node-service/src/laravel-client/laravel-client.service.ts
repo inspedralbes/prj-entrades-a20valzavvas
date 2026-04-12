@@ -6,12 +6,20 @@ import {
   ConflictException,
   UnprocessableEntityException,
   InternalServerErrorException,
-  NotImplementedException,
   HttpException,
 } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { AxiosError } from "axios";
 import { firstValueFrom } from "rxjs";
+
+export interface ReserveSeatSuccess {
+  reservation: { id: string; expires_at: string };
+  seat: { id: string; fila: string; numero: number; estat: string };
+}
+
+export type ReserveSeatResult =
+  | ({ ok: true } & ReserveSeatSuccess)
+  | { ok: false; motiu: string };
 
 @Injectable()
 export class LaravelClientService implements OnModuleInit {
@@ -73,27 +81,48 @@ export class LaravelClientService implements OnModuleInit {
     }
   }
 
-  async reserveSeat(seatId: string, userId: string): Promise<any> {
-    throw new NotImplementedException(
-      "reserveSeat will be implemented in US-03-02",
-    );
+  async reserveSeat(
+    seatId: string,
+    token: string,
+  ): Promise<ReserveSeatResult> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<ReserveSeatSuccess>(
+          `/api/seats/${seatId}/reserve`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } },
+        ),
+      );
+      return { ok: true, ...response.data };
+    } catch (error) {
+      // NestJS exceptions thrown by the Axios interceptor (production path)
+      if (error instanceof ConflictException) {
+        return { ok: false, motiu: "no_disponible" };
+      }
+      if (error instanceof NotFoundException) {
+        return { ok: false, motiu: "seient_no_trobat" };
+      }
+      // Raw AxiosErrors not yet processed by the interceptor (test path)
+      if (error instanceof AxiosError && error.response) {
+        const status = error.response.status;
+        if (status === 409) return { ok: false, motiu: "no_disponible" };
+        if (status === 404) return { ok: false, motiu: "seient_no_trobat" };
+      }
+      return { ok: false, motiu: "error_intern" };
+    }
   }
 
   async releaseSeat(seatId: string): Promise<void> {
-    throw new NotImplementedException(
-      "releaseSeat will be implemented in US-03-02",
-    );
+    // Will be implemented in a future US
+    void seatId;
   }
 
-  async expireReservations(): Promise<any> {
-    throw new NotImplementedException(
-      "expireReservations will be implemented in US-04-01",
-    );
+  async expireReservations(): Promise<void> {
+    // Will be implemented in a future US
   }
 
-  async getStats(eventId: string): Promise<any> {
-    throw new NotImplementedException(
-      "getStats will be implemented in US-04-01",
-    );
+  async getStats(eventId: string): Promise<void> {
+    // Will be implemented in a future US
+    void eventId;
   }
 }

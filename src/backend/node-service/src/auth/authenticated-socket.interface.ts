@@ -4,5 +4,6 @@ export interface AuthenticatedSocket extends Socket {
   data: {
     userId: string;
     role: string;
+    token: string;
   };
 }

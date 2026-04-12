@@ -46,6 +46,7 @@ export class JwtWsGuard implements CanActivate {
 
       client.data.userId = payload.sub;
       client.data.role = payload.role;
+      client.data.token = token;
 
       return true;
     } catch {
@@ -65,6 +66,7 @@ export class JwtWsGuard implements CanActivate {
 
     client.data.userId = user.id;
     client.data.role = user.role;
+    client.data.token = token;
 
     return true;
   }

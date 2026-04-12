@@ -3,6 +3,7 @@ import { useSeientStore } from "~/stores/seients";
 import type { SeatStateWithId } from "~/stores/seients";
 
 const seients = useSeientStore();
+const { $socket } = useNuxtApp();
 
 const files = computed(() => {
   const result: Array<{ fila: string; seats: SeatStateWithId[] }> = [];
@@ -19,6 +20,14 @@ function curveOffset(globalIndex: number, total: number): number {
   const center = (total - 1) / 2;
   const distance = Math.abs(globalIndex - center) / center;
   return Math.round(distance * distance * 10);
+}
+
+function handleReservar(seatId: string) {
+  ($socket as { emit: (event: string, data: unknown) => void }).emit(
+    "seient:reservar",
+    { seatId },
+  );
+}
 }
 </script>
 
@@ -41,12 +50,17 @@ function curveOffset(globalIndex: number, total: number): number {
           <!-- Bloc esquerra -->
           <div class="fila-bloc">
             <span
-              v-for="(seat, idx) in fila.seats.slice(0, Math.ceil(fila.seats.length / 2))"
+              v-for="(seat, idx) in fila.seats.slice(
+                0,
+                Math.ceil(fila.seats.length / 2),
+              )"
               :key="seat.id"
               class="seient-wrapper"
-              :style="{ transform: `translateY(${curveOffset(idx, fila.seats.length)}px)` }"
+              :style="{
+                transform: `translateY(${curveOffset(idx, fila.seats.length)}px)`,
+              }"
             >
-              <Seient :seat="seat" />
+              <Seient :seat="seat" @reservar="handleReservar" />
             </span>
           </div>
 
@@ -56,12 +70,16 @@ function curveOffset(globalIndex: number, total: number): number {
           <!-- Bloc dreta -->
           <div class="fila-bloc">
             <span
-              v-for="(seat, idx) in fila.seats.slice(Math.ceil(fila.seats.length / 2))"
+              v-for="(seat, idx) in fila.seats.slice(
+                Math.ceil(fila.seats.length / 2),
+              )"
               :key="seat.id"
               class="seient-wrapper"
-              :style="{ transform: `translateY(${curveOffset(Math.ceil(fila.seats.length / 2) + idx, fila.seats.length)}px)` }"
+              :style="{
+                transform: `translateY(${curveOffset(Math.ceil(fila.seats.length / 2) + idx, fila.seats.length)}px)`,
+              }"
             >
-              <Seient :seat="seat" />
+              <Seient :seat="seat" @reservar="handleReservar" />
             </span>
           </div>
 
