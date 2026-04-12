@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mountSuspended, mockNuxtImport } from "@nuxt/test-utils/runtime";
 import SlugPage from "./[slug].vue";
+import ConnexioIndicador from "~/components/ConnexioIndicador.vue";
 
 mockNuxtImport("useRoute", () =>
   vi.fn().mockReturnValue({ params: { slug: "dune-4k-dolby-2026" } }),
@@ -25,7 +26,10 @@ const mockSeientStore = {
 };
 
 const mockInicialitzarConnexio = vi.fn();
-const mockConnexioStore = { inicialitzar: mockInicialitzarConnexio };
+const mockConnexioStore = {
+  inicialitzar: mockInicialitzarConnexio,
+  estat: "connectat",
+};
 
 vi.mock("~/stores/seients", () => ({
   useSeientStore: vi.fn(),
@@ -89,5 +93,11 @@ describe("pages/events/[slug]", () => {
     wrapper.unmount();
 
     expect(mockDesconnectar).toHaveBeenCalledOnce();
+  });
+
+  it("inclou el component ConnexioIndicador a la pàgina", async () => {
+    const wrapper = await mountSuspended(SlugPage);
+
+    expect(wrapper.findComponent(ConnexioIndicador).exists()).toBe(true);
   });
 });

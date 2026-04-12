@@ -44,40 +44,64 @@ const cssClass = computed(() => {
 <style scoped>
 .seient {
   width: 2rem;
-  height: 2rem;
+  height: 1.85rem;
   border: none;
-  border-radius: 4px;
-  font-size: 0.65rem;
-  font-weight: 600;
+  border-radius: 5px 5px 2px 2px;
+  font-size: 0.6rem;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.15s;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+  position: relative;
+  outline: none;
 }
 
-.seient:disabled {
-  cursor: not-allowed;
-  opacity: 0.8;
+.seient:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
 }
 
+/* ── Disponible ── */
 .seient--disponible {
+  background-color: #15803d;
+  color: #bbf7d0;
+}
+
+.seient--disponible:hover {
+  transform: scale(1.12) translateY(-2px);
+  box-shadow: 0 0 10px rgba(22, 163, 74, 0.75);
   background-color: #16a34a;
-  color: #fff;
 }
 
+/* ── Reservat ── */
 .seient--reservat {
-  background-color: #d97706;
-  color: #fff;
+  background-color: #b45309;
+  color: #fde68a;
+  cursor: not-allowed;
+  opacity: 0.85;
 }
 
+/* ── Seleccionat per mi ── */
 .seient--seleccionat-per-mi {
   background-color: #7c3aed;
-  color: #fff;
+  color: #ede9fe;
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.65);
 }
 
+.seient--seleccionat-per-mi:hover {
+  transform: scale(1.08) translateY(-1px);
+  box-shadow: 0 0 14px rgba(124, 58, 237, 0.85);
+}
+
+/* ── Venut ── */
 .seient--venut {
-  background-color: #374151;
-  color: #9ca3af;
+  background-color: #1a2235;
+  color: #2d3748;
+  cursor: not-allowed;
 }
 </style>
