@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useSeientStore } from "~/stores/seients";
 import { useConnexioStore } from "~/stores/connexio";
+import { useReservaStore } from "~/stores/reserva";
 
 definePageMeta({ ssr: false });
 
@@ -9,6 +10,7 @@ const seients = useSeientStore();
 const connexio = useConnexioStore();
 
 const slug = route.params.slug as string;
+const reserva = useReservaStore();
 
 onMounted(async () => {
   connexio.inicialitzar();
@@ -26,8 +28,9 @@ onUnmounted(() => {
 <template>
   <div class="event-page">
     <div class="event-container">
-      <!-- Barra superior: indicador de connexió -->
+      <!-- Barra superior: indicador de connexió i temporitzador -->
       <div class="event-topbar">
+        <TemporitzadorReserva v-if="reserva.teReservaActiva" />
         <ConnexioIndicador />
       </div>
 
@@ -85,6 +88,8 @@ onUnmounted(() => {
 .event-topbar {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
   margin-bottom: 1.75rem;
 }
 

@@ -62,7 +62,11 @@ function handleReservar(seatId: string) {
                 transform: `translateY(${curveOffset(idx, fila.seats.length)}px)`,
               }"
             >
-              <Seient :seat="seat" @reservar="handleReservar" />
+              <Seient
+                :seat="seat"
+                :mi-seat="reserva.seatIds.includes(seat.id)"
+                @reservar="handleReservar"
+              />
             </span>
           </div>
 
@@ -81,7 +85,11 @@ function handleReservar(seatId: string) {
                 transform: `translateY(${curveOffset(Math.ceil(fila.seats.length / 2) + idx, fila.seats.length)}px)`,
               }"
             >
-              <Seient :seat="seat" @reservar="handleReservar" />
+              <Seient
+                :seat="seat"
+                :mi-seat="reserva.seatIds.includes(seat.id)"
+                @reservar="handleReservar"
+              />
             </span>
           </div>
 
