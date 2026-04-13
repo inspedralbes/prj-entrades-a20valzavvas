@@ -12,10 +12,19 @@ type SeatEntry = {
   preu: number;
 };
 const mockSeientsPerFila = vi.fn(() => new Map<string, SeatEntry[]>());
+const mockReservaSeatIds = vi.fn<() => string[]>(() => []);
 
 vi.mock("~/stores/seients", () => ({
   useSeientStore: vi.fn(() => ({
     seientsPerFila: mockSeientsPerFila(),
+  })),
+}));
+
+vi.mock("~/stores/reserva", () => ({
+  useReservaStore: vi.fn(() => ({
+    seatIds: mockReservaSeatIds(),
+    limitAssolit: false,
+    teReservaActiva: false,
   })),
 }));
 
@@ -106,5 +115,67 @@ describe("MapaSeients.vue", () => {
     const wrapper = await mountSuspended(MapaSeients);
     const seients = wrapper.findAll(".seient");
     expect(seients).toHaveLength(0);
+  });
+
+  it("aplica seient--seleccionat-per-mi al seient que pertany a reserva.seatIds", async () => {
+    const map = new Map([
+      [
+        "A",
+        [
+          {
+            id: "s1",
+            estat: EstatSeient.RESERVAT,
+            fila: "A",
+            numero: 1,
+            categoria: "c1",
+            preu: 10,
+          },
+          {
+            id: "s2",
+            estat: EstatSeient.DISPONIBLE,
+            fila: "A",
+            numero: 2,
+            categoria: "c1",
+            preu: 10,
+          },
+        ],
+      ],
+    ]);
+    mockSeientsPerFila.mockReturnValue(map);
+    mockReservaSeatIds.mockReturnValue(["s1"]);
+
+    const wrapper = await mountSuspended(MapaSeients);
+
+    const seleccionat = wrapper.findAll(".seient--seleccionat-per-mi");
+    expect(seleccionat).toHaveLength(1);
+    expect(seleccionat[0].text()).toBe("1");
+
+    const noSeleccionat = wrapper.findAll(".seient--disponible");
+    expect(noSeleccionat).toHaveLength(1);
+    expect(noSeleccionat[0].text()).toBe("2");
+  });
+
+  it("no aplica seient--seleccionat-per-mi quan reserva.seatIds és buit", async () => {
+    const map = new Map([
+      [
+        "A",
+        [
+          {
+            id: "s1",
+            estat: EstatSeient.RESERVAT,
+            fila: "A",
+            numero: 1,
+            categoria: "c1",
+            preu: 10,
+          },
+        ],
+      ],
+    ]);
+    mockSeientsPerFila.mockReturnValue(map);
+    mockReservaSeatIds.mockReturnValue([]);
+
+    const wrapper = await mountSuspended(MapaSeients);
+
+    expect(wrapper.findAll(".seient--seleccionat-per-mi")).toHaveLength(0);
   });
 });
