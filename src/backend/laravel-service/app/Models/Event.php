@@ -19,6 +19,7 @@ class Event extends Model
         'date',
         'venue',
         'total_capacity',
+        'max_seients_per_usuari',
         'published',
     ];
 
@@ -27,6 +28,7 @@ class Event extends Model
         return [
             'date' => 'datetime',
             'published' => 'boolean',
+            'max_seients_per_usuari' => 'integer',
         ];
     }
 

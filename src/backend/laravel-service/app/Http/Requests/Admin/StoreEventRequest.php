@@ -25,6 +25,7 @@ class StoreEventRequest extends FormRequest
             'price_categories.*.rows' => ['required', 'array', 'min:1'],
             'price_categories.*.rows.*' => ['required', 'string', 'max:10'],
             'price_categories.*.seats_per_row' => ['required', 'integer', 'min:1'],
+            'max_seients_per_usuari' => ['sometimes', 'integer', 'min:1'],
         ];
     }
 }

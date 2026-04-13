@@ -21,6 +21,7 @@ class UpdateEventRequest extends FormRequest
             'venue' => ['sometimes', 'string', 'max:255'],
             'price_categories' => ['sometimes', 'array', 'min:1'],
             'published' => ['sometimes', 'boolean'],
+            'max_seients_per_usuari' => ['sometimes', 'integer', 'min:1'],
         ];
     }
 }

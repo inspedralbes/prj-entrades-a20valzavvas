@@ -49,6 +49,7 @@ class EventSeatsController extends Controller
                 'slug' => $event->slug,
                 'data' => $event->date->toDateTimeString(),
                 'recinte' => $event->venue,
+                'max_seients_per_usuari' => $event->max_seients_per_usuari,
             ],
             'categories' => $categories,
             'files' => $files,

@@ -102,11 +102,15 @@ export class LaravelClientService implements OnModuleInit {
       if (error instanceof NotFoundException) {
         return { ok: false, motiu: "seient_no_trobat" };
       }
+      if (error instanceof UnprocessableEntityException) {
+        return { ok: false, motiu: "limit_assolit" };
+      }
       // Raw AxiosErrors not yet processed by the interceptor (test path)
       if (error instanceof AxiosError && error.response) {
         const status = error.response.status;
         if (status === 409) return { ok: false, motiu: "no_disponible" };
         if (status === 404) return { ok: false, motiu: "seient_no_trobat" };
+        if (status === 422) return { ok: false, motiu: "limit_assolit" };
       }
       return { ok: false, motiu: "error_intern" };
     }

@@ -83,7 +83,7 @@ class AdminEventService
             }
         }
 
-        $fillable = array_intersect_key($data, array_flip(['name', 'slug', 'description', 'date', 'venue', 'published']));
+        $fillable = array_intersect_key($data, array_flip(['name', 'slug', 'description', 'date', 'venue', 'published', 'max_seients_per_usuari']));
         $event->update($fillable);
 
         return $event->fresh(['priceCategories' => fn ($q) => $q->withCount('seats')]);
@@ -113,6 +113,7 @@ class AdminEventService
                 'date' => $data['date'],
                 'venue' => $data['venue'],
                 'total_capacity' => $totalCapacity,
+                'max_seients_per_usuari' => $data['max_seients_per_usuari'] ?? 4,
                 'published' => false,
             ]);
 

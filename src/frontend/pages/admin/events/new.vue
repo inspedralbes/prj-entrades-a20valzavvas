@@ -18,6 +18,7 @@ const slug = ref("");
 const description = ref("");
 const date = ref("");
 const venue = ref("");
+const maxSeientPerUsuari = ref<number>(4);
 const priceCategories = ref<PriceCategory[]>([
   { name: "", price: null, rows: "", seats_per_row: null },
 ]);
@@ -61,6 +62,7 @@ async function submit() {
     description: description.value || undefined,
     date: date.value,
     venue: venue.value,
+    max_seients_per_usuari: maxSeientPerUsuari.value,
     price_categories: priceCategories.value.map((cat) => ({
       name: cat.name,
       price: cat.price,
@@ -121,6 +123,20 @@ async function submit() {
         <label for="venue">Recinte *</label>
         <input id="venue" v-model="venue" type="text" required />
         <span v-if="serverErrors.venue" class="error">{{ serverErrors.venue[0] }}</span>
+      </div>
+
+      <div class="field">
+        <label for="max-seients">Màxim de seients per usuari *</label>
+        <input
+          id="max-seients"
+          v-model.number="maxSeientPerUsuari"
+          type="number"
+          min="1"
+          required
+        />
+        <span v-if="serverErrors.max_seients_per_usuari" class="error">
+          {{ serverErrors.max_seients_per_usuari[0] }}
+        </span>
       </div>
 
       <section class="categories">

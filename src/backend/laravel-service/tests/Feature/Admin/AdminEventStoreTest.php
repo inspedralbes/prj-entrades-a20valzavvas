@@ -41,10 +41,11 @@ class AdminEventStoreTest extends TestCase
         $response->assertStatus(201)
             ->assertJsonStructure([
                 'id', 'name', 'slug', 'date', 'time', 'venue', 'published',
-                'total_capacity', 'price_categories',
+                'total_capacity', 'max_seients_per_usuari', 'price_categories',
             ])
             ->assertJsonPath('published', false)
-            ->assertJsonPath('total_capacity', 10); // 2 rows × 5 seats
+            ->assertJsonPath('total_capacity', 10) // 2 rows × 5 seats
+            ->assertJsonPath('max_seients_per_usuari', 4); // default value
 
         $this->assertDatabaseHas('events', ['name' => 'Test Event']);
         $this->assertDatabaseHas('price_categories', ['name' => 'General']);
@@ -83,6 +84,20 @@ class AdminEventStoreTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonPath('slug', 'my-custom-slug');
+    }
+
+    public function test_store_accepts_custom_max_seients_per_usuari(): void
+    {
+        $admin = $this->adminUser();
+
+        $response = $this->actingAs($admin)->postJson('/api/admin/events', $this->validPayload([
+            'max_seients_per_usuari' => 2,
+        ]));
+
+        $response->assertStatus(201)
+            ->assertJsonPath('max_seients_per_usuari', 2);
+
+        $this->assertDatabaseHas('events', ['max_seients_per_usuari' => 2]);
     }
 
     public function test_store_returns_409_for_duplicate_slug(): void
