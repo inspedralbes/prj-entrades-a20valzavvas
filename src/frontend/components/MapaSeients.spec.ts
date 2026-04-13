@@ -12,7 +12,7 @@ type SeatEntry = {
   preu: number;
 };
 const mockSeientsPerFila = vi.fn(() => new Map<string, SeatEntry[]>());
-const mockReservaSeatIds = vi.fn<[], string[]>(() => []);
+const mockReservaSeatIds = vi.fn<() => string[]>(() => []);
 
 vi.mock("~/stores/seients", () => ({
   useSeientStore: vi.fn(() => ({
