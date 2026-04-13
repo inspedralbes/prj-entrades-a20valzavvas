@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useSeientStore } from "~/stores/seients";
+import { useReservaStore } from "~/stores/reserva";
 import type { SeatStateWithId } from "~/stores/seients";
 
 const seients = useSeientStore();
+const reserva = useReservaStore();
 const { $socket } = useNuxtApp();
 
 const files = computed(() => {
@@ -23,6 +25,7 @@ function curveOffset(globalIndex: number, total: number): number {
 }
 
 function handleReservar(seatId: string) {
+  if (reserva.limitAssolit) return;
   ($socket as { emit: (event: string, data: unknown) => void }).emit(
     "seient:reservar",
     { seatId },

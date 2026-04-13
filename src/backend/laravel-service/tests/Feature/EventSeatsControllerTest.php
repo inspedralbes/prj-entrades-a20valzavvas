@@ -22,10 +22,11 @@ class EventSeatsControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'event' => ['id', 'nom', 'slug', 'data', 'recinte'],
+                'event' => ['id', 'nom', 'slug', 'data', 'recinte', 'max_seients_per_usuari'],
                 'categories',
                 'files',
-            ]);
+            ])
+            ->assertJsonPath('event.max_seients_per_usuari', 4);
 
         $files = $response->json('files');
         $this->assertArrayHasKey('A', $files);

@@ -4,9 +4,11 @@ import { useSeientStore } from "./seients";
 import { EstatSeient } from "@shared/seat.types";
 
 const mockConfirmarReserva = vi.fn();
+const mockSetMaxSeientPerUsuari = vi.fn();
 vi.mock("~/stores/reserva", () => ({
   useReservaStore: vi.fn(() => ({
     confirmarReserva: mockConfirmarReserva,
+    setMaxSeientPerUsuari: mockSetMaxSeientPerUsuari,
   })),
 }));
 
@@ -40,6 +42,7 @@ const mockApiResponse = {
     slug: "dune-4k-dolby-2026",
     data: "2026-06-01 20:00:00",
     recinte: "Sala Onirica",
+    max_seients_per_usuari: 4,
   },
   categories: [{ id: "cat-1", name: "General", price: 12.5 }],
   files: {

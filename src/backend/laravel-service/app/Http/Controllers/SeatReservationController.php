@@ -28,6 +28,16 @@ class SeatReservationController extends Controller
                     return ['ok' => false, 'status' => 409, 'motiu' => 'no_disponible'];
                 }
 
+                $event = $seat->event;
+                $activeCount = Reservation::where('user_id', $user->id)
+                    ->where('expires_at', '>', now())
+                    ->whereHas('seat', fn ($q) => $q->where('event_id', $event->id))
+                    ->count();
+
+                if ($activeCount >= $event->max_seients_per_usuari) {
+                    return ['ok' => false, 'status' => 422, 'motiu' => 'limit_assolit'];
+                }
+
                 $expiresAt = now()->addMinutes(5);
 
                 $reservation = Reservation::create([

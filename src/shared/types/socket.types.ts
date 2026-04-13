@@ -21,9 +21,15 @@ export interface ReservaConfirmadaPayload {
   expiraEn: string; // ISO timestamp
 }
 
+export type ReservaRebutjadaMotiu =
+  | 'no_disponible'
+  | 'seient_no_trobat'
+  | 'limit_assolit'
+  | 'error_intern';
+
 export interface ReservaRebutjadaPayload {
   seatId: string;
-  motiu: string;
+  motiu: ReservaRebutjadaMotiu | string;
 }
 
 export interface CompraCompletadaPayload {

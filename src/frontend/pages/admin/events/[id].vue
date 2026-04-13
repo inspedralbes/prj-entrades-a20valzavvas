@@ -13,6 +13,7 @@ const slug = ref("");
 const description = ref("");
 const date = ref("");
 const venue = ref("");
+const maxSeientPerUsuari = ref<number>(4);
 
 const isLoading = ref(true);
 const loadError = ref<string | null>(null);
@@ -29,6 +30,7 @@ onMounted(async () => {
       description: string | null;
       date: string;
       venue: string;
+      max_seients_per_usuari: number;
     }>(`/api/admin/events/${eventId}`, {
       headers: { Authorization: `Bearer ${authStore.token}` },
     });
@@ -38,6 +40,7 @@ onMounted(async () => {
     description.value = event.description ?? "";
     date.value = event.date.slice(0, 16); // datetime-local format
     venue.value = event.venue;
+    maxSeientPerUsuari.value = event.max_seients_per_usuari;
   } catch {
     loadError.value = "Error en carregar l'event.";
   } finally {
@@ -50,12 +53,13 @@ async function submit() {
   serverError.value = null;
   isSubmitting.value = true;
 
-  const payload: Record<string, string> = {
+  const payload: Record<string, string | number> = {
     name: name.value,
     slug: slug.value,
     description: description.value,
     date: date.value,
     venue: venue.value,
+    max_seients_per_usuari: maxSeientPerUsuari.value,
   };
 
   try {
@@ -108,6 +112,17 @@ async function submit() {
       <div class="field">
         <label for="venue">Recinte *</label>
         <input id="venue" v-model="venue" type="text" required />
+      </div>
+
+      <div class="field">
+        <label for="max-seients">Màxim de seients per usuari *</label>
+        <input
+          id="max-seients"
+          v-model.number="maxSeientPerUsuari"
+          type="number"
+          min="1"
+          required
+        />
       </div>
 
       <div v-if="serverError" class="error server-error">{{ serverError }}</div>

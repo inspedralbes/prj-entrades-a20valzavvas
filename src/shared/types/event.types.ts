@@ -8,4 +8,5 @@ export interface IEvent {
   imatgeUrl: string;
   totalSeients: number;
   seientsDisponibles: number;
+  maxSeientPerUsuari: number;
 }

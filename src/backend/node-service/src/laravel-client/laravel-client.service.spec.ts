@@ -217,5 +217,32 @@ describe("LaravelClientService", () => {
         expect(result.motiu).toBe("error_intern");
       }
     });
+
+    it("retorna ok:false motiu:limit_assolit quan Laravel respon 422 (raw AxiosError)", async () => {
+      vi.mocked(httpService.post).mockReturnValue(
+        throwError(() => makeAxiosError(422, "Limit reached")),
+      );
+      service.onModuleInit();
+
+      const result = await service.reserveSeat("seat-B5", "tok-abc");
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.motiu).toBe("limit_assolit");
+      }
+    });
+
+    it("retorna ok:false motiu:limit_assolit quan el interceptor llança UnprocessableEntityException", async () => {
+      vi.mocked(httpService.post).mockReturnValue(
+        throwError(() => new UnprocessableEntityException("Limit reached")),
+      );
+
+      const result = await service.reserveSeat("seat-B5", "tok-abc");
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.motiu).toBe("limit_assolit");
+      }
+    });
   });
 });

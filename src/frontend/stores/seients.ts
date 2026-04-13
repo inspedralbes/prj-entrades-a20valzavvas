@@ -35,6 +35,7 @@ interface SeientApiResponse {
     slug: string;
     data: string;
     recinte: string;
+    max_seients_per_usuari: number;
   };
   categories: Array<{ id: string; name: string; price: number }>;
   files: Record<string, SeientApiSeat[]>;
@@ -80,6 +81,7 @@ export const useSeientStore = defineStore("seients", {
         );
         this.event = data.event;
         this.categories = data.categories;
+        useReservaStore().setMaxSeientPerUsuari(data.event.max_seients_per_usuari);
         this.llistat.clear();
         for (const seats of Object.values(data.files)) {
           for (const seat of seats) {

@@ -74,6 +74,7 @@ class AdminEventController extends Controller
             'venue' => $event->venue,
             'published' => $event->published,
             'total_capacity' => $event->total_capacity,
+            'max_seients_per_usuari' => $event->max_seients_per_usuari,
             'price_categories' => $event->priceCategories->map(fn ($cat) => [
                 'id' => $cat->id,
                 'name' => $cat->name,
@@ -129,6 +130,7 @@ class AdminEventController extends Controller
             'venue' => $event->venue,
             'published' => $event->published,
             'total_capacity' => $event->total_capacity,
+            'max_seients_per_usuari' => $event->max_seients_per_usuari,
             'price_categories' => $event->priceCategories->map(fn ($cat) => [
                 'id' => $cat->id,
                 'name' => $cat->name,
