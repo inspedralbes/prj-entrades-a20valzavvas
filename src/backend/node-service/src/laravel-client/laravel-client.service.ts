@@ -24,6 +24,11 @@ export type ReserveSeatResult =
   | ({ ok: true } & ReserveSeatSuccess)
   | { ok: false; motiu: string };
 
+export interface ReleasedSeat {
+  seatId: string;
+  eventId: string;
+}
+
 @Injectable()
 export class LaravelClientService implements OnModuleInit {
   constructor(private readonly httpService: HttpService) {}
@@ -149,8 +154,18 @@ export class LaravelClientService implements OnModuleInit {
     }
   }
 
-  async expireReservations(): Promise<void> {
-    // Will be implemented in a future US
+  async releaseExpiredReservations(): Promise<{ released: ReleasedSeat[] }> {
+    const response = await firstValueFrom(
+      this.httpService.delete<{ released: ReleasedSeat[] }>(
+        "/internal/reservations/expired",
+        {
+          headers: {
+            "X-Internal-Secret": process.env.INTERNAL_SECRET ?? "",
+          },
+        },
+      ),
+    );
+    return { released: response.data.released };
   }
 
   async getStats(eventId: string): Promise<void> {
