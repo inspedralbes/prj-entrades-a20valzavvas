@@ -35,8 +35,8 @@ class SeatExpiryService
             Seat::whereIn('id', $seatIds)->update(['estat' => 'DISPONIBLE']);
             Reservation::whereIn('id', $reservationIds)->delete();
 
-            return $reservations->map(fn($r) => [
-                'seatId'  => $r->seat_id,
+            return $reservations->map(fn ($r) => [
+                'seatId' => $r->seat_id,
                 'eventId' => $r->event_id,
             ])->values()->all();
         });

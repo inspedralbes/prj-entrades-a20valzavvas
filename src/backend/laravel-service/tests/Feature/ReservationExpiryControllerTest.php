@@ -28,6 +28,7 @@ class ReservationExpiryControllerTest extends TestCase
             'price_category_id' => $category->id,
             'estat' => $estat,
         ]);
+
         return [$event, $seat];
     }
 
@@ -37,8 +38,8 @@ class ReservationExpiryControllerTest extends TestCase
         [$event, $seat] = $this->createEventWithSeat();
         // Active reservation (not expired)
         Reservation::create([
-            'seat_id'    => $seat->id,
-            'user_id'    => $user->id,
+            'seat_id' => $seat->id,
+            'user_id' => $user->id,
             'expires_at' => now()->addMinutes(5),
         ]);
 
@@ -56,8 +57,8 @@ class ReservationExpiryControllerTest extends TestCase
         $user = User::factory()->create();
         [$event, $seat] = $this->createEventWithSeat();
         Reservation::create([
-            'seat_id'    => $seat->id,
-            'user_id'    => $user->id,
+            'seat_id' => $seat->id,
+            'user_id' => $user->id,
             'expires_at' => now()->subMinutes(1),
         ]);
 
@@ -82,13 +83,13 @@ class ReservationExpiryControllerTest extends TestCase
         [$event2, $seat2] = $this->createEventWithSeat();
 
         Reservation::create([
-            'seat_id'    => $seat1->id,
-            'user_id'    => $user->id,
+            'seat_id' => $seat1->id,
+            'user_id' => $user->id,
             'expires_at' => now()->subMinutes(2),
         ]);
         Reservation::create([
-            'seat_id'    => $seat2->id,
-            'user_id'    => $user->id,
+            'seat_id' => $seat2->id,
+            'user_id' => $user->id,
             'expires_at' => now()->subMinutes(1),
         ]);
 
@@ -136,4 +137,3 @@ class ReservationExpiryControllerTest extends TestCase
         $response->assertStatus(401)->assertJson(['message' => 'Unauthorized']);
     }
 }
-
