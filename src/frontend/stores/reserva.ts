@@ -2,48 +2,60 @@ import { defineStore } from "pinia";
 import type { ReservaConfirmadaPayload } from "@shared/socket.types";
 
 interface ReservaState {
-  seatId: string | null;
-  expiraEn: string | null; // ISO timestamp
-  seatIds: string[];
+  seients: Record<string, { expiraEn: string }>;
   maxSeientPerUsuari: number;
 }
 
 export const useReservaStore = defineStore("reserva", {
   state: (): ReservaState => ({
-    seatId: null,
-    expiraEn: null,
-    seatIds: [],
+    seients: {},
     maxSeientPerUsuari: 4,
   }),
 
   getters: {
-    teReservaActiva: (state): boolean => !!state.seatId,
+    seatIds: (state): string[] => Object.keys(state.seients),
+    // Retorna el darrer seatId confirmat (compat amb el compte enrere)
+    seatId: (state): string | null => {
+      const ids = Object.keys(state.seients);
+      return ids.length > 0 ? (ids[ids.length - 1] ?? null) : null;
+    },
+    // Retorna el expiraEn del darrer seient confirmat (compat amb el compte enrere)
+    expiraEn: (state): string | null => {
+      const ids = Object.keys(state.seients);
+      return ids.length > 0
+        ? (state.seients[ids[ids.length - 1]]?.expiraEn ?? null)
+        : null;
+    },
+    teReservaActiva: (state): boolean => Object.keys(state.seients).length > 0,
     limitAssolit: (state): boolean =>
       state.maxSeientPerUsuari > 0 &&
-      state.seatIds.length >= state.maxSeientPerUsuari,
+      Object.keys(state.seients).length >= state.maxSeientPerUsuari,
+    esSeleccionatPerMi:
+      (state) =>
+      (seatId: string): boolean =>
+        seatId in state.seients,
   },
 
   actions: {
     confirmarReserva(payload: ReservaConfirmadaPayload) {
-      this.seatId = payload.seatId;
-      this.expiraEn = payload.expiraEn;
-      if (!this.seatIds.includes(payload.seatId)) {
-        this.seatIds.push(payload.seatId);
-      }
+      this.seients[payload.seatId] = { expiraEn: payload.expiraEn };
     },
 
     netejarReserva() {
-      this.seatId = null;
-      this.expiraEn = null;
-      this.seatIds = [];
+      this.seients = {};
     },
 
     alliberarSeient(seatId: string) {
-      this.seatIds = this.seatIds.filter((id) => id !== seatId);
-      if (this.seatId === seatId) {
-        this.seatId = this.seatIds[this.seatIds.length - 1] ?? null;
-        this.expiraEn = null;
-      }
+      const { $socket } = useNuxtApp();
+      ($socket as { emit: (event: string, data: unknown) => void }).emit(
+        "seient:alliberar",
+        { seatId },
+      );
+    },
+
+    removeSeient(seatId: string) {
+      const { [seatId]: _, ...rest } = this.seients;
+      this.seients = rest;
     },
 
     setMaxSeientPerUsuari(max: number) {

@@ -25,6 +25,7 @@ vi.mock("~/stores/reserva", () => ({
     seatIds: mockReservaSeatIds(),
     limitAssolit: false,
     teReservaActiva: false,
+    esSeleccionatPerMi: (seatId: string) => mockReservaSeatIds().includes(seatId),
   })),
 }));
 

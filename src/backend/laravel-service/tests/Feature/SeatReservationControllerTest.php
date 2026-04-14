@@ -218,4 +218,63 @@ class SeatReservationControllerTest extends TestCase
 
         $response->assertStatus(401);
     }
+
+    // ─── destroy (DELETE /api/seats/{seatId}/reserve) ─────────────────────────
+
+    public function test_destroy_releases_own_reservation(): void
+    {
+        $user = $this->compradorUser();
+        [$event, $category] = $this->eventWithLimit(4);
+
+        $seat = Seat::factory()->create([
+            'event_id' => $event->id,
+            'price_category_id' => $category->id,
+            'row' => 'C',
+            'number' => 3,
+        ]);
+        $this->activeReservation($user, $seat);
+
+        $response = $this->actingAs($user)->deleteJson("/api/seats/{$seat->id}/reserve");
+
+        $response->assertStatus(204);
+        $this->assertDatabaseCount('reservations', 0);
+        $this->assertEquals('DISPONIBLE', $seat->fresh()->estat);
+    }
+
+    public function test_destroy_rejects_other_user_reservation(): void
+    {
+        $owner = $this->compradorUser();
+        $intruder = $this->compradorUser();
+        [$event, $category] = $this->eventWithLimit(4);
+
+        $seat = Seat::factory()->create([
+            'event_id' => $event->id,
+            'price_category_id' => $category->id,
+        ]);
+        $this->activeReservation($owner, $seat);
+
+        $response = $this->actingAs($intruder)->deleteJson("/api/seats/{$seat->id}/reserve");
+
+        $response->assertStatus(403);
+        $this->assertDatabaseCount('reservations', 1); // reservation unchanged
+        $this->assertEquals('RESERVAT', $seat->fresh()->estat);
+    }
+
+    public function test_destroy_returns_404_if_reservation_not_found(): void
+    {
+        $user = $this->compradorUser();
+        [$event, $category] = $this->eventWithLimit(4);
+
+        $seat = Seat::factory()->create([
+            'event_id' => $event->id,
+            'price_category_id' => $category->id,
+            'estat' => 'DISPONIBLE',
+        ]);
+
+        // No active reservation exists for this seat
+        $response = $this->actingAs($user)->deleteJson("/api/seats/{$seat->id}/reserve");
+
+        $response->assertStatus(404);
+        $this->assertEquals('DISPONIBLE', $seat->fresh()->estat);
+    }
 }

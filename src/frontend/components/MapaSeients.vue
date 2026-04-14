@@ -31,6 +31,10 @@ function handleReservar(seatId: string) {
     { seatId },
   );
 }
+
+function handleAlliberar(seatId: string) {
+  reserva.alliberarSeient(seatId);
+}
 </script>
 
 <template>
@@ -64,8 +68,9 @@ function handleReservar(seatId: string) {
             >
               <Seient
                 :seat="seat"
-                :mi-seat="reserva.seatIds.includes(seat.id)"
+                :mi-seat="reserva.esSeleccionatPerMi(seat.id)"
                 @reservar="handleReservar"
+                @alliberar="handleAlliberar"
               />
             </span>
           </div>
@@ -87,8 +92,9 @@ function handleReservar(seatId: string) {
             >
               <Seient
                 :seat="seat"
-                :mi-seat="reserva.seatIds.includes(seat.id)"
+                :mi-seat="reserva.esSeleccionatPerMi(seat.id)"
                 @reservar="handleReservar"
+                @alliberar="handleAlliberar"
               />
             </span>
           </div>

@@ -76,4 +76,39 @@ class SeatReservationController extends Controller
             return response()->json(['motiu' => 'error_intern'], 500);
         }
     }
+
+    public function destroy(Request $request, string $seatId): JsonResponse
+    {
+        $user = $request->user();
+
+        try {
+            $result = DB::transaction(function () use ($seatId, $user) {
+                $reservation = Reservation::where('seat_id', $seatId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $reservation) {
+                    return ['ok' => false, 'status' => 404];
+                }
+
+                if ($reservation->user_id !== $user->id) {
+                    return ['ok' => false, 'status' => 403];
+                }
+
+                $reservation->delete();
+                Seat::where('id', $seatId)->update(['estat' => 'DISPONIBLE']);
+
+                return ['ok' => true];
+            });
+
+            if (! $result['ok']) {
+                return response()->json([], $result['status']);
+            }
+
+            return response()->json(null, 204);
+
+        } catch (Throwable) {
+            return response()->json(['motiu' => 'error_intern'], 500);
+        }
+    }
 }

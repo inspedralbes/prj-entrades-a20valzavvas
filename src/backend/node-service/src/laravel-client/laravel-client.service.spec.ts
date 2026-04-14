@@ -3,6 +3,7 @@ import { LaravelClientService } from "./laravel-client.service";
 import { HttpService } from "@nestjs/axios";
 import {
   BadRequestException,
+  ForbiddenException,
   NotFoundException,
   ConflictException,
   UnprocessableEntityException,
@@ -25,10 +26,7 @@ function createMockHttpService() {
       interceptors: {
         response: {
           use: vi.fn(
-            (
-              fulfilled: (v: any) => any,
-              rejected: (e: any) => any,
-            ) => {
+            (fulfilled: (v: any) => any, rejected: (e: any) => any) => {
               interceptors.push({ fulfilled, rejected });
             },
           ),
@@ -91,9 +89,13 @@ describe("LaravelClientService", () => {
 
     it("should throw InternalServerErrorException when Laravel is unreachable", async () => {
       const networkError = new AxiosError("ECONNREFUSED");
-      vi.mocked(httpService.get).mockReturnValue(throwError(() => networkError));
+      vi.mocked(httpService.get).mockReturnValue(
+        throwError(() => networkError),
+      );
 
-      await expect(service.healthCheck()).rejects.toThrow(InternalServerErrorException);
+      await expect(service.healthCheck()).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 
@@ -242,6 +244,95 @@ describe("LaravelClientService", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.motiu).toBe("limit_assolit");
+      }
+    });
+  });
+
+  describe("releaseSeat", () => {
+    it("retorna ok:true quan Laravel respon 204", async () => {
+      const response: AxiosResponse = {
+        data: null,
+        status: 204,
+        statusText: "No Content",
+        headers: {},
+        config: { headers: new AxiosHeaders() },
+      };
+      vi.mocked(httpService.delete).mockReturnValue(of(response));
+
+      const result = await service.releaseSeat("seat-C3", "user-1", "tok-abc");
+
+      expect(result.ok).toBe(true);
+      expect(httpService.delete).toHaveBeenCalledWith(
+        "/api/seats/seat-C3/reserve",
+        { headers: { Authorization: "Bearer tok-abc" } },
+      );
+    });
+
+    it("retorna ok:false motiu:no_autoritzat quan Laravel respon 403 (raw AxiosError)", async () => {
+      vi.mocked(httpService.delete).mockReturnValue(
+        throwError(() => makeAxiosError(403, "Forbidden")),
+      );
+      service.onModuleInit();
+
+      const result = await service.releaseSeat("seat-C3", "user-2", "tok-abc");
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.motiu).toBe("no_autoritzat");
+      }
+    });
+
+    it("retorna ok:false motiu:no_autoritzat quan el interceptor llança ForbiddenException", async () => {
+      vi.mocked(httpService.delete).mockReturnValue(
+        throwError(() => new ForbiddenException("Forbidden")),
+      );
+
+      const result = await service.releaseSeat("seat-C3", "user-2", "tok-abc");
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.motiu).toBe("no_autoritzat");
+      }
+    });
+
+    it("retorna ok:false motiu:reserva_no_trobada quan Laravel respon 404 (raw AxiosError)", async () => {
+      vi.mocked(httpService.delete).mockReturnValue(
+        throwError(() => makeAxiosError(404, "Not found")),
+      );
+      service.onModuleInit();
+
+      const result = await service.releaseSeat("seat-C3", "user-1", "tok-abc");
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.motiu).toBe("reserva_no_trobada");
+      }
+    });
+
+    it("retorna ok:false motiu:reserva_no_trobada quan el interceptor llança NotFoundException", async () => {
+      vi.mocked(httpService.delete).mockReturnValue(
+        throwError(() => new NotFoundException("Not found")),
+      );
+
+      const result = await service.releaseSeat("seat-C3", "user-1", "tok-abc");
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.motiu).toBe("reserva_no_trobada");
+      }
+    });
+
+    it("retorna ok:false motiu:error_intern per altres errors", async () => {
+      vi.mocked(httpService.delete).mockReturnValue(
+        throwError(() => makeAxiosError(500, "Server error")),
+      );
+      service.onModuleInit();
+
+      const result = await service.releaseSeat("seat-C3", "user-1", "tok-abc");
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.motiu).toBe("error_intern");
       }
     });
   });

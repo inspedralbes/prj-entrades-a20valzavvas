@@ -87,24 +87,49 @@ Quan una reserva prospera, el sistema SHALL fer broadcast de `seient:canvi-estat
 
 ### Requirement: Store Pinia reserva.ts gestiona l'estat de la reserva activa
 
-El frontend SHALL mantenir un store Pinia `reserva.ts` que persisti el `seatId` i `expiraEn` de la reserva activa del Comprador. El store MUST exposar accions `confirmarReserva(payload)` i `netejarReserva()`.
+El frontend SHALL mantenir un store Pinia `reserva.ts` que persisti el `seatId` i `expiraEn` de cada seient que el Comprador té reservat activament com a `seients: Record<string, { expiraEn: string }>`. El store MUST exposar accions `confirmarReserva(payload)`, `netejarReserva()`, `alliberarSeient(seatId)` i `removeSeient(seatId)`, i el getter `esSeleccionatPerMi(seatId): boolean`.
 
 #### Scenario: confirmarReserva actualitza l'estat del store
 
-- **GIVEN** el store `reserva` té estat inicial `{ seatId: null, expiraEn: null }`
+- **GIVEN** el store `reserva` té estat inicial `{ seients: {} }`
 - **WHEN** s'invoca `confirmarReserva({ seatId: "B5-id", expiraEn: "2026-04-12T10:05:00Z" })`
-- **THEN** l'estat del store és `{ seatId: "B5-id", expiraEn: "2026-04-12T10:05:00Z" }`
+- **THEN** l'estat del store conté `seients["B5-id"] = { expiraEn: "2026-04-12T10:05:00Z" }`
 
 #### Scenario: netejarReserva restableix l'estat
 
-- **GIVEN** el store té una reserva activa
+- **GIVEN** el store té una o més reserves actives
 - **WHEN** s'invoca `netejarReserva()`
-- **THEN** `seatId` i `expiresAt` tornen a `null`
+- **THEN** `seients` torna a `{}`
+
+#### Scenario: alliberarSeient emet seient:alliberar i l'eliminació arriba via broadcast
+
+- **GIVEN** el store té el seient C3 com a reservat (`esSeleccionatPerMi("C3-id") === true`)
+- **WHEN** s'invoca `alliberarSeient("C3-id")`
+- **THEN** el socket emet `seient:alliberar { seatId: "C3-id" }`
+- **AND** l'entrada `seients["C3-id"]` no s'elimina directament — s'elimina quan arriba el broadcast `seient:canvi-estat { DISPONIBLE }` via `removeSeient`
+
+#### Scenario: removeSeient elimina l'entrada del store (cridat pel broadcast handler)
+
+- **GIVEN** el store té el seient C3 com a reservat
+- **WHEN** el broadcast `seient:canvi-estat { seatId: "C3-id", estat: "DISPONIBLE" }` arriba i el handler crida `removeSeient("C3-id")`
+- **THEN** l'entrada `seients["C3-id"]` és eliminada del store
+
+#### Scenario: esSeleccionatPerMi retorna true per seients reservats per l'usuari actual
+
+- **GIVEN** el store té `seients["B5-id"]` a l'estat
+- **WHEN** s'invoca `esSeleccionatPerMi("B5-id")`
+- **THEN** retorna `true`
+
+#### Scenario: esSeleccionatPerMi retorna false per seients d'altri o disponibles
+
+- **GIVEN** el store no té `seients["C3-id"]` (seient d'un altre usuari o disponible)
+- **WHEN** s'invoca `esSeleccionatPerMi("C3-id")`
+- **THEN** retorna `false`
 
 #### Scenario: Testabilitat — store és testable amb Vitest
 
 - **GIVEN** el store s'inicialitza en un test Vitest amb `setActivePinia(createPinia())`
-- **WHEN** s'executen les accions `confirmarReserva` i `netejarReserva`
+- **WHEN** s'executen les accions `confirmarReserva`, `netejarReserva`, `alliberarSeient`, `removeSeient` i el getter `esSeleccionatPerMi`
 - **THEN** els canvis d'estat es verifiquen directament sense mocks externs
 
 ---

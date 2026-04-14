@@ -81,7 +81,9 @@ export const useSeientStore = defineStore("seients", {
         );
         this.event = data.event;
         this.categories = data.categories;
-        useReservaStore().setMaxSeientPerUsuari(data.event.max_seients_per_usuari);
+        useReservaStore().setMaxSeientPerUsuari(
+          data.event.max_seients_per_usuari,
+        );
         this.llistat.clear();
         for (const seats of Object.values(data.files)) {
           for (const seat of seats) {
@@ -104,7 +106,7 @@ export const useSeientStore = defineStore("seients", {
     actualitzarEstat(seatId: string, estat: EstatSeient) {
       const seat = this.llistat.get(seatId);
       if (seat) {
-        seat.estat = estat;
+        this.llistat.set(seatId, { ...seat, estat });
       }
     },
 
@@ -117,11 +119,22 @@ export const useSeientStore = defineStore("seients", {
         off: (event: string) => void;
       };
 
+      // Re-join the event room on every (re)connect so the server can broadcast
+      // seient:canvi-estat back to this socket after automatic reconnections.
+      socket.on("connect", () => {
+        if (this.event) {
+          socket.emit("event:unir", { eventId: this.event.id });
+        }
+      });
+
       socket.connect();
 
       socket.on("seient:canvi-estat", (payload: unknown) => {
         const p = payload as SeientCanviEstatPayload;
         this.actualitzarEstat(p.seatId, p.estat);
+        if (p.estat === EstatSeient.DISPONIBLE) {
+          useReservaStore().removeSeient(p.seatId);
+        }
       });
 
       socket.on("reserva:confirmada", (payload: unknown) => {
@@ -133,10 +146,6 @@ export const useSeientStore = defineStore("seients", {
         const p = payload as ReservaRebutjadaPayload;
         console.warn(`[reserva] Rebutjada: ${p.seatId} — ${p.motiu}`);
       });
-
-      if (this.event) {
-        socket.emit("event:unir", { eventId: this.event.id });
-      }
     },
 
     desconnectar() {
@@ -146,6 +155,7 @@ export const useSeientStore = defineStore("seients", {
         disconnect: () => void;
       };
 
+      socket.off("connect");
       socket.off("seient:canvi-estat");
       socket.off("reserva:confirmada");
       socket.off("reserva:rebutjada");
