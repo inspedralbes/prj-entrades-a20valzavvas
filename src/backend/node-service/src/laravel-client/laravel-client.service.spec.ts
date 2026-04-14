@@ -336,4 +336,52 @@ describe("LaravelClientService", () => {
       }
     });
   });
+
+  describe("releaseExpiredReservations", () => {
+    it("retorna la llista de seients alliberats quan Laravel respon 200", async () => {
+      const responseData = {
+        released: [
+          { seatId: "seat-S1", eventId: "event-E1" },
+          { seatId: "seat-S2", eventId: "event-E1" },
+        ],
+      };
+      const response: AxiosResponse = {
+        data: responseData,
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config: { headers: new AxiosHeaders() },
+      };
+      vi.mocked(httpService.delete).mockReturnValue(of(response));
+      process.env.INTERNAL_SECRET = "test-secret";
+
+      const result = await service.releaseExpiredReservations();
+
+      expect(result.released).toHaveLength(2);
+      expect(result.released[0]).toEqual({
+        seatId: "seat-S1",
+        eventId: "event-E1",
+      });
+      expect(httpService.delete).toHaveBeenCalledWith(
+        "/internal/reservations/expired",
+        { headers: { "X-Internal-Secret": "test-secret" } },
+      );
+    });
+
+    it("retorna released buit quan no hi ha reserves expirades", async () => {
+      const response: AxiosResponse = {
+        data: { released: [] },
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config: { headers: new AxiosHeaders() },
+      };
+      vi.mocked(httpService.delete).mockReturnValue(of(response));
+      process.env.INTERNAL_SECRET = "test-secret";
+
+      const result = await service.releaseExpiredReservations();
+
+      expect(result.released).toHaveLength(0);
+    });
+  });
 });

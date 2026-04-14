@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\ReservationExpiryController;
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Internal Routes
@@ -9,3 +12,7 @@
 | These routes are intended to be accessible only within the Docker network.
 |
 */
+
+Route::middleware('internal.secret')->group(function () {
+    Route::delete('/reservations/expired', [ReservationExpiryController::class, 'destroy']);
+});

@@ -26,6 +26,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       PORT: ${BACKEND_PORT:-3001}
       JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
     depends_on:
       db:
         condition: service_healthy
@@ -57,6 +58,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       # Shared with the Node Service — must be identical in both services
       JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
       SANCTUM_TOKEN_TTL: ${SANCTUM_TOKEN_TTL:-60}
       FRONTEND_URL: http://localhost:${FRONTEND_PORT:-3000}
       SESSION_DRIVER: file

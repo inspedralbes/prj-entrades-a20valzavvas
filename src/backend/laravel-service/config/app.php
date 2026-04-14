@@ -123,4 +123,13 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Internal Service Secret
+    |--------------------------------------------------------------------------
+    | Shared secret for service-to-service internal calls (e.g. Node → Laravel).
+    | Must match INTERNAL_SECRET in the Node Service environment.
+    */
+    'internal_secret' => env('INTERNAL_SECRET'),
+
 ];
