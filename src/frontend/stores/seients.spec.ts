@@ -5,10 +5,12 @@ import { EstatSeient } from "@shared/seat.types";
 
 const mockConfirmarReserva = vi.fn();
 const mockSetMaxSeientPerUsuari = vi.fn();
+const mockRemoveSeient = vi.fn();
 vi.mock("~/stores/reserva", () => ({
   useReservaStore: vi.fn(() => ({
     confirmarReserva: mockConfirmarReserva,
     setMaxSeientPerUsuari: mockSetMaxSeientPerUsuari,
+    removeSeient: mockRemoveSeient,
   })),
 }));
 
@@ -219,7 +221,7 @@ describe("useSeientStore", () => {
   });
 
   describe("connectar", () => {
-    it("crida socket.connect() i socket.emit('event:unir') amb l'eventId correcte", async () => {
+    it("crida socket.connect() i emet event:unir quan el socket es connecta", async () => {
       mockFetch.mockResolvedValueOnce(mockApiResponse);
       const store = useSeientStore();
       await store.inicialitzar("dune-4k-dolby-2026");
@@ -227,6 +229,10 @@ describe("useSeientStore", () => {
       store.connectar();
 
       expect(socketMock.connect).toHaveBeenCalledOnce();
+
+      // event:unir s'emet dins del handler "connect" (cobreix connexió inicial i reconexions)
+      socketMock.triggerEvent("connect", undefined);
+
       expect(socketMock.emit).toHaveBeenCalledWith("event:unir", {
         eventId: "evt-1",
       });
@@ -297,6 +303,7 @@ describe("useSeientStore", () => {
 
       store.desconnectar();
 
+      expect(socketMock.off).toHaveBeenCalledWith("connect");
       expect(socketMock.off).toHaveBeenCalledWith("seient:canvi-estat");
       expect(socketMock.off).toHaveBeenCalledWith("reserva:confirmada");
       expect(socketMock.off).toHaveBeenCalledWith("reserva:rebutjada");

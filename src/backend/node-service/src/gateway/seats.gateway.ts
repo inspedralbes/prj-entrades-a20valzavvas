@@ -13,8 +13,10 @@ import { LaravelClientService } from "../laravel-client/laravel-client.service";
 import type {
   SeientCanviEstatPayload,
   SeientReservarPayload,
+  SeientAlliberarPayload,
   ReservaConfirmadaPayload,
   ReservaRebutjadaPayload,
+  ErrorGeneralPayload,
 } from "shared/types/socket.types";
 import { EstatSeient } from "shared/types/seat.types";
 
@@ -77,5 +79,38 @@ export class SeatsGateway {
 
   emitCanviEstat(eventId: string, payload: SeientCanviEstatPayload): void {
     this.server.to(`event:${eventId}`).emit("seient:canvi-estat", payload);
+  }
+
+  @SubscribeMessage("seient:alliberar")
+  async handleSeientAlliberar(
+    @ConnectedSocket() socket: AuthenticatedSocket,
+    @MessageBody() payload: SeientAlliberarPayload,
+  ): Promise<void> {
+    const result = await this.laravelClient.releaseSeat(
+      payload.seatId,
+      socket.data.userId,
+      socket.data.token,
+    );
+
+    if (result.ok) {
+      const canviPayload: SeientCanviEstatPayload = {
+        seatId: payload.seatId,
+        estat: EstatSeient.DISPONIBLE,
+        fila: "",
+        numero: 0,
+      };
+      const eventRoom = Array.from(socket.rooms).find((r) =>
+        r.startsWith("event:"),
+      );
+      if (eventRoom) {
+        this.server.to(eventRoom).emit("seient:canvi-estat", canviPayload);
+      }
+    } else {
+      const errorPayload: ErrorGeneralPayload = {
+        codi: result.motiu,
+        missatge: result.motiu,
+      };
+      socket.emit("error:general", errorPayload);
+    }
   }
 }

@@ -96,5 +96,32 @@ describe("Seient.vue", () => {
 
       expect(wrapper.emitted("reservar")).toBeUndefined();
     });
+
+    it("emet l'event alliberar amb seatId quan miSeat és true", async () => {
+      const wrapper = await mountSuspended(Seient, {
+        props: {
+          seat: makeSeat(EstatSeient.RESERVAT, "seat-C3"),
+          miSeat: true,
+        },
+      });
+
+      await wrapper.trigger("click");
+
+      expect(wrapper.emitted("alliberar")).toBeDefined();
+      expect(wrapper.emitted("alliberar")?.[0]).toEqual(["seat-C3"]);
+    });
+
+    it("no emet l'event reservar quan miSeat és true", async () => {
+      const wrapper = await mountSuspended(Seient, {
+        props: {
+          seat: makeSeat(EstatSeient.RESERVAT, "seat-C3"),
+          miSeat: true,
+        },
+      });
+
+      await wrapper.trigger("click");
+
+      expect(wrapper.emitted("reservar")).toBeUndefined();
+    });
   });
 });

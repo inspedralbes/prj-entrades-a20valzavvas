@@ -24,6 +24,7 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/seats/{seatId}/reserve', [SeatReservationController::class, 'store']);
+    Route::delete('/seats/{seatId}/reserve', [SeatReservationController::class, 'destroy']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {

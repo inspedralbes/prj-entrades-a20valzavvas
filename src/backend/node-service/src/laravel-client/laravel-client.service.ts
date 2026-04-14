@@ -2,6 +2,7 @@ import {
   Injectable,
   OnModuleInit,
   BadRequestException,
+  ForbiddenException,
   NotFoundException,
   ConflictException,
   UnprocessableEntityException,
@@ -16,6 +17,8 @@ export interface ReserveSeatSuccess {
   reservation: { id: string; expires_at: string };
   seat: { id: string; fila: string; numero: number; estat: string };
 }
+
+export type ReleaseSeatResult = { ok: true } | { ok: false; motiu: string };
 
 export type ReserveSeatResult =
   | ({ ok: true } & ReserveSeatSuccess)
@@ -43,6 +46,8 @@ export class LaravelClientService implements OnModuleInit {
         switch (status) {
           case 400:
             throw new BadRequestException(message);
+          case 403:
+            throw new ForbiddenException(message);
           case 404:
             throw new NotFoundException(message);
           case 409:
@@ -81,10 +86,7 @@ export class LaravelClientService implements OnModuleInit {
     }
   }
 
-  async reserveSeat(
-    seatId: string,
-    token: string,
-  ): Promise<ReserveSeatResult> {
+  async reserveSeat(seatId: string, token: string): Promise<ReserveSeatResult> {
     try {
       const response = await firstValueFrom(
         this.httpService.post<ReserveSeatSuccess>(
@@ -116,9 +118,35 @@ export class LaravelClientService implements OnModuleInit {
     }
   }
 
-  async releaseSeat(seatId: string): Promise<void> {
-    // Will be implemented in a future US
-    void seatId;
+  async releaseSeat(
+    seatId: string,
+    userId: string,
+    token: string,
+  ): Promise<ReleaseSeatResult> {
+    void userId; // userId is conveyed by the Bearer token; parameter kept for call-site clarity
+    try {
+      await firstValueFrom(
+        this.httpService.delete(`/api/seats/${seatId}/reserve`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      );
+      return { ok: true };
+    } catch (error) {
+      // NestJS exceptions thrown by the Axios interceptor (production path)
+      if (error instanceof ForbiddenException) {
+        return { ok: false, motiu: "no_autoritzat" };
+      }
+      if (error instanceof NotFoundException) {
+        return { ok: false, motiu: "reserva_no_trobada" };
+      }
+      // Raw AxiosErrors not yet processed by the interceptor (test path)
+      if (error instanceof AxiosError && error.response) {
+        const status = error.response.status;
+        if (status === 403) return { ok: false, motiu: "no_autoritzat" };
+        if (status === 404) return { ok: false, motiu: "reserva_no_trobada" };
+      }
+      return { ok: false, motiu: "error_intern" };
+    }
   }
 
   async expireReservations(): Promise<void> {

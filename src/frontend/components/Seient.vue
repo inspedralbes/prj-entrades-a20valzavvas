@@ -14,6 +14,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   reservar: [seatId: string];
+  alliberar: [seatId: string];
 }>();
 
 const cssClass = computed(() => {
@@ -31,6 +32,10 @@ const cssClass = computed(() => {
 });
 
 function handleClick() {
+  if (props.miSeat) {
+    emit("alliberar", props.seat.id);
+    return;
+  }
   if (props.seat.estat !== EstatSeient.DISPONIBLE) return;
   emit("reservar", props.seat.id);
 }
@@ -43,7 +48,8 @@ function handleClick() {
     :class="cssClass"
     :aria-label="`Seient ${seat.fila}${seat.numero}`"
     :disabled="
-      seat.estat === EstatSeient.VENUT || seat.estat === EstatSeient.RESERVAT
+      seat.estat === EstatSeient.VENUT ||
+      (seat.estat === EstatSeient.RESERVAT && !miSeat)
     "
     @click="handleClick"
   >
