@@ -7,6 +7,14 @@ const seients = useSeientStore();
 const reserva = useReservaStore();
 const { $socket } = useNuxtApp();
 
+const categoryNameById = computed(() => {
+  const map = new Map<string, string>();
+  for (const cat of seients.categories) {
+    map.set(cat.id, cat.name);
+  }
+  return map;
+});
+
 const files = computed(() => {
   const result: Array<{ fila: string; seats: SeatStateWithId[] }> = [];
   const keys = Array.from(seients.seientsPerFila.keys()).sort();
@@ -69,6 +77,7 @@ function handleAlliberar(seatId: string) {
               <Seient
                 :seat="seat"
                 :mi-seat="reserva.esSeleccionatPerMi(seat.id)"
+                :category-name="categoryNameById.get(seat.categoria)"
                 @reservar="handleReservar"
                 @alliberar="handleAlliberar"
               />
@@ -93,6 +102,7 @@ function handleAlliberar(seatId: string) {
               <Seient
                 :seat="seat"
                 :mi-seat="reserva.esSeleccionatPerMi(seat.id)"
+                :category-name="categoryNameById.get(seat.categoria)"
                 @reservar="handleReservar"
                 @alliberar="handleAlliberar"
               />

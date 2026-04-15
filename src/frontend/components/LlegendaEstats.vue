@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const estats = [
   { label: "Disponible", color: "#15803d" },
+  { label: "VIP", color: "#b8860b", glow: "rgba(218,165,32,0.45)" },
   { label: "Reservat", color: "#b45309" },
   { label: "Seleccionat per mi", color: "#7c3aed" },
   { label: "Venut", color: "#2d3748", border: "#4b5563" },
@@ -14,7 +15,11 @@ const estats = [
         class="llegenda-dot"
         :style="{
           backgroundColor: estat.color,
-          boxShadow: estat.border ? `inset 0 0 0 1px ${estat.border}` : 'none',
+          boxShadow: estat.border
+            ? `inset 0 0 0 1px ${estat.border}`
+            : estat.glow
+              ? `0 0 6px ${estat.glow}`
+              : 'none',
         }"
       />
       <span class="llegenda-text">{{ estat.label }}</span>

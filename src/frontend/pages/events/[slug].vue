@@ -30,7 +30,12 @@ onUnmounted(() => {
     <div class="event-container">
       <!-- Barra superior: indicador de connexió i temporitzador -->
       <div class="event-topbar">
-        <TemporitzadorReserva v-if="reserva.teReservaActiva" />
+        <div v-if="reserva.teReservaActiva" class="topbar-reserva">
+          <TemporitzadorReserva />
+          <NuxtLink to="/checkout" class="btn-checkout">
+            Confirmar compra ({{ reserva.seatIds.length }})
+          </NuxtLink>
+        </div>
         <ConnexioIndicador />
       </div>
 
@@ -91,6 +96,30 @@ onUnmounted(() => {
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.75rem;
+}
+
+.topbar-reserva {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-checkout {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  background: #7c3aed;
+  color: #ede9fe;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-checkout:hover {
+  background: #6d28d9;
 }
 
 /* ── Capçalera ── */

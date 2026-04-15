@@ -6,9 +6,11 @@ const props = withDefaults(
   defineProps<{
     seat: SeatStateWithId;
     miSeat?: boolean;
+    categoryName?: string;
   }>(),
   {
     miSeat: false,
+    categoryName: undefined,
   },
 );
 
@@ -17,11 +19,15 @@ const emit = defineEmits<{
   alliberar: [seatId: string];
 }>();
 
+const isVip = computed(
+  () => props.categoryName?.toLowerCase() === "vip",
+);
+
 const cssClass = computed(() => {
   if (props.miSeat) return "seient--seleccionat-per-mi";
   switch (props.seat.estat) {
     case EstatSeient.DISPONIBLE:
-      return "seient--disponible";
+      return isVip.value ? "seient--vip" : "seient--disponible";
     case EstatSeient.RESERVAT:
       return "seient--reservat";
     case EstatSeient.VENUT:
@@ -46,7 +52,8 @@ function handleClick() {
     type="button"
     class="seient"
     :class="cssClass"
-    :aria-label="`Seient ${seat.fila}${seat.numero}`"
+    :aria-label="`Seient ${seat.fila}${seat.numero}${categoryName ? ` — ${categoryName}` : ''}`"
+    :title="categoryName ? `${categoryName} · ${seat.preu.toFixed(2)} €` : undefined"
     :disabled="
       seat.estat === EstatSeient.VENUT ||
       (seat.estat === EstatSeient.RESERVAT && !miSeat)
@@ -92,6 +99,19 @@ function handleClick() {
   transform: scale(1.12) translateY(-2px);
   box-shadow: 0 0 10px rgba(22, 163, 74, 0.75);
   background-color: #16a34a;
+}
+
+/* ── VIP (disponible) ── */
+.seient--vip {
+  background-color: #b8860b;
+  color: #fff8e7;
+  box-shadow: 0 0 6px rgba(184, 134, 11, 0.4);
+}
+
+.seient--vip:hover {
+  transform: scale(1.12) translateY(-2px);
+  background-color: #daa520;
+  box-shadow: 0 0 14px rgba(218, 165, 32, 0.65);
 }
 
 /* ── Reservat ── */

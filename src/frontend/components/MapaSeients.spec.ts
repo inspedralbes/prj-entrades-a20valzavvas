@@ -17,6 +17,7 @@ const mockReservaSeatIds = vi.fn<() => string[]>(() => []);
 vi.mock("~/stores/seients", () => ({
   useSeientStore: vi.fn(() => ({
     seientsPerFila: mockSeientsPerFila(),
+    categories: [],
   })),
 }));
 
