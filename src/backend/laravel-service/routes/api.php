@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventSeatsController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\SeatController;
 use App\Http\Controllers\SeatReservationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,8 +25,10 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/seats', [SeatController::class, 'indexByIds']);
     Route::post('/seats/{seatId}/reserve', [SeatReservationController::class, 'store']);
     Route::delete('/seats/{seatId}/reserve', [SeatReservationController::class, 'destroy']);
+    Route::post('/orders', [OrderController::class, 'store']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
