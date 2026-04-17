@@ -27,6 +27,9 @@ onUnmounted(() => {
 
 <template>
   <div class="event-page">
+    <!-- Conflict toast — always mounted so reserva:rebutjada toasts render at any time -->
+    <NotificacioEstat />
+
     <div class="event-container">
       <!-- Barra superior: indicador de connexió i temporitzador -->
       <div class="event-topbar">
@@ -65,7 +68,7 @@ onUnmounted(() => {
 
       <!-- Error state -->
       <div v-else-if="seients.error" class="event-error">
-        <NotificacioEstat :missatge="seients.error" tipus="error" />
+        <p class="event-error-missatge" role="alert">{{ seients.error }}</p>
         <NuxtLink to="/" class="btn-tornar">Tornar a la portada</NuxtLink>
       </div>
 
@@ -193,6 +196,15 @@ onUnmounted(() => {
 }
 
 /* ── Error ── */
+.event-error-missatge {
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
 .event-error {
   display: flex;
   flex-direction: column;

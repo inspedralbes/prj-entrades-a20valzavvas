@@ -6,6 +6,7 @@ import type {
   ReservaRebutjadaPayload,
 } from "@shared/socket.types";
 import { useReservaStore } from "~/stores/reserva";
+import { handleReservaRebutjada } from "~/composables/useConflicte";
 
 export interface SeatState {
   estat: EstatSeient;
@@ -143,8 +144,7 @@ export const useSeientStore = defineStore("seients", {
       });
 
       socket.on("reserva:rebutjada", (payload: unknown) => {
-        const p = payload as ReservaRebutjadaPayload;
-        console.warn(`[reserva] Rebutjada: ${p.seatId} — ${p.motiu}`);
+        handleReservaRebutjada(payload as ReservaRebutjadaPayload);
       });
     },
 
