@@ -245,7 +245,8 @@ describe("pages/checkout", () => {
 
     // Spy on the real socket instance provided by the nuxt plugin
     const { $socket } = useNuxtApp();
-    const emitSpy = vi.spyOn($socket as Parameters<typeof vi.spyOn>[0], "emit");
+    const socketWithEmit = $socket as unknown as { emit: (...args: unknown[]) => unknown };
+    const emitSpy = vi.spyOn(socketWithEmit, "emit");
 
     await wrapper.find("#nom").setValue("Joan García");
     await wrapper.find("#email").setValue("joan@example.com");
