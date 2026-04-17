@@ -3,6 +3,8 @@ import { defineComponent } from "vue";
 import { mount } from "@vue/test-utils";
 import { setActivePinia, createPinia, getActivePinia } from "pinia";
 import { useReservaStore } from "~/stores/reserva";
+import { useSeientStore } from "~/stores/seients";
+import { EstatSeient } from "@shared/seat.types";
 import { useTemporitzador } from "./useTemporitzador";
 
 // Helper to mount a composable that uses lifecycle hooks
@@ -99,6 +101,41 @@ describe("useTemporitzador", () => {
     vi.advanceTimersByTime(1_000);
 
     expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it("actualitzarEstat es crida a DISPONIBLE per a cada seient quan el timer expira", () => {
+    const reservaStore = useReservaStore();
+    const seientStore = useSeientStore();
+
+    const expiraEn = new Date(Date.now() + 1_000).toISOString();
+    reservaStore.confirmarReserva({ seatId: "seat-A1", expiraEn });
+    reservaStore.confirmarReserva({ seatId: "seat-A2", expiraEn });
+
+    seientStore.llistat.set("seat-A1", {
+      estat: EstatSeient.RESERVAT,
+      fila: "A",
+      numero: 1,
+      categoria: "cat-1",
+      preu: 10,
+    });
+    seientStore.llistat.set("seat-A2", {
+      estat: EstatSeient.RESERVAT,
+      fila: "A",
+      numero: 2,
+      categoria: "cat-1",
+      preu: 10,
+    });
+
+    withSetup(() => useTemporitzador());
+
+    vi.advanceTimersByTime(1_000);
+
+    expect(seientStore.llistat.get("seat-A1")?.estat).toBe(
+      EstatSeient.DISPONIBLE,
+    );
+    expect(seientStore.llistat.get("seat-A2")?.estat).toBe(
+      EstatSeient.DISPONIBLE,
+    );
   });
 
   it("l'interval és netejat en desmontar (no ticks addicionals)", () => {

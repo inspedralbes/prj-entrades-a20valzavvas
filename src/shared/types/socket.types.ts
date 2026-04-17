@@ -57,5 +57,7 @@ export interface SeientAlliberarPayload {
 }
 
 export interface CompraConfirmarPayload {
-  seients: string[]; // seat IDs to purchase
+  orderId: string;
+  eventId: string;
+  seients: Array<{ seatId: string; fila: string; numero: number }>;
 }

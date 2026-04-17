@@ -17,6 +17,8 @@ import type {
   ReservaConfirmadaPayload,
   ReservaRebutjadaPayload,
   ErrorGeneralPayload,
+  CompraConfirmarPayload,
+  CompraCompletadaPayload,
 } from "shared/types/socket.types";
 import { EstatSeient } from "shared/types/seat.types";
 
@@ -79,6 +81,34 @@ export class SeatsGateway {
 
   emitCanviEstat(eventId: string, payload: SeientCanviEstatPayload): void {
     this.server.to(`event:${eventId}`).emit("seient:canvi-estat", payload);
+  }
+
+  @SubscribeMessage("compra:confirmar")
+  handleCompraConfirmar(
+    @ConnectedSocket() socket: AuthenticatedSocket,
+    @MessageBody() payload: CompraConfirmarPayload,
+  ): void {
+    if (!payload.seients || payload.seients.length === 0) {
+      return;
+    }
+
+    const eventRoom = `event:${payload.eventId}`;
+
+    for (const seient of payload.seients) {
+      const canviPayload: SeientCanviEstatPayload = {
+        seatId: seient.seatId,
+        estat: EstatSeient.VENUT,
+        fila: seient.fila,
+        numero: seient.numero,
+      };
+      this.server.to(eventRoom).emit("seient:canvi-estat", canviPayload);
+    }
+
+    const completadaPayload: CompraCompletadaPayload = {
+      orderId: payload.orderId,
+      seients: payload.seients.map((s) => `${s.fila}${s.numero}`),
+    };
+    socket.emit("compra:completada", completadaPayload);
   }
 
   @SubscribeMessage("seient:alliberar")

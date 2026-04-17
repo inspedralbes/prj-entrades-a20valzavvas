@@ -81,27 +81,66 @@ async function submit() {
       "/api/orders",
       {
         method: "POST",
-        body: { nom: nom.value.trim(), email: email.value.trim() },
+        body: {
+          nom: nom.value.trim(),
+          email: email.value.trim(),
+          seat_ids: reservaStore.seatIds,
+        },
         headers: { Authorization: `Bearer ${authStore.token}` },
       },
     );
+
     orderId.value = result.id;
+
+    const eventId = seientStore.event?.id;
+    if (eventId) {
+      const { $socket } = useNuxtApp();
+      ($socket as { emit: (event: string, data: unknown) => void }).emit(
+        "compra:confirmar",
+        {
+          orderId: result.id,
+          eventId,
+          seients: seats.value.map((s) => ({
+            seatId: s.id,
+            fila: s.fila,
+            numero: s.numero,
+          })),
+        },
+      );
+    }
+
     reservaStore.netejarReserva();
     orderConfirmed.value = true;
   } catch (err: unknown) {
     const apiError = err as {
-      data?: { errors?: Record<string, string[]>; error?: string };
+      data?: {
+        errors?: Record<string, string[]>;
+        error?: string;
+        seients_expirats?: string[];
+      };
     };
-    const serverErrors = apiError?.data?.errors ?? {};
-    if (serverErrors.email?.[0]) {
-      errors.value.email = serverErrors.email[0];
-    }
-    if (serverErrors.nom?.[0]) {
-      errors.value.nom = serverErrors.nom[0];
-    }
-    if (Object.keys(errors.value).length === 0) {
-      errors.value.general =
-        apiError?.data?.error ?? "Ha ocorregut un error. Torna-ho a intentar.";
+
+    const seients_expirats = apiError?.data?.seients_expirats;
+    if (seients_expirats && seients_expirats.length > 0) {
+      const expiredLabels = seients_expirats
+        .map((expiredId) => {
+          const seat = seats.value.find((s) => s.id === expiredId);
+          return seat ? `${seat.fila}${seat.numero}` : expiredId;
+        })
+        .join(", ");
+      errors.value.general = `Els seients ${expiredLabels} han expirat. Torna al mapa per escollir-ne de nous.`;
+    } else {
+      const serverErrors = apiError?.data?.errors ?? {};
+      if (serverErrors.email?.[0]) {
+        errors.value.email = serverErrors.email[0];
+      }
+      if (serverErrors.nom?.[0]) {
+        errors.value.nom = serverErrors.nom[0];
+      }
+      if (Object.keys(errors.value).length === 0) {
+        errors.value.general =
+          apiError?.data?.error ?? "Ha ocorregut un error. Torna-ho a intentar.";
+      }
     }
   } finally {
     isSubmitting.value = false;
