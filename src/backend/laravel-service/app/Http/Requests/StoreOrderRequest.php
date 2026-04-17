@@ -16,6 +16,8 @@ class StoreOrderRequest extends FormRequest
         return [
             'nom' => ['required', 'string', 'max:100'],
             'email' => ['required', 'string', 'email:rfc'],
+            'seat_ids' => ['sometimes', 'array'],
+            'seat_ids.*' => ['uuid'],
         ];
     }
 }

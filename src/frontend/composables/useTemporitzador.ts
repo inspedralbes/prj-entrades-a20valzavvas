@@ -1,8 +1,11 @@
 import { ref, computed, onUnmounted, watch } from "vue";
 import { useReservaStore } from "~/stores/reserva";
+import { useSeientStore } from "~/stores/seients";
+import { EstatSeient } from "@shared/seat.types";
 
 export function useTemporitzador() {
   const reserva = useReservaStore();
+  const seients = useSeientStore();
 
   const secondsLeft = ref<number>(0);
   let intervalId: ReturnType<typeof setInterval> | null = null;
@@ -28,6 +31,9 @@ export function useTemporitzador() {
       secondsLeft.value = calcularSegonesRestants();
       if (secondsLeft.value === 0) {
         aturarInterval();
+        for (const seatId of reserva.seatIds) {
+          seients.actualitzarEstat(seatId, EstatSeient.DISPONIBLE);
+        }
         reserva.netejarReserva();
       }
     }, 1000);

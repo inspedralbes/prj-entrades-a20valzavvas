@@ -260,4 +260,56 @@ describe("SeatsGateway", () => {
       expect(to).not.toHaveBeenCalled();
     });
   });
+
+  describe("handleCompraConfirmar", () => {
+    it("fa broadcast seient:canvi-estat VENUT per a cada seient i emet compra:completada al client", () => {
+      const { server, to, emit: roomEmit } = makeServerMock();
+      (gateway as unknown as { server: typeof server }).server = server;
+      const socket = makeSocketMock(["event:evt-1"]);
+
+      gateway.handleCompraConfirmar(socket as never, {
+        orderId: "order-abc",
+        eventId: "evt-1",
+        seients: [
+          { seatId: "seat-B5", fila: "B", numero: 5 },
+          { seatId: "seat-B6", fila: "B", numero: 6 },
+        ],
+      });
+
+      expect(to).toHaveBeenCalledTimes(2);
+      expect(to).toHaveBeenCalledWith("event:evt-1");
+      expect(roomEmit).toHaveBeenCalledWith("seient:canvi-estat", {
+        seatId: "seat-B5",
+        estat: EstatSeient.VENUT,
+        fila: "B",
+        numero: 5,
+      });
+      expect(roomEmit).toHaveBeenCalledWith("seient:canvi-estat", {
+        seatId: "seat-B6",
+        estat: EstatSeient.VENUT,
+        fila: "B",
+        numero: 6,
+      });
+
+      expect(socket.emit).toHaveBeenCalledWith("compra:completada", {
+        orderId: "order-abc",
+        seients: ["B5", "B6"],
+      });
+    });
+
+    it("no fa cap broadcast si la llista de seients és buida", () => {
+      const { server, to } = makeServerMock();
+      (gateway as unknown as { server: typeof server }).server = server;
+      const socket = makeSocketMock(["event:evt-1"]);
+
+      gateway.handleCompraConfirmar(socket as never, {
+        orderId: "order-abc",
+        eventId: "evt-1",
+        seients: [],
+      });
+
+      expect(to).not.toHaveBeenCalled();
+      expect(socket.emit).not.toHaveBeenCalled();
+    });
+  });
 });

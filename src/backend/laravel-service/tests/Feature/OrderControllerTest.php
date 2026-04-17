@@ -147,6 +147,69 @@ class OrderControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
+    public function test_store_returns_409_with_expired_seat_ids_when_seat_ids_provided(): void
+    {
+        $user = $this->compradorUser();
+        [$seat1] = $this->createSeatWithReservation($user, ['row' => 'B', 'number' => 5]);
+        [$seat2] = $this->createSeatWithReservation($user, ['row' => 'B', 'number' => 6]);
+
+        // Simulate seat1's reservation expired (delete it as the cron would)
+        Reservation::where('seat_id', $seat1->id)->delete();
+
+        $response = $this->actingAs($user)->postJson('/api/orders', [
+            'nom' => 'Joan García',
+            'email' => 'joan@example.com',
+            'seat_ids' => [$seat1->id, $seat2->id],
+        ]);
+
+        $response->assertStatus(409)
+            ->assertJsonPath('seients_expirats', [$seat1->id]);
+
+        $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_store_returns_409_seients_expirats_when_all_seat_ids_expired(): void
+    {
+        $user = $this->compradorUser();
+        [$seat1] = $this->createSeatWithReservation($user, ['row' => 'B', 'number' => 5]);
+        [$seat2] = $this->createSeatWithReservation($user, ['row' => 'B', 'number' => 6]);
+
+        // Simulate both reservations expired (cron deleted them)
+        Reservation::where('user_id', $user->id)->delete();
+
+        $response = $this->actingAs($user)->postJson('/api/orders', [
+            'nom' => 'Joan García',
+            'email' => 'joan@example.com',
+            'seat_ids' => [$seat1->id, $seat2->id],
+        ]);
+
+        $response->assertStatus(409)
+            ->assertJsonPath('seients_expirats', [$seat1->id, $seat2->id]);
+
+        $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_store_creates_order_successfully_with_seat_ids_all_active(): void
+    {
+        $user = $this->compradorUser();
+        [$seat1] = $this->createSeatWithReservation($user, ['row' => 'B', 'number' => 5]);
+        [$seat2] = $this->createSeatWithReservation($user, ['row' => 'B', 'number' => 6]);
+
+        $response = $this->actingAs($user)->postJson('/api/orders', [
+            'nom' => 'Joan García',
+            'email' => 'joan@example.com',
+            'seat_ids' => [$seat1->id, $seat2->id],
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure(['id', 'total_amount', 'items']);
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('reservations', 0);
+        $this->assertEquals('VENUT', $seat1->fresh()->estat);
+        $this->assertEquals('VENUT', $seat2->fresh()->estat);
+    }
+
     public function test_store_does_not_affect_other_users_reservations(): void
     {
         $user = $this->compradorUser();

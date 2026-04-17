@@ -21,6 +21,15 @@ class OrderController extends Controller
             ->where('expires_at', '>', now())
             ->get();
 
+        $seatIds = $request->input('seat_ids');
+        if (! empty($seatIds)) {
+            $activeIds = $activeReservations->pluck('seat_id')->all();
+            $expiredIds = array_values(array_diff($seatIds, $activeIds));
+            if (! empty($expiredIds)) {
+                return response()->json(['seients_expirats' => $expiredIds], 409);
+            }
+        }
+
         if ($activeReservations->isEmpty()) {
             return response()->json(['error' => 'No tens reserves actives.'], 409);
         }

@@ -9,9 +9,11 @@ mockNuxtImport("navigateTo", () => navigateToMock);
 // ── Mock stores ───────────────────────────────────────────────────────────
 vi.mock("~/stores/reserva", () => ({ useReservaStore: vi.fn() }));
 vi.mock("~/stores/auth", () => ({ useAuthStore: vi.fn() }));
+vi.mock("~/stores/seients", () => ({ useSeientStore: vi.fn() }));
 
 import { useReservaStore } from "~/stores/reserva";
 import { useAuthStore } from "~/stores/auth";
+import { useSeientStore } from "~/stores/seients";
 
 // ── Mock $fetch (Nuxt global) ─────────────────────────────────────────────
 const fetchMock = vi.fn();
@@ -32,7 +34,25 @@ function makeReservaStore(active = true) {
 function makeAuthStore() {
   return {
     token: "test-token",
-    user: { id: "u1", name: "Test User", email: "test@example.com", role: "comprador" },
+    user: {
+      id: "u1",
+      name: "Test User",
+      email: "test@example.com",
+      role: "comprador",
+    },
+  };
+}
+
+function makeSeientStore(eventId = "evt-1") {
+  return {
+    event: {
+      id: eventId,
+      slug: "test-event",
+      nom: "Test",
+      data: "",
+      recinte: "",
+      max_seients_per_usuari: 4,
+    },
   };
 }
 
@@ -41,6 +61,7 @@ describe("pages/checkout", () => {
     navigateToMock.mockReset();
     fetchMock.mockReset();
     vi.stubGlobal("$fetch", fetchMock);
+    vi.mocked(useSeientStore).mockReturnValue(makeSeientStore() as any);
   });
 
   // 4.1 — Redirecció sense reserves
@@ -159,5 +180,88 @@ describe("pages/checkout", () => {
 
     expect(wrapper.text()).toContain("No tens reserves actives.");
     expect(netejarReserva).not.toHaveBeenCalled();
+  });
+
+  // PE-28 — 409 amb seients expirats
+  it("shows expired seat labels and does not clear store on 409 seients_expirats", async () => {
+    const netejarReserva = vi.fn();
+    vi.mocked(useReservaStore).mockReturnValue({
+      ...makeReservaStore(),
+      netejarReserva,
+    } as any);
+    vi.mocked(useAuthStore).mockReturnValue(makeAuthStore() as any);
+    fetchMock
+      .mockResolvedValueOnce(mockSeatDetails) // GET /api/seats
+      .mockRejectedValueOnce({ data: { seients_expirats: ["seat-1"] } }); // POST 409
+
+    const wrapper = await mountSuspended(CheckoutPage);
+
+    await wrapper.find("#nom").setValue("Joan García");
+    await wrapper.find("#email").setValue("joan@example.com");
+    await wrapper.find("form").trigger("submit");
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.text()).toContain("A1");
+    expect(wrapper.text()).toContain("han expirat");
+    expect(netejarReserva).not.toHaveBeenCalled();
+  });
+
+  // PE-28 — seat_ids s'inclou al body del POST
+  it("includes seat_ids in the POST /api/orders body", async () => {
+    vi.mocked(useReservaStore).mockReturnValue(makeReservaStore() as any);
+    vi.mocked(useAuthStore).mockReturnValue(makeAuthStore() as any);
+    fetchMock
+      .mockResolvedValueOnce(mockSeatDetails)
+      .mockResolvedValueOnce({ id: "order-uuid", total_amount: "25.00" });
+
+    const wrapper = await mountSuspended(CheckoutPage);
+
+    await wrapper.find("#nom").setValue("Joan García");
+    await wrapper.find("#email").setValue("joan@example.com");
+    await wrapper.find("form").trigger("submit");
+    await wrapper.vm.$nextTick();
+
+    const orderCall = fetchMock.mock.calls[1];
+    const body = (orderCall?.[1] as { body: Record<string, unknown> }).body;
+    expect(body).toHaveProperty("seat_ids");
+    expect(body.seat_ids).toEqual(["seat-1"]);
+  });
+
+  // PE-28 — compra:confirmar socket emission is verified via integration test (5.1)
+
+  // PE-28 — compra:confirmar s'emet via socket després d'un 201
+  it("emits compra:confirmar via socket and shows confirmation screen after a successful 201 response", async () => {
+    const netejarReserva = vi.fn();
+    vi.mocked(useReservaStore).mockReturnValue({
+      ...makeReservaStore(),
+      netejarReserva,
+    } as any);
+    vi.mocked(useAuthStore).mockReturnValue(makeAuthStore() as any);
+    fetchMock
+      .mockResolvedValueOnce(mockSeatDetails) // GET /api/seats
+      .mockResolvedValueOnce({ id: "order-abc", total_amount: "25.00" }); // POST 201
+
+    const wrapper = await mountSuspended(CheckoutPage);
+
+    // Spy on the real socket instance provided by the nuxt plugin
+    const { $socket } = useNuxtApp();
+    const socketWithEmit = $socket as unknown as { emit: (...args: unknown[]) => unknown };
+    const emitSpy = vi.spyOn(socketWithEmit, "emit");
+
+    await wrapper.find("#nom").setValue("Joan García");
+    await wrapper.find("#email").setValue("joan@example.com");
+    await wrapper.find("form").trigger("submit");
+    await wrapper.vm.$nextTick();
+
+    expect(emitSpy).toHaveBeenCalledWith(
+      "compra:confirmar",
+      expect.objectContaining({
+        orderId: "order-abc",
+        eventId: "evt-1",
+        seients: [{ seatId: "seat-1", fila: "A", numero: 1 }],
+      }),
+    );
+    expect(netejarReserva).toHaveBeenCalledTimes(1);
+    expect(wrapper.text()).toContain("Compra completada!");
   });
 });
