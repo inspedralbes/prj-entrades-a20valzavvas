@@ -14,6 +14,11 @@ vi.mock("~/stores/reserva", () => ({
   })),
 }));
 
+const mockHandleReservaRebutjada = vi.hoisted(() => vi.fn());
+vi.mock("~/composables/useConflicte", () => ({
+  handleReservaRebutjada: mockHandleReservaRebutjada,
+}));
+
 const mockFetch = vi.fn();
 vi.stubGlobal("$fetch", mockFetch);
 
@@ -279,18 +284,16 @@ describe("useSeientStore", () => {
       expect(mockConfirmarReserva).toHaveBeenCalledWith(payload);
     });
 
-    it("subscriu el listener reserva:rebutjada sense llançar errors", async () => {
+    it("subscriu el listener reserva:rebutjada i delega a handleReservaRebutjada", async () => {
       mockFetch.mockResolvedValueOnce(mockApiResponse);
       const store = useSeientStore();
       await store.inicialitzar("dune-4k-dolby-2026");
       store.connectar();
 
-      expect(() =>
-        socketMock.triggerEvent("reserva:rebutjada", {
-          seatId: "seat-1",
-          motiu: "no_disponible",
-        }),
-      ).not.toThrow();
+      const payload = { seatId: "seat-1", motiu: "no_disponible" };
+      socketMock.triggerEvent("reserva:rebutjada", payload);
+
+      expect(mockHandleReservaRebutjada).toHaveBeenCalledWith(payload);
     });
   }); // end describe("connectar")
 
