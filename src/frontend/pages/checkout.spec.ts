@@ -140,7 +140,7 @@ describe("pages/checkout", () => {
     expect(orderCall?.[0]).toBe("/api/orders");
     expect((orderCall?.[1] as { method: string }).method).toBe("POST");
     expect(netejarReserva).toHaveBeenCalledOnce();
-    expect(wrapper.text()).toContain("Compra completada!");
+    expect(wrapper.text()).toContain("Compra confirmada!");
   });
 
   // nom > 100 chars — validació client-side
@@ -229,6 +229,51 @@ describe("pages/checkout", () => {
 
   // PE-28 — compra:confirmar socket emission is verified via integration test (5.1)
 
+  // PE-30 — Panel de confirmació post-compra (5.3)
+  it("shows confirmation panel and hides form when orderConfirmed is true", async () => {
+    const netejarReserva = vi.fn();
+    vi.mocked(useReservaStore).mockReturnValue({
+      ...makeReservaStore(),
+      netejarReserva,
+    } as any);
+    vi.mocked(useAuthStore).mockReturnValue(makeAuthStore() as any);
+    fetchMock
+      .mockResolvedValueOnce(mockSeatDetails)
+      .mockResolvedValueOnce({ id: "order-uuid", total_amount: "25.00" });
+
+    const wrapper = await mountSuspended(CheckoutPage);
+
+    await wrapper.find("#nom").setValue("Joan García");
+    await wrapper.find("#email").setValue("joan@example.com");
+    await wrapper.find("form").trigger("submit");
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find(".confirmation-card").exists()).toBe(true);
+    expect(wrapper.find("form").exists()).toBe(false);
+    expect(wrapper.text()).toContain("Compra confirmada!");
+    expect(wrapper.find('a[href="/entrades"]').exists()).toBe(true);
+    expect(wrapper.find('a[href="/"]').exists()).toBe(true);
+  });
+
+  it("shows seat summary in confirmation panel", async () => {
+    vi.mocked(useReservaStore).mockReturnValue(makeReservaStore() as any);
+    vi.mocked(useAuthStore).mockReturnValue(makeAuthStore() as any);
+    fetchMock
+      .mockResolvedValueOnce(mockSeatDetails)
+      .mockResolvedValueOnce({ id: "order-uuid", total_amount: "25.00" });
+
+    const wrapper = await mountSuspended(CheckoutPage);
+
+    await wrapper.find("#nom").setValue("Joan García");
+    await wrapper.find("#email").setValue("joan@example.com");
+    await wrapper.find("form").trigger("submit");
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.text()).toContain("25.00 €");
+    expect(wrapper.text()).toContain("A");
+    expect(wrapper.text()).toContain("1");
+  });
+
   // PE-28 — compra:confirmar s'emet via socket després d'un 201
   it("emits compra:confirmar via socket and shows confirmation screen after a successful 201 response", async () => {
     const netejarReserva = vi.fn();
@@ -262,6 +307,6 @@ describe("pages/checkout", () => {
       }),
     );
     expect(netejarReserva).toHaveBeenCalledTimes(1);
-    expect(wrapper.text()).toContain("Compra completada!");
+    expect(wrapper.text()).toContain("Compra confirmada!");
   });
 });

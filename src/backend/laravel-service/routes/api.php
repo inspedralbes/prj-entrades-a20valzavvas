@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/seats', [SeatController::class, 'indexByIds']);
     Route::post('/seats/{seatId}/reserve', [SeatReservationController::class, 'store']);
     Route::delete('/seats/{seatId}/reserve', [SeatReservationController::class, 'destroy']);
+    Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
 });
 

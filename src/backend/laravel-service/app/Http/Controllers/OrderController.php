@@ -3,16 +3,57 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreOrderRequest;
+use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Reservation;
 use App\Models\Seat;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 class OrderController extends Controller
 {
+    public function index(Request $request): JsonResponse
+    {
+        $orders = Order::with([
+            'orderItems.seat.event',
+            'orderItems.seat.priceCategory',
+        ])
+            ->where('user_id', $request->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($orders->map(fn (Order $order) => [
+            'id' => $order->id,
+            'total_amount' => $order->total_amount,
+            'status' => $order->status,
+            'created_at' => $order->created_at,
+            'items' => $order->orderItems->map(fn (OrderItem $item) => [
+                'id' => $item->id,
+                'price' => $item->price,
+                'seat' => [
+                    'id' => $item->seat->id,
+                    'row' => $item->seat->row,
+                    'number' => $item->seat->number,
+                    'price_category' => $item->seat->priceCategory
+                        ? ['name' => $item->seat->priceCategory->name]
+                        : null,
+                    'event' => $item->seat->event ? [
+                        'id' => $item->seat->event->id,
+                        'name' => $item->seat->event->name,
+                        'slug' => $item->seat->event->slug,
+                        'date' => $item->seat->event->date,
+                        'venue' => $item->seat->event->venue,
+                        'image_url' => $item->seat->event->image_url,
+                    ] : null,
+                ],
+            ]),
+        ]));
+    }
+
     public function store(StoreOrderRequest $request): JsonResponse
     {
         $user = $request->user();
@@ -34,8 +75,10 @@ class OrderController extends Controller
             return response()->json(['error' => 'No tens reserves actives.'], 409);
         }
 
+        $createdOrder = null;
+
         try {
-            $result = DB::transaction(function () use ($user, $activeReservations) {
+            $result = DB::transaction(function () use ($user, $activeReservations, &$createdOrder) {
                 $seatIds = $activeReservations->pluck('seat_id');
 
                 $seats = Seat::with('priceCategory')
@@ -50,6 +93,8 @@ class OrderController extends Controller
                     'total_amount' => $totalAmount,
                     'status' => 'completed',
                 ]);
+
+                $createdOrder = $order;
 
                 $items = [];
                 foreach ($seats as $seat) {
@@ -73,11 +118,18 @@ class OrderController extends Controller
                     'items' => $items,
                 ];
             });
-
-            return response()->json($result, 201);
-
         } catch (Throwable) {
             return response()->json(['error' => 'Error intern del servidor.'], 500);
         }
+
+        // Send confirmation email after the transaction — a mail failure must not affect the response
+        try {
+            $createdOrder->load(['user', 'orderItems.seat.event', 'orderItems.seat.priceCategory']);
+            Mail::to($user->email)->send(new OrderConfirmationMail($createdOrder));
+        } catch (Throwable) {
+            // Mail failure is non-fatal; order is already persisted
+        }
+
+        return response()->json($result, 201);
     }
 }

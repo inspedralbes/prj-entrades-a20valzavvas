@@ -82,54 +82,88 @@ async function submit() {
 </script>
 
 <template>
-  <div class="edit-event">
-    <h1>Editar Esdeveniment</h1>
+  <div class="admin-form-page">
+    <header class="admin-form-header">
+      <NuxtLink to="/admin/events" class="btn-back">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.75 19.5 8.25 12l7.5-7.5"
+          />
+        </svg>
+        Tornar
+      </NuxtLink>
+      <h1 class="admin-form-title">Editar Esdeveniment</h1>
+    </header>
 
-    <div v-if="isLoading">Carregant...</div>
-    <div v-else-if="loadError" class="error">{{ loadError }}</div>
-    <form v-else @submit.prevent="submit">
-      <div class="field">
-        <label for="name">Nom *</label>
-        <input id="name" v-model="name" type="text" required />
+    <div v-if="isLoading" class="state-message">Carregant...</div>
+    <div v-else-if="loadError" class="state-message state-message--error">
+      {{ loadError }}
+    </div>
+
+    <form v-else @submit.prevent="submit" novalidate>
+      <div class="form-card">
+        <h2 class="form-card-title">Informació general</h2>
+
+        <div class="field">
+          <label for="name">Nom *</label>
+          <input id="name" v-model="name" type="text" required />
+        </div>
+
+        <div class="field">
+          <label for="slug">Slug</label>
+          <input
+            id="slug"
+            v-model="slug"
+            type="text"
+            :class="{ 'input-error': slugError }"
+          />
+          <span v-if="slugError" class="error-message">{{ slugError }}</span>
+        </div>
+
+        <div class="field">
+          <label for="description">Descripció</label>
+          <textarea id="description" v-model="description" rows="3" />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="date">Data i hora *</label>
+            <input id="date" v-model="date" type="datetime-local" required />
+          </div>
+
+          <div class="field">
+            <label for="venue">Recinte *</label>
+            <input id="venue" v-model="venue" type="text" required />
+          </div>
+        </div>
+
+        <div class="field field--narrow">
+          <label for="max-seients">Màxim de seients per usuari *</label>
+          <input
+            id="max-seients"
+            v-model.number="maxSeientPerUsuari"
+            type="number"
+            min="1"
+            required
+          />
+        </div>
       </div>
 
-      <div class="field">
-        <label for="slug">Slug</label>
-        <input id="slug" v-model="slug" type="text" />
-        <span v-if="slugError" class="error slug-error">{{ slugError }}</span>
+      <div v-if="serverError" class="error-banner" role="alert">
+        {{ serverError }}
       </div>
 
-      <div class="field">
-        <label for="description">Descripció</label>
-        <textarea id="description" v-model="description" />
-      </div>
-
-      <div class="field">
-        <label for="date">Data i hora *</label>
-        <input id="date" v-model="date" type="datetime-local" required />
-      </div>
-
-      <div class="field">
-        <label for="venue">Recinte *</label>
-        <input id="venue" v-model="venue" type="text" required />
-      </div>
-
-      <div class="field">
-        <label for="max-seients">Màxim de seients per usuari *</label>
-        <input
-          id="max-seients"
-          v-model.number="maxSeientPerUsuari"
-          type="number"
-          min="1"
-          required
-        />
-      </div>
-
-      <div v-if="serverError" class="error server-error">{{ serverError }}</div>
-
-      <div class="actions">
-        <NuxtLink to="/admin/events">Cancel·lar</NuxtLink>
-        <button type="submit" :disabled="isSubmitting">
+      <div class="form-actions">
+        <NuxtLink to="/admin/events" class="btn-cancel">Cancel·lar</NuxtLink>
+        <button type="submit" class="btn-submit" :disabled="isSubmitting">
           {{ isSubmitting ? "Desant..." : "Desar canvis" }}
         </button>
       </div>
@@ -138,46 +172,222 @@ async function submit() {
 </template>
 
 <style scoped>
-.edit-event {
-  max-width: 720px;
+.admin-form-page {
+  min-height: 100dvh;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  padding: 2rem 1.5rem;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
 }
+
+/* Header */
+.admin-form-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-back svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.btn-back:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
+}
+
+.admin-form-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+}
+
+/* States */
+.state-message {
+  color: var(--color-text-secondary);
+  padding: 2rem 0;
+  font-size: var(--font-size-sm);
+}
+
+.state-message--error {
+  color: var(--color-error);
+}
+
+/* Card */
+.form-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 1.25rem;
+}
+
+/* Fields */
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 1rem;
+  gap: 0.35rem;
+  margin-bottom: 1.1rem;
 }
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field--narrow {
+  max-width: 200px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+@media (max-width: 560px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .field--narrow {
+    max-width: 100%;
+  }
+}
+
 .field label {
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
 }
+
 .field input,
 .field textarea {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-base);
+  padding: 0.6rem 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+  box-sizing: border-box;
 }
-.error {
-  color: #dc2626;
-  font-size: 0.85rem;
+
+.field textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
 }
-.actions {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin-top: 1.5rem;
+
+.field input:focus,
+.field textarea:focus {
+  border-color: var(--color-border-focus);
 }
-.actions button {
-  padding: 8px 20px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 4px;
+
+.field input.input-error {
+  border-color: var(--color-error);
+}
+
+.field input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
   cursor: pointer;
 }
-.actions button:disabled {
+
+.error-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+}
+
+/* Error banner */
+.error-banner {
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: var(--radius-md);
+  color: #f87171;
+  font-size: var(--font-size-sm);
+  padding: 0.6rem 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Actions */
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.btn-cancel:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+}
+
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  padding: 0.65rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: var(--color-accent-primary-hover);
+}
+
+.btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
