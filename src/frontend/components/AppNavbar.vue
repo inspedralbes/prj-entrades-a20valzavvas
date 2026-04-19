@@ -14,7 +14,11 @@ async function logout() {
 <template>
   <nav class="app-navbar">
     <div class="navbar-inner">
-      <NuxtLink to="/" class="navbar-logo" exact-active-class="navbar-logo--active">
+      <NuxtLink
+        to="/"
+        class="navbar-logo"
+        exact-active-class="navbar-logo--active"
+      >
         SALA ONIRICA
       </NuxtLink>
 
@@ -29,6 +33,7 @@ async function logout() {
 
         <template v-if="authStore.isAuthenticated">
           <NuxtLink
+            v-if="!isAdmin"
             to="/entrades"
             class="navbar-link"
             active-class="navbar-link--active"
@@ -162,7 +167,9 @@ async function logout() {
   padding: 0.375rem 0.75rem;
   cursor: pointer;
   font-family: var(--font-family-base);
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .navbar-logout:hover {

@@ -2,15 +2,19 @@
 import { useSeientStore } from "~/stores/seients";
 import { useConnexioStore } from "~/stores/connexio";
 import { useReservaStore } from "~/stores/reserva";
+import { useAuthStore } from "~/stores/auth";
 
 definePageMeta({ ssr: false });
 
 const route = useRoute();
 const seients = useSeientStore();
 const connexio = useConnexioStore();
+const authStore = useAuthStore();
 
 const slug = route.params.slug as string;
 const reserva = useReservaStore();
+
+const esAdmin = computed(() => authStore.user?.role === "admin");
 
 onMounted(async () => {
   connexio.inicialitzar();
@@ -33,7 +37,7 @@ onUnmounted(() => {
     <div class="event-container">
       <!-- Barra superior: indicador de connexió i temporitzador -->
       <div class="event-topbar">
-        <div v-if="reserva.teReservaActiva" class="topbar-reserva">
+        <div v-if="reserva.teReservaActiva && !esAdmin" class="topbar-reserva">
           <TemporitzadorReserva />
           <NuxtLink to="/checkout" class="btn-checkout">
             Confirmar compra ({{ reserva.seatIds.length }})
@@ -73,7 +77,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Seat map -->
-      <MapaSeients v-else />
+      <MapaSeients v-else :read-only="esAdmin" />
     </div>
   </div>
 </template>

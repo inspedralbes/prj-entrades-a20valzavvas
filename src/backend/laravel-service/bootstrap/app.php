@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureAdmin;
+use App\Http\Middleware\EnsureBuyer;
 use App\Http\Middleware\InternalSecretMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -26,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'admin' => EnsureAdmin::class,
+            'buyer' => EnsureBuyer::class,
             'internal.secret' => InternalSecretMiddleware::class,
         ]);
     })

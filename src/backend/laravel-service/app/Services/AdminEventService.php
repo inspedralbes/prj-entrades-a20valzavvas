@@ -154,6 +154,17 @@ class AdminEventService
             }
         }
 
+        if (isset($data['published']) && $data['published'] === false) {
+            $hasSoldTickets = OrderItem::whereHas(
+                'seat',
+                fn ($q) => $q->where('event_id', $event->id)
+            )->exists();
+
+            if ($hasSoldTickets) {
+                throw new \RuntimeException('has_sold_tickets');
+            }
+        }
+
         $newSlug = $data['slug'] ?? null;
         if ($newSlug && $newSlug !== $event->slug) {
             if (Event::where('slug', $newSlug)->where('id', '!=', $event->id)->exists()) {

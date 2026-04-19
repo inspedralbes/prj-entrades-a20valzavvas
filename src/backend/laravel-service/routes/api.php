@@ -26,10 +26,13 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/seats', [SeatController::class, 'indexByIds']);
-    Route::post('/seats/{seatId}/reserve', [SeatReservationController::class, 'store']);
     Route::delete('/seats/{seatId}/reserve', [SeatReservationController::class, 'destroy']);
     Route::get('/orders', [OrderController::class, 'index']);
-    Route::post('/orders', [OrderController::class, 'store']);
+
+    Route::middleware('buyer')->group(function () {
+        Route::post('/seats/{seatId}/reserve', [SeatReservationController::class, 'store']);
+        Route::post('/orders', [OrderController::class, 'store']);
+    });
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {

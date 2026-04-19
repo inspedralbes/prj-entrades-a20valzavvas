@@ -123,5 +123,20 @@ describe("Seient.vue", () => {
 
       expect(wrapper.emitted("reservar")).toBeUndefined();
     });
+
+    it("no emet reservar ni alliberar quan readOnly és true", async () => {
+      const wrapper = await mountSuspended(Seient, {
+        props: {
+          seat: makeSeat(EstatSeient.DISPONIBLE, "seat-D1"),
+          readOnly: true,
+        },
+      });
+
+      await wrapper.trigger("click");
+
+      expect(wrapper.emitted("reservar")).toBeUndefined();
+      expect(wrapper.emitted("alliberar")).toBeUndefined();
+      expect(wrapper.find("button").classes()).toContain("seient--readonly");
+    });
   });
 });

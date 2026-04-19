@@ -251,4 +251,27 @@ describe("pages/admin/events/index — toggle de publicació", () => {
       "Error en canviar l'estat de publicació",
     );
   });
+
+  it("error 422 has_sold_tickets mostra missatge específic sobre entrades venudes", async () => {
+    mockFetch.mockRejectedValueOnce({
+      statusCode: 422,
+      data: { code: "has_sold_tickets" },
+    });
+
+    const wrapper = await mountSuspended(AdminEventsPage);
+
+    const despublicarButtons = wrapper
+      .findAll("button")
+      .filter((b) => b.text() === "Despublicar");
+    await despublicarButtons[0]!.trigger("click");
+    await wrapper.vm.$nextTick();
+
+    // Badge should remain "Publicat"
+    const publishedBadges = wrapper.findAll(".badge--published");
+    expect(publishedBadges).toHaveLength(2);
+
+    // Specific error message should appear
+    expect(wrapper.find(".toggle-error").exists()).toBe(true);
+    expect(wrapper.find(".toggle-error").text()).toContain("entrades venudes");
+  });
 });

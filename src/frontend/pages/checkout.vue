@@ -3,7 +3,7 @@ import { useReservaStore } from "~/stores/reserva";
 import { useAuthStore } from "~/stores/auth";
 import { useSeientStore } from "~/stores/seients";
 
-definePageMeta({ middleware: "auth", ssr: false });
+definePageMeta({ middleware: ["auth", "buyer-only"], ssr: false });
 
 interface SeatDetail {
   id: string;

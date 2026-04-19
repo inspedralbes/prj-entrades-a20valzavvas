@@ -7,6 +7,15 @@ const seients = useSeientStore();
 const reserva = useReservaStore();
 const { $socket } = useNuxtApp();
 
+const props = withDefaults(
+  defineProps<{
+    readOnly?: boolean;
+  }>(),
+  {
+    readOnly: false,
+  },
+);
+
 const categoryNameById = computed(() => {
   const map = new Map<string, string>();
   for (const cat of seients.categories) {
@@ -78,6 +87,7 @@ function handleAlliberar(seatId: string) {
                 :seat="seat"
                 :mi-seat="reserva.esSeleccionatPerMi(seat.id)"
                 :category-name="categoryNameById.get(seat.categoria)"
+                :read-only="props.readOnly"
                 @reservar="handleReservar"
                 @alliberar="handleAlliberar"
               />
@@ -103,6 +113,7 @@ function handleAlliberar(seatId: string) {
                 :seat="seat"
                 :mi-seat="reserva.esSeleccionatPerMi(seat.id)"
                 :category-name="categoryNameById.get(seat.categoria)"
+                :read-only="props.readOnly"
                 @reservar="handleReservar"
                 @alliberar="handleAlliberar"
               />

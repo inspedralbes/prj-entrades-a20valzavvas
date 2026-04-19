@@ -283,4 +283,39 @@ class AdminEventUpdateTest extends TestCase
 
         $this->assertDatabaseHas('events', ['id' => $event->id, 'published' => false]);
     }
+
+    public function test_cannot_unpublish_event_with_sold_tickets(): void
+    {
+        $admin = $this->adminUser();
+        $buyer = User::factory()->create(['role' => 'comprador']);
+        [$event, $seatId] = $this->createEventWithSeat(['published' => true]);
+
+        $now = now();
+        $orderId = (string) Str::uuid();
+        DB::table('orders')->insert([
+            'id' => $orderId,
+            'user_id' => $buyer->id,
+            'total_amount' => 10.00,
+            'status' => 'completed',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        DB::table('order_items')->insert([
+            'id' => (string) Str::uuid(),
+            'order_id' => $orderId,
+            'seat_id' => $seatId,
+            'price' => 10.00,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $response = $this->actingAs($admin)->putJson("/api/admin/events/{$event->id}", [
+            'published' => false,
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonPath('code', 'has_sold_tickets');
+
+        $this->assertDatabaseHas('events', ['id' => $event->id, 'published' => true]);
+    }
 }
