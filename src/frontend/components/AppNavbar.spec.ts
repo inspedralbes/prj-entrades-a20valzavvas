@@ -65,7 +65,7 @@ describe("AppNavbar.vue", () => {
     const wrapper = await mountSuspended(AppNavbar);
 
     expect(wrapper.text()).toContain("Panel Admin");
-    expect(wrapper.text()).toContain("Entrades");
+    expect(wrapper.text()).not.toContain("Entrades");
     expect(wrapper.text()).toContain("Tancar sessió");
     expect(wrapper.text()).not.toContain("Iniciar sessió");
     expect(wrapper.text()).not.toContain("Registrar-se");

@@ -113,6 +113,10 @@ class AdminEventController extends Controller
                 'has_active_reservations' => response()->json([
                     'message' => 'No és possible modificar les categories mentre hi ha reserves actives',
                 ], 422),
+                'has_sold_tickets' => response()->json([
+                    'message' => 'No es pot despublicar: l\'event té entrades venudes',
+                    'code' => 'has_sold_tickets',
+                ], 422),
                 'duplicate_slug' => response()->json(['message' => 'Slug already exists'], 409),
                 default => throw $e,
             };

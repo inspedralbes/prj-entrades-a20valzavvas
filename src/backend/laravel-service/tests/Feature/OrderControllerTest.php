@@ -19,6 +19,11 @@ class OrderControllerTest extends TestCase
         return User::factory()->create(['role' => 'comprador']);
     }
 
+    private function adminUser(): User
+    {
+        return User::factory()->create(['role' => 'admin']);
+    }
+
     private function createSeatWithReservation(User $user, array $seatOverrides = []): array
     {
         $event = Event::factory()->create(['published' => true]);
@@ -359,5 +364,36 @@ class OrderControllerTest extends TestCase
         $response->assertStatus(200)->assertJsonCount(2);
         $orders = $response->json();
         $this->assertGreaterThanOrEqual($orders[1]['created_at'], $orders[0]['created_at']);
+    }
+
+    // --- EnsureBuyer middleware tests ---
+
+    public function test_admin_cannot_create_order(): void
+    {
+        $admin = $this->adminUser();
+
+        $response = $this->actingAs($admin)->postJson('/api/orders', [
+            'nom' => 'Admin User',
+            'email' => 'admin@example.com',
+        ]);
+
+        $response->assertStatus(403)
+            ->assertJsonPath('message', 'El rol admin no pot realitzar compres');
+
+        $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_comprador_can_still_create_order(): void
+    {
+        $user = $this->compradorUser();
+        $this->createSeatWithReservation($user);
+
+        $response = $this->actingAs($user)->postJson('/api/orders', [
+            'nom' => 'Joan García',
+            'email' => 'joan@example.com',
+        ]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseCount('orders', 1);
     }
 }

@@ -86,8 +86,14 @@ async function togglePublish(event: AdminEvent) {
       },
     );
     event.publicat = updated.published;
-  } catch {
-    toggleError.value = "Error en canviar l'estat de publicació de l'event.";
+  } catch (err: unknown) {
+    const status = (err as { statusCode?: number })?.statusCode;
+    const code = (err as { data?: { code?: string } })?.data?.code;
+    if (status === 422 && code === "has_sold_tickets") {
+      toggleError.value = "No es pot despublicar: l'event té entrades venudes.";
+    } else {
+      toggleError.value = "Error en canviar l'estat de publicació de l'event.";
+    }
   }
 }
 </script>

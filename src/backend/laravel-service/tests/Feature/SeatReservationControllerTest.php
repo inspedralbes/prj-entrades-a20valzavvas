@@ -16,6 +16,11 @@ class SeatReservationControllerTest extends TestCase
         return User::factory()->create(['role' => 'comprador']);
     }
 
+    private function adminUser(): User
+    {
+        return User::factory()->create(['role' => 'admin']);
+    }
+
     private function eventWithLimit(int $limit = 4): array
     {
         $event = Event::factory()->create([
@@ -276,5 +281,44 @@ class SeatReservationControllerTest extends TestCase
 
         $response->assertStatus(404);
         $this->assertEquals('DISPONIBLE', $seat->fresh()->estat);
+    }
+
+    // --- EnsureBuyer middleware tests ---
+
+    public function test_admin_cannot_reserve_seat(): void
+    {
+        $admin = $this->adminUser();
+        [$event, $category] = $this->eventWithLimit(4);
+
+        $seat = Seat::factory()->create([
+            'event_id' => $event->id,
+            'price_category_id' => $category->id,
+            'estat' => 'DISPONIBLE',
+        ]);
+
+        $response = $this->actingAs($admin)->postJson("/api/seats/{$seat->id}/reserve");
+
+        $response->assertStatus(403)
+            ->assertJsonPath('message', 'El rol admin no pot realitzar compres');
+
+        $this->assertDatabaseCount('reservations', 0);
+        $this->assertEquals('DISPONIBLE', $seat->fresh()->estat);
+    }
+
+    public function test_comprador_can_reserve_seat(): void
+    {
+        $user = $this->compradorUser();
+        [$event, $category] = $this->eventWithLimit(4);
+
+        $seat = Seat::factory()->create([
+            'event_id' => $event->id,
+            'price_category_id' => $category->id,
+            'estat' => 'DISPONIBLE',
+        ]);
+
+        $response = $this->actingAs($user)->postJson("/api/seats/{$seat->id}/reserve");
+
+        $response->assertStatus(200);
+        $this->assertDatabaseCount('reservations', 1);
     }
 }

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { mountSuspended } from "@nuxt/test-utils/runtime";
 import { EstatSeient } from "@shared/seat.types";
 import MapaSeients from "./MapaSeients.vue";
+import Seient from "./Seient.vue";
 
 type SeatEntry = {
   id: string;
@@ -26,7 +27,8 @@ vi.mock("~/stores/reserva", () => ({
     seatIds: mockReservaSeatIds(),
     limitAssolit: false,
     teReservaActiva: false,
-    esSeleccionatPerMi: (seatId: string) => mockReservaSeatIds().includes(seatId),
+    esSeleccionatPerMi: (seatId: string) =>
+      mockReservaSeatIds().includes(seatId),
   })),
 }));
 
@@ -179,5 +181,42 @@ describe("MapaSeients.vue", () => {
     const wrapper = await mountSuspended(MapaSeients);
 
     expect(wrapper.findAll(".seient--seleccionat-per-mi")).toHaveLength(0);
+  });
+
+  it("passa readOnly=true a tots els components Seient fills", async () => {
+    const map = new Map([
+      [
+        "A",
+        [
+          {
+            id: "s1",
+            estat: EstatSeient.DISPONIBLE,
+            fila: "A",
+            numero: 1,
+            categoria: "c1",
+            preu: 10,
+          },
+          {
+            id: "s2",
+            estat: EstatSeient.DISPONIBLE,
+            fila: "A",
+            numero: 2,
+            categoria: "c1",
+            preu: 10,
+          },
+        ],
+      ],
+    ]);
+    mockSeientsPerFila.mockReturnValue(map);
+
+    const wrapper = await mountSuspended(MapaSeients, {
+      props: { readOnly: true },
+    });
+
+    const seientComponents = wrapper.findAllComponents(Seient);
+    expect(seientComponents).toHaveLength(2);
+    for (const seient of seientComponents) {
+      expect(seient.props("readOnly")).toBe(true);
+    }
   });
 });
