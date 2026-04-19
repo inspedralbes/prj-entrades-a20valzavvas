@@ -12,6 +12,7 @@ import { AuthenticatedSocket } from "../auth/authenticated-socket.interface";
 import { LaravelClientService } from "../laravel-client/laravel-client.service";
 import type {
   SeientCanviEstatPayload,
+  StatsActualitzacioPayload,
   SeientReservarPayload,
   SeientAlliberarPayload,
   ReservaConfirmadaPayload,
@@ -69,6 +70,8 @@ export class SeatsGateway {
       );
       if (eventRoom) {
         this.server.to(eventRoom).emit("seient:canvi-estat", canviPayload);
+        const eventId = eventRoom.replace("event:", "");
+        await this.broadcastStats(eventId);
       }
     } else {
       const rebutjadaPayload: ReservaRebutjadaPayload = {
@@ -83,11 +86,18 @@ export class SeatsGateway {
     this.server.to(`event:${eventId}`).emit("seient:canvi-estat", payload);
   }
 
+  emitStatsActualitzacio(
+    eventId: string,
+    payload: StatsActualitzacioPayload,
+  ): void {
+    this.server.to(`event:${eventId}`).emit("stats:actualitzacio", payload);
+  }
+
   @SubscribeMessage("compra:confirmar")
-  handleCompraConfirmar(
+  async handleCompraConfirmar(
     @ConnectedSocket() socket: AuthenticatedSocket,
     @MessageBody() payload: CompraConfirmarPayload,
-  ): void {
+  ): Promise<void> {
     if (!payload.seients || payload.seients.length === 0) {
       return;
     }
@@ -109,6 +119,8 @@ export class SeatsGateway {
       seients: payload.seients.map((s) => `${s.fila}${s.numero}`),
     };
     socket.emit("compra:completada", completadaPayload);
+
+    await this.broadcastStats(payload.eventId);
   }
 
   @SubscribeMessage("seient:alliberar")
@@ -134,6 +146,8 @@ export class SeatsGateway {
       );
       if (eventRoom) {
         this.server.to(eventRoom).emit("seient:canvi-estat", canviPayload);
+        const eventId = eventRoom.replace("event:", "");
+        await this.broadcastStats(eventId);
       }
     } else {
       const errorPayload: ErrorGeneralPayload = {
@@ -141,6 +155,19 @@ export class SeatsGateway {
         missatge: result.motiu,
       };
       socket.emit("error:general", errorPayload);
+    }
+  }
+
+  private async broadcastStats(eventId: string): Promise<void> {
+    try {
+      const stats = await this.laravelClient.getStats(eventId);
+      const sockets = await this.server
+        .in(`event:${eventId}`)
+        .fetchSockets();
+      stats.usuaris = sockets.length;
+      this.emitStatsActualitzacio(eventId, stats);
+    } catch {
+      // Stats broadcast is best-effort; don't fail the main operation
     }
   }
 }

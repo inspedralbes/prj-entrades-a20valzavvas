@@ -168,8 +168,18 @@ export class LaravelClientService implements OnModuleInit {
     return { released: response.data.released };
   }
 
-  async getStats(eventId: string): Promise<void> {
-    // Will be implemented in a future US
-    void eventId;
+  async getStats(
+    eventId: string,
+  ): Promise<import("shared/types/socket.types").StatsActualitzacioPayload> {
+    const response = await firstValueFrom(
+      this.httpService.get<
+        import("shared/types/socket.types").StatsActualitzacioPayload
+      >(`/internal/events/${eventId}/stats`, {
+        headers: {
+          "X-Internal-Secret": process.env.INTERNAL_SECRET ?? "",
+        },
+      }),
+    );
+    return response.data;
   }
 }
