@@ -12,6 +12,42 @@ use Illuminate\Support\Str;
 
 class AdminEventService
 {
+    public function getSalesReport(): array
+    {
+        $categories = PriceCategory::with('event')
+            ->withCount([
+                'seats as total_seients',
+                'seats as seients_venuts' => fn ($q) => $q->where('estat', 'VENUT'),
+            ])
+            ->get();
+
+        return $categories->map(function (PriceCategory $category) {
+            $totalSeients = (int) $category->total_seients;
+            $seientsVenuts = (int) $category->seients_venuts;
+
+            $recaptacio = OrderItem::whereHas(
+                'seat',
+                fn ($q) => $q->where('price_category_id', $category->id)
+                    ->where('estat', 'VENUT')
+            )->sum('price');
+
+            $percentatge = $totalSeients > 0
+                ? round(($seientsVenuts / $totalSeients) * 100, 2)
+                : 0.0;
+
+            return [
+                'category_id' => $category->id,
+                'event_nom' => $category->event->name,
+                'nom' => $category->name,
+                'preu' => number_format((float) $category->price, 2, '.', ''),
+                'total_seients' => $totalSeients,
+                'seients_venuts' => $seientsVenuts,
+                'percentatge_ocupacio' => $percentatge,
+                'recaptacio' => number_format((float) $recaptacio, 2, '.', ''),
+            ];
+        })->values()->all();
+    }
+
     /**
      * @throws \RuntimeException 'not_found'
      */

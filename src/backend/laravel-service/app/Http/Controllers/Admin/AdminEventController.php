@@ -67,6 +67,11 @@ class AdminEventController extends Controller
         return response()->json($stats);
     }
 
+    public function reports(): JsonResponse
+    {
+        return response()->json($this->eventService->getSalesReport());
+    }
+
     public function store(StoreEventRequest $request): JsonResponse
     {
         try {

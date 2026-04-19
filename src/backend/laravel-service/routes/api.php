@@ -39,4 +39,5 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/events/{id}/stats', [AdminEventController::class, 'stats']);
     Route::put('/events/{id}', [AdminEventController::class, 'update']);
     Route::delete('/events/{id}', [AdminEventController::class, 'destroy']);
+    Route::get('/reports', [AdminEventController::class, 'reports']);
 });
