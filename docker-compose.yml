@@ -27,6 +27,7 @@ services:
       PORT: ${BACKEND_PORT:-3001}
       JWT_SECRET: ${JWT_SECRET}
       INTERNAL_SECRET: ${INTERNAL_SECRET}
+      LARAVEL_INTERNAL_URL: ${LARAVEL_INTERNAL_URL:-http://laravel-service:8000}
     depends_on:
       db:
         condition: service_healthy

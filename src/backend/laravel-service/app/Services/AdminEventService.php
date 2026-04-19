@@ -6,11 +6,53 @@ use App\Models\Event;
 use App\Models\OrderItem;
 use App\Models\PriceCategory;
 use App\Models\Reservation;
+use App\Models\Seat;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AdminEventService
 {
+    /**
+     * @throws \RuntimeException 'not_found'
+     */
+    public function getEventStats(string $id): array
+    {
+        if (! Event::where('id', $id)->exists()) {
+            throw new \RuntimeException('not_found');
+        }
+
+        $seatCounts = Seat::where('event_id', $id)
+            ->select('estat', DB::raw('count(*) as total'))
+            ->groupBy('estat')
+            ->pluck('total', 'estat');
+
+        $disponibles = (int) ($seatCounts['DISPONIBLE'] ?? 0);
+        $reservats = (int) ($seatCounts['RESERVAT'] ?? 0);
+        $venuts = (int) ($seatCounts['VENUT'] ?? 0);
+        $totalSeients = $disponibles + $reservats + $venuts;
+
+        $reservesActives = Reservation::where('expires_at', '>', now())
+            ->whereHas('seat', fn ($q) => $q->where('event_id', $id))
+            ->count();
+
+        $recaptacioTotal = (float) OrderItem::whereHas(
+            'seat',
+            fn ($q) => $q->where('event_id', $id)
+        )->sum('price');
+
+        return [
+            'disponibles' => $disponibles,
+            'reservats' => $reservats,
+            'venuts' => $venuts,
+            'totalSeients' => $totalSeients,
+            'percentatgeVenuts' => $totalSeients > 0 ? round($venuts / $totalSeients * 100, 2) : 0,
+            'percentatgeReservats' => $totalSeients > 0 ? round($reservats / $totalSeients * 100, 2) : 0,
+            'usuaris' => 0,
+            'reservesActives' => $reservesActives,
+            'recaptacioTotal' => $recaptacioTotal,
+        ];
+    }
+
     public function show(string $id): Event
     {
         $event = Event::with(['priceCategories' => fn ($q) => $q->withCount('seats')])->find($id);

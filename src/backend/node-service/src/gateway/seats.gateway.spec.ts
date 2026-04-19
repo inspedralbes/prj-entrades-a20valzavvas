@@ -1,8 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { SeatsGateway } from "./seats.gateway";
-import type { SeientCanviEstatPayload } from "shared/types/socket.types";
+import type {
+  SeientCanviEstatPayload,
+  StatsActualitzacioPayload,
+} from "shared/types/socket.types";
 import { EstatSeient } from "shared/types/seat.types";
 import type { LaravelClientService } from "../laravel-client/laravel-client.service";
+
+const MOCK_STATS: StatsActualitzacioPayload = {
+  disponibles: 80,
+  reservats: 10,
+  venuts: 10,
+  totalSeients: 100,
+  percentatgeVenuts: 10,
+  percentatgeReservats: 10,
+  usuaris: 0,
+  reservesActives: 2,
+  recaptacioTotal: 200,
+};
 
 function makeSocketMock(rooms: string[] = []) {
   return {
@@ -16,13 +31,16 @@ function makeSocketMock(rooms: string[] = []) {
 function makeServerMock() {
   const emit = vi.fn();
   const to = vi.fn().mockReturnValue({ emit });
-  return { server: { to }, emit, to };
+  const fetchSockets = vi.fn().mockResolvedValue([]);
+  const inFn = vi.fn().mockReturnValue({ fetchSockets });
+  return { server: { to, in: inFn }, emit, to, inFn, fetchSockets };
 }
 
 function makeLaravelClientMock(): LaravelClientService {
   return {
     reserveSeat: vi.fn(),
     releaseSeat: vi.fn(),
+    getStats: vi.fn().mockResolvedValue({ ...MOCK_STATS }),
   } as unknown as LaravelClientService;
 }
 
@@ -94,6 +112,46 @@ describe("SeatsGateway", () => {
     });
   });
 
+  describe("emitStatsActualitzacio", () => {
+    it("emet stats:actualitzacio al room de l'event", () => {
+      const { server, to, emit } = makeServerMock();
+      (gateway as unknown as { server: typeof server }).server = server;
+
+      gateway.emitStatsActualitzacio("evt-123", MOCK_STATS);
+
+      expect(to).toHaveBeenCalledWith("event:evt-123");
+      expect(emit).toHaveBeenCalledWith("stats:actualitzacio", MOCK_STATS);
+    });
+
+    it("no emet a rooms d'altres events", () => {
+      const { server, to } = makeServerMock();
+      (gateway as unknown as { server: typeof server }).server = server;
+
+      gateway.emitStatsActualitzacio("evt-abc", MOCK_STATS);
+
+      expect(to).toHaveBeenCalledWith("event:evt-abc");
+      expect(to).not.toHaveBeenCalledWith("event:evt-xyz");
+    });
+
+    it("el payload conté tots els camps obligatoris", () => {
+      const { server, to, emit } = makeServerMock();
+      (gateway as unknown as { server: typeof server }).server = server;
+
+      gateway.emitStatsActualitzacio("evt-123", MOCK_STATS);
+
+      expect(emit).toHaveBeenCalledWith(
+        "stats:actualitzacio",
+        expect.objectContaining({
+          disponibles: expect.any(Number),
+          reservats: expect.any(Number),
+          venuts: expect.any(Number),
+          totalSeients: expect.any(Number),
+          recaptacioTotal: expect.any(Number),
+        }),
+      );
+    });
+  });
+
   describe("handleSeientReservar", () => {
     it("emet reserva:confirmada i seient:canvi-estat quan la reserva prospera", async () => {
       const { server, to, emit: roomEmit } = makeServerMock();
@@ -127,6 +185,26 @@ describe("SeatsGateway", () => {
         fila: "B",
         numero: 5,
       });
+    });
+
+    it("emet stats:actualitzacio després de la reserva confirmada", async () => {
+      const { server, to, emit: roomEmit } = makeServerMock();
+      (gateway as unknown as { server: typeof server }).server = server;
+      const socket = makeSocketMock(["event:evt-1"]);
+
+      vi.mocked(laravelClient.reserveSeat).mockResolvedValue({
+        ok: true,
+        reservation: { id: "res-1", expires_at: "2026-04-12T10:05:00.000Z" },
+        seat: { id: "seat-B5", fila: "B", numero: 5, estat: "RESERVAT" },
+      });
+
+      await gateway.handleSeientReservar(socket as never, { seatId: "seat-B5" });
+
+      expect(laravelClient.getStats).toHaveBeenCalledWith("evt-1");
+      expect(roomEmit).toHaveBeenCalledWith(
+        "stats:actualitzacio",
+        expect.objectContaining({ disponibles: expect.any(Number) }),
+      );
     });
 
     it("emet reserva:rebutjada sense broadcast quan el seient no és disponible", async () => {
@@ -204,6 +282,22 @@ describe("SeatsGateway", () => {
       );
     });
 
+    it("emet stats:actualitzacio després de l'alliberament correcte", async () => {
+      const { server, to: _to, emit: roomEmit } = makeServerMock();
+      (gateway as unknown as { server: typeof server }).server = server;
+      const socket = makeSocketMock(["event:evt-1"]);
+
+      vi.mocked(laravelClient.releaseSeat).mockResolvedValue({ ok: true });
+
+      await gateway.handleSeientAlliberar(socket as never, { seatId: "seat-C3" });
+
+      expect(laravelClient.getStats).toHaveBeenCalledWith("evt-1");
+      expect(roomEmit).toHaveBeenCalledWith(
+        "stats:actualitzacio",
+        expect.objectContaining({ disponibles: expect.any(Number) }),
+      );
+    });
+
     it("emet error:general al socket quan la reserva pertany a un altre usuari (no_autoritzat)", async () => {
       const { server, to } = makeServerMock();
       (gateway as unknown as { server: typeof server }).server = server;
@@ -262,12 +356,12 @@ describe("SeatsGateway", () => {
   });
 
   describe("handleCompraConfirmar", () => {
-    it("fa broadcast seient:canvi-estat VENUT per a cada seient i emet compra:completada al client", () => {
+    it("fa broadcast seient:canvi-estat VENUT per a cada seient i emet compra:completada al client", async () => {
       const { server, to, emit: roomEmit } = makeServerMock();
       (gateway as unknown as { server: typeof server }).server = server;
       const socket = makeSocketMock(["event:evt-1"]);
 
-      gateway.handleCompraConfirmar(socket as never, {
+      await gateway.handleCompraConfirmar(socket as never, {
         orderId: "order-abc",
         eventId: "evt-1",
         seients: [
@@ -276,7 +370,6 @@ describe("SeatsGateway", () => {
         ],
       });
 
-      expect(to).toHaveBeenCalledTimes(2);
       expect(to).toHaveBeenCalledWith("event:evt-1");
       expect(roomEmit).toHaveBeenCalledWith("seient:canvi-estat", {
         seatId: "seat-B5",
@@ -297,12 +390,30 @@ describe("SeatsGateway", () => {
       });
     });
 
-    it("no fa cap broadcast si la llista de seients és buida", () => {
+    it("emet stats:actualitzacio després de confirmar la compra", async () => {
+      const { server, to: _to, emit: roomEmit } = makeServerMock();
+      (gateway as unknown as { server: typeof server }).server = server;
+      const socket = makeSocketMock(["event:evt-1"]);
+
+      await gateway.handleCompraConfirmar(socket as never, {
+        orderId: "order-abc",
+        eventId: "evt-1",
+        seients: [{ seatId: "seat-B5", fila: "B", numero: 5 }],
+      });
+
+      expect(laravelClient.getStats).toHaveBeenCalledWith("evt-1");
+      expect(roomEmit).toHaveBeenCalledWith(
+        "stats:actualitzacio",
+        expect.objectContaining({ venuts: expect.any(Number) }),
+      );
+    });
+
+    it("no fa cap broadcast si la llista de seients és buida", async () => {
       const { server, to } = makeServerMock();
       (gateway as unknown as { server: typeof server }).server = server;
       const socket = makeSocketMock(["event:evt-1"]);
 
-      gateway.handleCompraConfirmar(socket as never, {
+      await gateway.handleCompraConfirmar(socket as never, {
         orderId: "order-abc",
         eventId: "evt-1",
         seients: [],

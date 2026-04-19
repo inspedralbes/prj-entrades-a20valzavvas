@@ -12,7 +12,12 @@ export interface StatsActualitzacioPayload {
   disponibles: number;
   reservats: number;
   venuts: number;
+  totalSeients: number;
+  percentatgeVenuts: number;
+  percentatgeReservats: number;
   usuaris: number;
+  reservesActives: number;
+  recaptacioTotal: number;
 }
 
 // Server → Client private responses

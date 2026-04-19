@@ -38,6 +38,15 @@ async function logout() {
 
           <NuxtLink
             v-if="isAdmin"
+            to="/admin"
+            class="navbar-link"
+            exact-active-class="navbar-link--active"
+          >
+            Dashboard
+          </NuxtLink>
+
+          <NuxtLink
+            v-if="isAdmin"
             to="/admin/events"
             class="navbar-link"
             active-class="navbar-link--active"

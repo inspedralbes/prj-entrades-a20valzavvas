@@ -53,6 +53,20 @@ class AdminEventController extends Controller
         return response()->json($this->formatEvent($event));
     }
 
+    public function stats(string $id): JsonResponse
+    {
+        try {
+            $stats = $this->eventService->getEventStats($id);
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() === 'not_found') {
+                return response()->json(['message' => 'Event not found'], 404);
+            }
+            throw $e;
+        }
+
+        return response()->json($stats);
+    }
+
     public function store(StoreEventRequest $request): JsonResponse
     {
         try {

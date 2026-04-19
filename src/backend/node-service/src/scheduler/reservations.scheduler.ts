@@ -19,6 +19,8 @@ export class ReservationsScheduler {
       const { released } =
         await this.laravelClient.releaseExpiredReservations();
 
+      const affectedEventIds = new Set<string>();
+
       for (const { seatId, eventId } of released) {
         this.seatsGateway.server
           .to(`event:${eventId}`)
@@ -26,6 +28,20 @@ export class ReservationsScheduler {
             seatId,
             estat: EstatSeient.DISPONIBLE,
           });
+        affectedEventIds.add(eventId);
+      }
+
+      for (const eventId of affectedEventIds) {
+        try {
+          const stats = await this.laravelClient.getStats(eventId);
+          const sockets = await this.seatsGateway.server
+            .in(`event:${eventId}`)
+            .fetchSockets();
+          stats.usuaris = sockets.length;
+          this.seatsGateway.emitStatsActualitzacio(eventId, stats);
+        } catch {
+          // Stats broadcast is best-effort
+        }
       }
 
       if (released.length > 0) {

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { EstatSeient } from "./seat.types";
 import type {
   SeientCanviEstatPayload,
+  StatsActualitzacioPayload,
   ReservaConfirmadaPayload,
   ReservaRebutjadaPayload,
   CompraCompletadaPayload,
@@ -70,6 +71,32 @@ describe("ErrorGeneralPayload", () => {
 
     expect(payload.codi).toBe("SEIENT_NO_DISPONIBLE");
     expect(payload.missatge).toBeTruthy();
+  });
+});
+
+describe("StatsActualitzacioPayload", () => {
+  it("contains all required stats fields", () => {
+    const payload: StatsActualitzacioPayload = {
+      disponibles: 60,
+      reservats: 20,
+      venuts: 20,
+      totalSeients: 100,
+      percentatgeVenuts: 20,
+      percentatgeReservats: 20,
+      usuaris: 5,
+      reservesActives: 3,
+      recaptacioTotal: 400.0,
+    };
+
+    expect(payload.disponibles).toBe(60);
+    expect(payload.reservats).toBe(20);
+    expect(payload.venuts).toBe(20);
+    expect(payload.totalSeients).toBe(100);
+    expect(payload.percentatgeVenuts).toBe(20);
+    expect(payload.percentatgeReservats).toBe(20);
+    expect(payload.usuaris).toBeGreaterThanOrEqual(0);
+    expect(payload.reservesActives).toBeGreaterThanOrEqual(0);
+    expect(payload.recaptacioTotal).toBeGreaterThanOrEqual(0);
   });
 });
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EventStatsController;
 use App\Http\Controllers\ReservationExpiryController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,4 +16,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('internal.secret')->group(function () {
     Route::delete('/reservations/expired', [ReservationExpiryController::class, 'destroy']);
+    Route::get('/events/{id}/stats', [EventStatsController::class, 'show']);
 });
