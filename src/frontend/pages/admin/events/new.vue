@@ -181,7 +181,7 @@ async function submit() {
             type="text"
             :class="{ 'input-error': slugError || serverErrors.slug }"
           />
-          <span v-if="slugError" class="error-message">{{ slugError }}</span>
+          <span v-if="slugError" class="error-message slug-error">{{ slugError }}</span>
           <span v-else-if="serverErrors.slug" class="error-message">{{
             serverErrors.slug[0]
           }}</span>

@@ -125,7 +125,7 @@ async function submit() {
             type="text"
             :class="{ 'input-error': slugError }"
           />
-          <span v-if="slugError" class="error-message">{{ slugError }}</span>
+          <span v-if="slugError" class="error-message slug-error">{{ slugError }}</span>
         </div>
 
         <div class="field">
@@ -157,7 +157,7 @@ async function submit() {
         </div>
       </div>
 
-      <div v-if="serverError" class="error-banner" role="alert">
+      <div v-if="serverError" class="error-banner server-error" role="alert">
         {{ serverError }}
       </div>
 
