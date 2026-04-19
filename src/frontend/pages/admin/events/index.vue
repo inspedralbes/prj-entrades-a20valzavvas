@@ -187,44 +187,42 @@ async function togglePublish(event: AdminEvent) {
       {{ toggleError }}
     </p>
 
-    <Teleport to="body">
-      <div
-        v-if="deleteModal.open"
-        class="modal-overlay"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-        @click.self="closeDeleteModal"
-      >
-        <div class="modal">
-          <h2 id="modal-title" class="modal-title">Eliminar event</h2>
-          <p class="modal-body">
-            Segur que vols eliminar
-            <strong class="modal-event-name">{{ deleteModal.eventName }}</strong
-            >? Aquesta acció no es pot desfer.
-          </p>
-          <p v-if="deleteModal.error" class="modal-error" role="alert">
-            {{ deleteModal.error }}
-          </p>
-          <div class="modal-actions">
-            <button
-              type="button"
-              class="btn-action btn-action--delete"
-              @click="confirmDelete"
-            >
-              Eliminar
-            </button>
-            <button
-              type="button"
-              class="btn-action btn-action--cancel"
-              @click="closeDeleteModal"
-            >
-              Cancel·lar
-            </button>
-          </div>
+    <div
+      v-if="deleteModal.open"
+      class="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      @click.self="closeDeleteModal"
+    >
+      <div class="modal">
+        <h2 id="modal-title" class="modal-title">Eliminar event</h2>
+        <p class="modal-body">
+          Segur que vols eliminar
+          <strong class="modal-event-name">{{ deleteModal.eventName }}</strong
+          >? Aquesta acció no es pot desfer.
+        </p>
+        <p v-if="deleteModal.error" class="modal-error" role="alert">
+          {{ deleteModal.error }}
+        </p>
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn-action btn-action--delete"
+            @click="confirmDelete"
+          >
+            Confirmar
+          </button>
+          <button
+            type="button"
+            class="btn-action btn-action--cancel"
+            @click="closeDeleteModal"
+          >
+            Cancel·lar
+          </button>
         </div>
       </div>
-    </Teleport>
+    </div>
   </div>
 </template>
 
