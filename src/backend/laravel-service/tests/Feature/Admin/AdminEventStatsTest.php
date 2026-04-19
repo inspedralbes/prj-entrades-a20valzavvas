@@ -97,9 +97,9 @@ class AdminEventStatsTest extends TestCase
         $response = $this->actingAs($admin)
             ->getJson("/api/admin/events/{$event->id}/stats");
 
-        $response->assertStatus(200)
-            ->assertJsonPath('percentatgeVenuts', 50.0)
-            ->assertJsonPath('percentatgeReservats', 0.0);
+        $response->assertStatus(200);
+        $this->assertEquals(50.0, (float) $response->json('percentatgeVenuts'));
+        $this->assertEquals(0.0, (float) $response->json('percentatgeReservats'));
     }
 
     public function test_stats_counts_active_reservations(): void
@@ -136,6 +136,8 @@ class AdminEventStatsTest extends TestCase
         DB::table('orders')->insert([
             'id' => $orderId,
             'user_id' => $comprador->id,
+            'total_amount' => 20.00,
+            'status' => 'completed',
             'created_at' => $now,
             'updated_at' => $now,
         ]);
