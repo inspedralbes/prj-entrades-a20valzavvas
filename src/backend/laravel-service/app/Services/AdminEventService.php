@@ -27,8 +27,8 @@ class AdminEventService
             ->pluck('total', 'estat');
 
         $disponibles = (int) ($seatCounts['DISPONIBLE'] ?? 0);
-        $reservats   = (int) ($seatCounts['RESERVAT'] ?? 0);
-        $venuts      = (int) ($seatCounts['VENUT'] ?? 0);
+        $reservats = (int) ($seatCounts['RESERVAT'] ?? 0);
+        $venuts = (int) ($seatCounts['VENUT'] ?? 0);
         $totalSeients = $disponibles + $reservats + $venuts;
 
         $reservesActives = Reservation::where('expires_at', '>', now())
@@ -41,15 +41,15 @@ class AdminEventService
         )->sum('price');
 
         return [
-            'disponibles'        => $disponibles,
-            'reservats'          => $reservats,
-            'venuts'             => $venuts,
-            'totalSeients'       => $totalSeients,
-            'percentatgeVenuts'  => $totalSeients > 0 ? round($venuts / $totalSeients * 100, 2) : 0,
+            'disponibles' => $disponibles,
+            'reservats' => $reservats,
+            'venuts' => $venuts,
+            'totalSeients' => $totalSeients,
+            'percentatgeVenuts' => $totalSeients > 0 ? round($venuts / $totalSeients * 100, 2) : 0,
             'percentatgeReservats' => $totalSeients > 0 ? round($reservats / $totalSeients * 100, 2) : 0,
-            'usuaris'            => 0,
-            'reservesActives'    => $reservesActives,
-            'recaptacioTotal'    => $recaptacioTotal,
+            'usuaris' => 0,
+            'reservesActives' => $reservesActives,
+            'recaptacioTotal' => $recaptacioTotal,
         ];
     }
 

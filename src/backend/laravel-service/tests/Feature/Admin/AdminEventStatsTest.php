@@ -27,10 +27,10 @@ class AdminEventStatsTest extends TestCase
 
         $categoryId = (string) Str::uuid();
         DB::table('price_categories')->insert([
-            'id'         => $categoryId,
-            'event_id'   => $event->id,
-            'name'       => 'General',
-            'price'      => 10.00,
+            'id' => $categoryId,
+            'event_id' => $event->id,
+            'name' => 'General',
+            'price' => 10.00,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
@@ -40,14 +40,14 @@ class AdminEventStatsTest extends TestCase
             $seatId = (string) Str::uuid();
             $seatIds[] = $seatId;
             DB::table('seats')->insert([
-                'id'                => $seatId,
-                'event_id'          => $event->id,
+                'id' => $seatId,
+                'event_id' => $event->id,
                 'price_category_id' => $categoryId,
-                'row'               => 'A',
-                'number'            => $i,
-                'estat'             => $estat,
-                'created_at'        => $now,
-                'updated_at'        => $now,
+                'row' => 'A',
+                'number' => $i,
+                'estat' => $estat,
+                'created_at' => $now,
+                'updated_at' => $now,
             ]);
         }
 
@@ -110,9 +110,9 @@ class AdminEventStatsTest extends TestCase
 
         $now = now();
         DB::table('reservations')->insert([
-            'id'         => (string) Str::uuid(),
-            'seat_id'    => $seatIds[0],
-            'user_id'    => $comprador->id,
+            'id' => (string) Str::uuid(),
+            'seat_id' => $seatIds[0],
+            'user_id' => $comprador->id,
             'expires_at' => now()->addMinutes(5),
             'created_at' => $now,
             'updated_at' => $now,
@@ -134,16 +134,16 @@ class AdminEventStatsTest extends TestCase
         $now = now();
         $orderId = (string) Str::uuid();
         DB::table('orders')->insert([
-            'id'         => $orderId,
-            'user_id'    => $comprador->id,
+            'id' => $orderId,
+            'user_id' => $comprador->id,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
         DB::table('order_items')->insert([
-            'id'         => (string) Str::uuid(),
-            'order_id'   => $orderId,
-            'seat_id'    => $seatIds[0],
-            'price'      => 20.00,
+            'id' => (string) Str::uuid(),
+            'order_id' => $orderId,
+            'seat_id' => $seatIds[0],
+            'price' => 20.00,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
@@ -160,7 +160,7 @@ class AdminEventStatsTest extends TestCase
         $admin = $this->adminUser();
 
         $response = $this->actingAs($admin)
-            ->getJson('/api/admin/events/' . Str::uuid() . '/stats');
+            ->getJson('/api/admin/events/'.Str::uuid().'/stats');
 
         $response->assertStatus(404);
     }
