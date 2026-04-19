@@ -164,22 +164,33 @@ Després d'una compra completada amb èxit, el sistema SHALL netejar l'estat de 
 
 ---
 
-### Requirement: Gestió de seients expirats al frontend
-La pàgina `/checkout` SHALL enviar els `seat_ids` actuals en el body de `POST /api/orders` i SHALL mostrar un missatge clar a l'usuari quan el servidor retorni `409 { seients_expirats }`, indicant quins seients (per etiqueta fila+numero) han expirat.
+### Requirement: Formulari de checkout envia la comanda al backend
 
-#### Scenario: Missatge d'error amb seients expirats
-- **GIVEN** que `POST /api/orders` retorna HTTP 409 amb `{ seients_expirats: ["uuid-B5"] }`
-- **WHEN** el frontend processa la resposta
-- **THEN** es mostra un missatge d'error que identifica el seient B5 (fila B, numero 5) com expirat
-- **THEN** el formulari roman visible (l'usuari pot tornar enrere per escollir nous seients)
+El sistema SHALL permetre al Comprador autenticat enviar el formulari de checkout per completar la compra dels seients reservats. Quan `POST /api/orders` retorna `201`, el sistema SHALL substituir el formulari pel panel de confirmació (`order-confirmation-ui`) en lloc de mostrar un missatge inline mínim.
 
-#### Scenario: Emissió de compra:confirmar post-201
-- **GIVEN** que `POST /api/orders` retorna HTTP 201
-- **WHEN** el frontend processa la resposta exitosa
-- **THEN** el frontend emet `compra:confirmar { orderId, eventId, seients: [{seatId, fila, numero}] }` via Socket.IO
-- **THEN** s'invoca `reservaStore.netejarReserva()` i `orderConfirmed` passa a `true`
+#### Scenario: Compra exitosa mostra panel de confirmació (modificat)
 
-#### Scenario: Testabilitat — error 409 seients expirats
-- **WHEN** el mock de `$fetch` per a `POST /api/orders` retorna `{ status: 409, data: { seients_expirats: ["uuid-B5"] } }`
-- **THEN** el component mostra el nom del seient B5 en el missatge d'error
-- **THEN** `reservaStore.netejarReserva` NO ha estat invocat
+- **GIVEN** que el Comprador té reserves actives i omple el formulari de checkout
+- **WHEN** `POST /api/orders` retorna `201 { id, total_amount, items }`
+- **THEN** `orderConfirmed` passa a `true` i `orderId` s'actualitza amb l'id rebut
+- **THEN** el formulari desapareix i es mostra el panel de confirmació amb el resum de la compra
+- **THEN** el panel inclou el botó "Veure les meves entrades" que navega a `/entrades`
+
+#### Scenario: Error de seients expirats (409) mostra missatge d'error
+
+- **GIVEN** que algun seient ha expirat durant el checkout
+- **WHEN** `POST /api/orders` retorna `409 { seients_expirats: [...] }`
+- **THEN** el formulari continua visible amb un missatge d'error indicant els seients expirats
+- **THEN** `orderConfirmed` roman `false`
+
+#### Scenario: Redirecció si no hi ha reserves actives
+
+- **GIVEN** que el Comprador accedeix a `/checkout` sense reserves actives
+- **WHEN** es munta la pàgina
+- **THEN** és redirigit a `/`
+
+#### Scenario: Testabilitat — renderització del panel de confirmació
+
+- **WHEN** s'executa el test unitari de `checkout.vue` amb `orderConfirmed = true` i dades d'ordre mocades
+- **THEN** el DOM conté "Compra confirmada!" i el resum de l'ordre
+- **THEN** el formulari no és al DOM

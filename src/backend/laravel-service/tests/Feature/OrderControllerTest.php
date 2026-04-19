@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Mail\OrderConfirmationMail;
 use App\Models\Event;
 use App\Models\Order;
 use App\Models\PriceCategory;
 use App\Models\Reservation;
 use App\Models\Seat;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class OrderControllerTest extends TestCase
@@ -226,5 +228,136 @@ class OrderControllerTest extends TestCase
         // Other user's reservation must remain untouched
         $this->assertEquals('RESERVAT', $otherSeat->fresh()->estat);
         $this->assertDatabaseCount('reservations', 1);
+    }
+
+    // --- mail tests ---
+
+    public function test_store_sends_confirmation_email_on_success(): void
+    {
+        Mail::fake();
+
+        $user = $this->compradorUser();
+        $this->createSeatWithReservation($user);
+
+        $this->actingAs($user)->postJson('/api/orders', [
+            'nom' => 'Joan García',
+            'email' => 'joan@example.com',
+        ])->assertStatus(201);
+
+        Mail::assertSent(OrderConfirmationMail::class, function ($mail) use ($user) {
+            return $mail->hasTo($user->email)
+                && $mail->hasSubject('Confirmació de la teva compra');
+        });
+    }
+
+    public function test_store_does_not_send_email_on_409_expired_seats(): void
+    {
+        Mail::fake();
+
+        $user = $this->compradorUser();
+        $event = Event::factory()->create(['published' => true]);
+        $category = PriceCategory::factory()->create(['event_id' => $event->id]);
+        $seat = Seat::factory()->create([
+            'event_id' => $event->id,
+            'price_category_id' => $category->id,
+            'estat' => 'RESERVAT',
+        ]);
+        Reservation::create([
+            'seat_id' => $seat->id,
+            'user_id' => $user->id,
+            'expires_at' => now()->subMinutes(1),
+        ]);
+
+        $this->actingAs($user)->postJson('/api/orders', [
+            'nom' => 'Joan García',
+            'email' => 'joan@example.com',
+        ])->assertStatus(409);
+
+        Mail::assertNothingSent();
+    }
+
+    // --- index() tests ---
+
+    public function test_index_returns_orders_for_authenticated_user(): void
+    {
+        $user = $this->compradorUser();
+        [$seat1] = $this->createSeatWithReservation($user);
+        [$seat2] = $this->createSeatWithReservation($user);
+
+        $this->actingAs($user)->postJson('/api/orders', [
+            'nom' => 'Joan García',
+            'email' => 'joan@example.com',
+        ])->assertStatus(201);
+
+        $response = $this->actingAs($user)->getJson('/api/orders');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1)
+            ->assertJsonStructure([[
+                'id', 'total_amount', 'status', 'created_at',
+                'items' => [['id', 'price', 'seat' => ['id', 'row', 'number', 'price_category', 'event']]],
+            ]]);
+    }
+
+    public function test_index_returns_empty_array_when_no_orders(): void
+    {
+        $user = $this->compradorUser();
+
+        $response = $this->actingAs($user)->getJson('/api/orders');
+
+        $response->assertStatus(200)->assertExactJson([]);
+    }
+
+    public function test_index_returns_401_without_authentication(): void
+    {
+        $response = $this->getJson('/api/orders');
+
+        $response->assertStatus(401);
+    }
+
+    public function test_index_isolates_orders_between_users(): void
+    {
+        $userA = $this->compradorUser();
+        $userB = $this->compradorUser();
+
+        $this->createSeatWithReservation($userA);
+        $this->actingAs($userA)->postJson('/api/orders', [
+            'nom' => 'User A',
+            'email' => 'a@example.com',
+        ])->assertStatus(201);
+
+        $this->createSeatWithReservation($userB);
+        $this->actingAs($userB)->postJson('/api/orders', [
+            'nom' => 'User B',
+            'email' => 'b@example.com',
+        ])->assertStatus(201);
+
+        $response = $this->actingAs($userA)->getJson('/api/orders');
+
+        $response->assertStatus(200)->assertJsonCount(1);
+        $this->assertEquals($userA->id, Order::first()->user_id);
+    }
+
+    public function test_index_returns_orders_sorted_by_created_at_desc(): void
+    {
+        $user = $this->compradorUser();
+
+        $this->createSeatWithReservation($user);
+        $this->actingAs($user)->postJson('/api/orders', [
+            'nom' => 'Joan',
+            'email' => 'joan@example.com',
+        ])->assertStatus(201);
+
+        $this->createSeatWithReservation($user);
+        $this->actingAs($user)->postJson('/api/orders', [
+            'nom' => 'Joan',
+            'email' => 'joan@example.com',
+        ])->assertStatus(201);
+
+        $response = $this->actingAs($user)->getJson('/api/orders');
+
+        $response->assertStatus(200)->assertJsonCount(2);
+        $orders = $response->json();
+        $this->assertGreaterThanOrEqual($orders[1]['created_at'], $orders[0]['created_at']);
     }
 }

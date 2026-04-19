@@ -62,9 +62,23 @@ services:
       SANCTUM_TOKEN_TTL: ${SANCTUM_TOKEN_TTL:-60}
       FRONTEND_URL: http://localhost:${FRONTEND_PORT:-3000}
       SESSION_DRIVER: file
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@salaonirica.local}
+      MAIL_FROM_NAME: ${APP_NAME:-Sala Onirica}
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  # ── Mailpit (email testing UI) ─────────────────────────────────────────
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+    restart: unless-stopped
 
   # ── Nginx reverse proxy ─────────────────────────────────────────────────
   nginx:

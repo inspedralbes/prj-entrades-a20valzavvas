@@ -6,6 +6,10 @@ export default defineNuxtConfig({
   modules: ["@pinia/nuxt"],
   css: ["~/assets/css/tokens.css"],
 
+  app: {
+    pageTransition: { name: "page", mode: "out-in" },
+  },
+
   // @shared/* alias: resolves to ../shared/types for Vite bundler and auto-imports
   alias: {
     "@shared": fileURLToPath(new URL("../shared/types", import.meta.url)),
