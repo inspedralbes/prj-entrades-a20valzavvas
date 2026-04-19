@@ -28,7 +28,7 @@ class AdminEventService
             $recaptacio = OrderItem::whereHas(
                 'seat',
                 fn ($q) => $q->where('price_category_id', $category->id)
-                             ->where('estat', 'VENUT')
+                    ->where('estat', 'VENUT')
             )->sum('price');
 
             $percentatge = $totalSeients > 0
