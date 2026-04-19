@@ -51,6 +51,7 @@ const {
           :date="event.date"
           :venue="event.venue"
           :description="event.description"
+          :image_url="event.image_url"
           :available_seats="event.available_seats"
         />
       </div>

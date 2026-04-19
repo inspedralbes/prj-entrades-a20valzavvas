@@ -48,10 +48,23 @@ onUnmounted(() => {
 
       <!-- Capçalera de l'event -->
       <div v-if="seients.event" class="event-header">
-        <h1 class="event-nom">{{ seients.event.nom }}</h1>
-        <p class="event-meta">
-          {{ seients.event.data }} · {{ seients.event.recinte }}
-        </p>
+        <div v-if="seients.event.image_url" class="event-header__image">
+          <img
+            :src="seients.event.image_url"
+            :alt="seients.event.nom"
+            loading="lazy"
+            class="event-header__img"
+          />
+        </div>
+        <div class="event-header__info">
+          <h1 class="event-nom">{{ seients.event.nom }}</h1>
+          <p class="event-meta">
+            {{ seients.event.data }} · {{ seients.event.recinte }}
+          </p>
+          <p v-if="seients.event.description" class="event-description">
+            {{ seients.event.description }}
+          </p>
+        </div>
       </div>
 
       <!-- Llegenda -->
@@ -131,8 +144,33 @@ onUnmounted(() => {
 
 /* ── Capçalera ── */
 .event-header {
-  text-align: center;
-  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #1e2d45;
+}
+
+.event-header__image {
+  flex-shrink: 0;
+  width: 110px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.event-header__img {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+.event-header__info {
+  flex: 1;
+  min-width: 0;
 }
 
 .event-nom {
@@ -146,8 +184,32 @@ onUnmounted(() => {
 
 .event-meta {
   font-size: 0.88rem;
-  color: #475569;
+  color: #7c3aed;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+}
+
+.event-description {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  line-height: 1.6;
   margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .event-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .event-header__image {
+    width: 90px;
+  }
 }
 
 /* ── Loading skeleton ── */
