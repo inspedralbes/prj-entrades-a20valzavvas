@@ -37,6 +37,8 @@ interface SeientApiResponse {
     data: string;
     recinte: string;
     max_seients_per_usuari: number;
+    description?: string | null;
+    image_url?: string | null;
   };
   categories: Array<{ id: string; name: string; price: number }>;
   files: Record<string, SeientApiSeat[]>;
