@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useSeientStore } from "~/stores/seients";
-import { useConnexioStore } from "~/stores/connexio";
-import { useReservaStore } from "~/stores/reserva";
-import { useAuthStore } from "~/stores/auth";
+import { useSeientStore } from '~/stores/seients';
+import { useConnexioStore } from '~/stores/connexio';
+import { useReservaStore } from '~/stores/reserva';
+import { useAuthStore } from '~/stores/auth';
 
 definePageMeta({ ssr: false });
 
@@ -14,7 +14,7 @@ const authStore = useAuthStore();
 const slug = route.params.slug as string;
 const reserva = useReservaStore();
 
-const esAdmin = computed(() => authStore.user?.role === "admin");
+const esAdmin = computed(() => authStore.user?.role === 'admin');
 
 onMounted(async () => {
   connexio.inicialitzar();
@@ -58,9 +58,7 @@ onUnmounted(() => {
         </div>
         <div class="event-header__info">
           <h1 class="event-nom">{{ seients.event.nom }}</h1>
-          <p class="event-meta">
-            {{ seients.event.data }} · {{ seients.event.recinte }}
-          </p>
+          <p class="event-meta">{{ seients.event.data }} · {{ seients.event.recinte }}</p>
           <p v-if="seients.event.description" class="event-description">
             {{ seients.event.description }}
           </p>
@@ -225,12 +223,7 @@ onUnmounted(() => {
   width: 50%;
   max-width: 320px;
   height: 4px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.08),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
   border-radius: 2px;
   animation: pulse 1.4s ease-in-out infinite;
 }

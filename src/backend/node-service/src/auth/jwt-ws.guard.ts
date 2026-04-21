@@ -1,9 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
-import { WsException } from "@nestjs/websockets";
-import { Socket } from "socket.io";
-import { LaravelClientService } from "../laravel-client/laravel-client.service";
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { WsException } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
+import { LaravelClientService } from '../laravel-client/laravel-client.service';
 
 interface JwtPayload {
   sub: string;
@@ -28,7 +28,7 @@ export class JwtWsGuard implements CanActivate {
       (client.handshake.query?.token as string | undefined);
 
     if (!token) {
-      throw new WsException("Unauthorized");
+      throw new WsException('Unauthorized');
     }
 
     if (SANCTUM_OPAQUE_TOKEN_RE.test(token)) {
@@ -41,7 +41,7 @@ export class JwtWsGuard implements CanActivate {
   private async validateJwt(client: Socket, token: string): Promise<boolean> {
     try {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: this.configService.get<string>("JWT_SECRET"),
+        secret: this.configService.get<string>('JWT_SECRET'),
       });
 
       client.data.userId = payload.sub;
@@ -50,18 +50,15 @@ export class JwtWsGuard implements CanActivate {
 
       return true;
     } catch {
-      throw new WsException("Unauthorized");
+      throw new WsException('Unauthorized');
     }
   }
 
-  private async validateSanctumToken(
-    client: Socket,
-    token: string,
-  ): Promise<boolean> {
+  private async validateSanctumToken(client: Socket, token: string): Promise<boolean> {
     const user = await this.laravelClient.getUserByToken(token);
 
     if (!user) {
-      throw new WsException("Unauthorized");
+      throw new WsException('Unauthorized');
     }
 
     client.data.userId = user.id;

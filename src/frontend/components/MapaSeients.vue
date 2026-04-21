@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useSeientStore } from "~/stores/seients";
-import { useReservaStore } from "~/stores/reserva";
-import type { SeatStateWithId } from "~/stores/seients";
+import { useSeientStore } from '~/stores/seients';
+import { useReservaStore } from '~/stores/reserva';
+import type { SeatStateWithId } from '~/stores/seients';
 
 const seients = useSeientStore();
 const reserva = useReservaStore();
@@ -43,10 +43,7 @@ function curveOffset(globalIndex: number, total: number): number {
 
 function handleReservar(seatId: string) {
   if (reserva.limitAssolit) return;
-  ($socket as { emit: (event: string, data: unknown) => void }).emit(
-    "seient:reservar",
-    { seatId },
-  );
+  ($socket as { emit: (event: string, data: unknown) => void }).emit('seient:reservar', { seatId });
 }
 
 function handleAlliberar(seatId: string) {
@@ -73,10 +70,7 @@ function handleAlliberar(seatId: string) {
           <!-- Bloc esquerra -->
           <div class="fila-bloc">
             <span
-              v-for="(seat, idx) in fila.seats.slice(
-                0,
-                Math.ceil(fila.seats.length / 2),
-              )"
+              v-for="(seat, idx) in fila.seats.slice(0, Math.ceil(fila.seats.length / 2))"
               :key="seat.id"
               class="seient-wrapper"
               :style="{
@@ -100,9 +94,7 @@ function handleAlliberar(seatId: string) {
           <!-- Bloc dreta -->
           <div class="fila-bloc">
             <span
-              v-for="(seat, idx) in fila.seats.slice(
-                Math.ceil(fila.seats.length / 2),
-              )"
+              v-for="(seat, idx) in fila.seats.slice(Math.ceil(fila.seats.length / 2))"
               :key="seat.id"
               class="seient-wrapper"
               :style="{

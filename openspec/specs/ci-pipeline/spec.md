@@ -56,7 +56,7 @@ El workflow SHALL instal·lar les dependències del monorepo usant `pnpm install
 
 ### Requirement: Lint i type-check passen en CI
 
-El workflow SHALL executar lint i type-check de tots els workspaces. Qualsevol error de lint o de tipatge MUST fer fallar el workflow.
+El workflow SHALL executar lint i type-check de tots els workspaces. El pas de lint (`pnpm lint`) MUST ser el primer step de validació del workflow, executat **abans** del type-check i dels tests. Qualsevol error de lint o de tipatge MUST fer fallar el workflow.
 
 #### Scenario: Lint passa sense errors
 
@@ -75,6 +75,18 @@ El workflow SHALL executar lint i type-check de tots els workspaces. Qualsevol e
 - **WHEN** existeix un error de tipatge en el codi enviat
 - **THEN** el pas de type-check falla amb codi de sortida diferent de 0
 - **AND** el workflow es marca com a `failure` i no continua amb els tests
+
+#### Scenario: Lint s'executa com a primer step de validació
+
+- **WHEN** s'inspeccionà el fitxer `.github/workflows/ci.yml`
+- **THEN** el step `pnpm lint` apareix **abans** dels steps de type-check i tests en la seqüència del job
+- **AND** si `pnpm lint` falla, el workflow s'atura i no executa els tests
+
+#### Scenario: pnpm lint executa ESLint real (no stub)
+
+- **WHEN** el workflow executa `pnpm lint`
+- **THEN** ESLint s'invoca realment en els tres workspaces (no el missatge `echo 'eslint not configured yet'`)
+- **AND** el workflow falla si existeix algun error d'ESLint o Prettier
 
 ---
 
@@ -125,7 +137,7 @@ El workflow SHALL executar validació de backend per a **tots dos** serveis (nod
 - **THEN** Vitest executa `concurrencia.spec.ts` juntament amb tots els altres tests de backend
 - **AND** no cal un pas de CI separat per al test de concurrència
 
-#### Scenario: DATABASE_URL i DB_* mai hardcodejades
+#### Scenario: DATABASE*URL i DB*\* mai hardcodejades
 
 - **WHEN** s'inspeccionà el fitxer `.github/workflows/ci.yml`
 - **THEN** la `DATABASE_URL` és referenciada com a variable d'entorn

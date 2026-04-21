@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { setActivePinia, createPinia } from "pinia";
-import { mockNuxtImport } from "@nuxt/test-utils/runtime";
-import { useConnexioStore } from "./connexio";
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { setActivePinia, createPinia } from 'pinia';
+import { mockNuxtImport } from '@nuxt/test-utils/runtime';
+import { useConnexioStore } from './connexio';
 
 function makeSocketMock() {
   const handlers: Record<string, () => void> = {};
@@ -19,9 +19,9 @@ function makeSocketMock() {
 }
 
 const useNuxtAppMock = vi.hoisted(() => vi.fn());
-mockNuxtImport("useNuxtApp", () => useNuxtAppMock);
+mockNuxtImport('useNuxtApp', () => useNuxtAppMock);
 
-describe("useConnexioStore", () => {
+describe('useConnexioStore', () => {
   let socketMock: ReturnType<typeof makeSocketMock>;
 
   beforeEach(() => {
@@ -32,48 +32,48 @@ describe("useConnexioStore", () => {
     });
   });
 
-  it("estat inicial és desconnectat", () => {
+  it('estat inicial és desconnectat', () => {
     const store = useConnexioStore();
-    expect(store.estat).toBe("desconnectat");
+    expect(store.estat).toBe('desconnectat');
   });
 
-  it("estat canvia a connectat quan el socket emet connect", () => {
+  it('estat canvia a connectat quan el socket emet connect', () => {
     const store = useConnexioStore();
     store.inicialitzar();
 
-    socketMock.emit("connect");
+    socketMock.emit('connect');
 
-    expect(store.estat).toBe("connectat");
+    expect(store.estat).toBe('connectat');
   });
 
-  it("estat canvia a desconnectat quan el socket emet disconnect", () => {
+  it('estat canvia a desconnectat quan el socket emet disconnect', () => {
     const store = useConnexioStore();
     store.inicialitzar();
-    socketMock.emit("connect");
+    socketMock.emit('connect');
 
-    socketMock.emit("disconnect");
+    socketMock.emit('disconnect');
 
-    expect(store.estat).toBe("desconnectat");
+    expect(store.estat).toBe('desconnectat');
   });
 
-  it("estat canvia a reconnectant quan el socket emet reconnect_attempt", () => {
+  it('estat canvia a reconnectant quan el socket emet reconnect_attempt', () => {
     const store = useConnexioStore();
     store.inicialitzar();
-    socketMock.emit("connect");
+    socketMock.emit('connect');
 
-    socketMock.emit("reconnect_attempt");
+    socketMock.emit('reconnect_attempt');
 
-    expect(store.estat).toBe("reconnectant");
+    expect(store.estat).toBe('reconnectant');
   });
 
-  it("inicialitzar cridat dues vegades no duplica els listeners", () => {
+  it('inicialitzar cridat dues vegades no duplica els listeners', () => {
     const store = useConnexioStore();
     store.inicialitzar();
     store.inicialitzar();
 
-    socketMock.emit("connect");
+    socketMock.emit('connect');
 
-    expect(store.estat).toBe("connectat");
+    expect(store.estat).toBe('connectat');
     expect(socketMock.off).toHaveBeenCalledTimes(6);
   });
 });

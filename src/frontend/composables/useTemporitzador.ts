@@ -1,7 +1,7 @@
-import { ref, computed, onUnmounted, watch } from "vue";
-import { useReservaStore } from "~/stores/reserva";
-import { useSeientStore } from "~/stores/seients";
-import { EstatSeient } from "@shared/seat.types";
+import { ref, computed, onUnmounted, watch } from 'vue';
+import { useReservaStore } from '~/stores/reserva';
+import { useSeientStore } from '~/stores/seients';
+import { EstatSeient } from '@shared/seat.types';
 
 export function useTemporitzador() {
   const reserva = useReservaStore();
@@ -12,9 +12,7 @@ export function useTemporitzador() {
 
   function calcularSegonesRestants(): number {
     if (!reserva.expiraEn) return 0;
-    const remaining = Math.floor(
-      (new Date(reserva.expiraEn).getTime() - Date.now()) / 1000,
-    );
+    const remaining = Math.floor((new Date(reserva.expiraEn).getTime() - Date.now()) / 1000);
     return Math.max(0, remaining);
   }
 
@@ -39,9 +37,7 @@ export function useTemporitzador() {
     }, 1000);
   }
 
-  const isUrgent = computed(
-    () => secondsLeft.value > 0 && secondsLeft.value <= 60,
-  );
+  const isUrgent = computed(() => secondsLeft.value > 0 && secondsLeft.value <= 60);
 
   // Watch expiraEn with immediate so the initial value is computed on setup
   watch(

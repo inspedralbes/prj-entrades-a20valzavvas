@@ -8,10 +8,10 @@ import {
   UnprocessableEntityException,
   InternalServerErrorException,
   HttpException,
-} from "@nestjs/common";
-import { HttpService } from "@nestjs/axios";
-import { AxiosError } from "axios";
-import { firstValueFrom } from "rxjs";
+} from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { AxiosError } from 'axios';
+import { firstValueFrom } from 'rxjs';
 
 export interface ReserveSeatSuccess {
   reservation: { id: string; expires_at: string };
@@ -20,9 +20,7 @@ export interface ReserveSeatSuccess {
 
 export type ReleaseSeatResult = { ok: true } | { ok: false; motiu: string };
 
-export type ReserveSeatResult =
-  | ({ ok: true } & ReserveSeatSuccess)
-  | { ok: false; motiu: string };
+export type ReserveSeatResult = ({ ok: true } & ReserveSeatSuccess) | { ok: false; motiu: string };
 
 export interface ReleasedSeat {
   seatId: string;
@@ -38,15 +36,12 @@ export class LaravelClientService implements OnModuleInit {
       (response) => response,
       (error: AxiosError) => {
         if (!error.response) {
-          throw new InternalServerErrorException(
-            "Laravel service is unreachable",
-          );
+          throw new InternalServerErrorException('Laravel service is unreachable');
         }
 
         const status = error.response.status;
         const data = error.response.data as Record<string, unknown> | undefined;
-        const message =
-          (data?.message as string) || error.response.statusText || "Error";
+        const message = (data?.message as string) || error.response.statusText || 'Error';
 
         switch (status) {
           case 400:
@@ -68,20 +63,18 @@ export class LaravelClientService implements OnModuleInit {
 
   async healthCheck(): Promise<boolean> {
     try {
-      await firstValueFrom(this.httpService.get("/api/health"));
+      await firstValueFrom(this.httpService.get('/api/health'));
       return true;
     } catch (error) {
       if (error instanceof HttpException) throw error;
-      throw new InternalServerErrorException("Laravel service is unreachable");
+      throw new InternalServerErrorException('Laravel service is unreachable');
     }
   }
 
-  async getUserByToken(
-    token: string,
-  ): Promise<{ id: string; role: string } | null> {
+  async getUserByToken(token: string): Promise<{ id: string; role: string } | null> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get<{ id: string; role: string }>("/api/user", {
+        this.httpService.get<{ id: string; role: string }>('/api/user', {
           headers: { Authorization: `Bearer ${token}` },
         }),
       );
@@ -104,30 +97,26 @@ export class LaravelClientService implements OnModuleInit {
     } catch (error) {
       // NestJS exceptions thrown by the Axios interceptor (production path)
       if (error instanceof ConflictException) {
-        return { ok: false, motiu: "no_disponible" };
+        return { ok: false, motiu: 'no_disponible' };
       }
       if (error instanceof NotFoundException) {
-        return { ok: false, motiu: "seient_no_trobat" };
+        return { ok: false, motiu: 'seient_no_trobat' };
       }
       if (error instanceof UnprocessableEntityException) {
-        return { ok: false, motiu: "limit_assolit" };
+        return { ok: false, motiu: 'limit_assolit' };
       }
       // Raw AxiosErrors not yet processed by the interceptor (test path)
       if (error instanceof AxiosError && error.response) {
         const status = error.response.status;
-        if (status === 409) return { ok: false, motiu: "no_disponible" };
-        if (status === 404) return { ok: false, motiu: "seient_no_trobat" };
-        if (status === 422) return { ok: false, motiu: "limit_assolit" };
+        if (status === 409) return { ok: false, motiu: 'no_disponible' };
+        if (status === 404) return { ok: false, motiu: 'seient_no_trobat' };
+        if (status === 422) return { ok: false, motiu: 'limit_assolit' };
       }
-      return { ok: false, motiu: "error_intern" };
+      return { ok: false, motiu: 'error_intern' };
     }
   }
 
-  async releaseSeat(
-    seatId: string,
-    userId: string,
-    token: string,
-  ): Promise<ReleaseSeatResult> {
+  async releaseSeat(seatId: string, userId: string, token: string): Promise<ReleaseSeatResult> {
     void userId; // userId is conveyed by the Bearer token; parameter kept for call-site clarity
     try {
       await firstValueFrom(
@@ -139,46 +128,44 @@ export class LaravelClientService implements OnModuleInit {
     } catch (error) {
       // NestJS exceptions thrown by the Axios interceptor (production path)
       if (error instanceof ForbiddenException) {
-        return { ok: false, motiu: "no_autoritzat" };
+        return { ok: false, motiu: 'no_autoritzat' };
       }
       if (error instanceof NotFoundException) {
-        return { ok: false, motiu: "reserva_no_trobada" };
+        return { ok: false, motiu: 'reserva_no_trobada' };
       }
       // Raw AxiosErrors not yet processed by the interceptor (test path)
       if (error instanceof AxiosError && error.response) {
         const status = error.response.status;
-        if (status === 403) return { ok: false, motiu: "no_autoritzat" };
-        if (status === 404) return { ok: false, motiu: "reserva_no_trobada" };
+        if (status === 403) return { ok: false, motiu: 'no_autoritzat' };
+        if (status === 404) return { ok: false, motiu: 'reserva_no_trobada' };
       }
-      return { ok: false, motiu: "error_intern" };
+      return { ok: false, motiu: 'error_intern' };
     }
   }
 
   async releaseExpiredReservations(): Promise<{ released: ReleasedSeat[] }> {
     const response = await firstValueFrom(
-      this.httpService.delete<{ released: ReleasedSeat[] }>(
-        "/internal/reservations/expired",
-        {
-          headers: {
-            "X-Internal-Secret": process.env.INTERNAL_SECRET ?? "",
-          },
+      this.httpService.delete<{ released: ReleasedSeat[] }>('/internal/reservations/expired', {
+        headers: {
+          'X-Internal-Secret': process.env.INTERNAL_SECRET ?? '',
         },
-      ),
+      }),
     );
     return { released: response.data.released };
   }
 
   async getStats(
     eventId: string,
-  ): Promise<import("shared/types/socket.types").StatsActualitzacioPayload> {
+  ): Promise<import('shared/types/socket.types').StatsActualitzacioPayload> {
     const response = await firstValueFrom(
-      this.httpService.get<
-        import("shared/types/socket.types").StatsActualitzacioPayload
-      >(`/internal/events/${eventId}/stats`, {
-        headers: {
-          "X-Internal-Secret": process.env.INTERNAL_SECRET ?? "",
+      this.httpService.get<import('shared/types/socket.types').StatsActualitzacioPayload>(
+        `/internal/events/${eventId}/stats`,
+        {
+          headers: {
+            'X-Internal-Secret': process.env.INTERNAL_SECRET ?? '',
+          },
         },
-      }),
+      ),
     );
     return response.data;
   }

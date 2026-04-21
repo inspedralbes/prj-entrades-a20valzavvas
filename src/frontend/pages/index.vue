@@ -16,7 +16,7 @@ const {
   data: events,
   pending,
   error,
-} = await useFetch<EventItem[]>("/api/events", {
+} = await useFetch<EventItem[]>('/api/events', {
   baseURL: config.laravelBaseUrl || undefined,
 });
 </script>

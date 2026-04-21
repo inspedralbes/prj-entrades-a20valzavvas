@@ -1,12 +1,12 @@
-import { defineStore } from "pinia";
-import { EstatSeient } from "@shared/seat.types";
+import { defineStore } from 'pinia';
+import { EstatSeient } from '@shared/seat.types';
 import type {
   SeientCanviEstatPayload,
   ReservaConfirmadaPayload,
   ReservaRebutjadaPayload,
-} from "@shared/socket.types";
-import { useReservaStore } from "~/stores/reserva";
-import { handleReservaRebutjada } from "~/composables/useConflicte";
+} from '@shared/socket.types';
+import { useReservaStore } from '~/stores/reserva';
+import { handleReservaRebutjada } from '~/composables/useConflicte';
 
 export interface SeatState {
   estat: EstatSeient;
@@ -44,11 +44,11 @@ interface SeientApiResponse {
   files: Record<string, SeientApiSeat[]>;
 }
 
-export const useSeientStore = defineStore("seients", {
+export const useSeientStore = defineStore('seients', {
   state: () => ({
     llistat: new Map<string, SeatState>(),
-    event: null as SeientApiResponse["event"] | null,
-    categories: [] as SeientApiResponse["categories"],
+    event: null as SeientApiResponse['event'] | null,
+    categories: [] as SeientApiResponse['categories'],
     isLoading: false,
     error: null as string | null,
   }),
@@ -66,10 +66,7 @@ export const useSeientStore = defineStore("seients", {
       return new Map(
         Array.from(map.entries())
           .sort(([a], [b]) => a.localeCompare(b))
-          .map(([fila, seats]) => [
-            fila,
-            seats.sort((a, b) => a.numero - b.numero),
-          ]),
+          .map(([fila, seats]) => [fila, seats.sort((a, b) => a.numero - b.numero)]),
       );
     },
   },
@@ -79,14 +76,10 @@ export const useSeientStore = defineStore("seients", {
       this.isLoading = true;
       this.error = null;
       try {
-        const data = await $fetch<SeientApiResponse>(
-          `/api/events/${slug}/seats`,
-        );
+        const data = await $fetch<SeientApiResponse>(`/api/events/${slug}/seats`);
         this.event = data.event;
         this.categories = data.categories;
-        useReservaStore().setMaxSeientPerUsuari(
-          data.event.max_seients_per_usuari,
-        );
+        useReservaStore().setMaxSeientPerUsuari(data.event.max_seients_per_usuari);
         this.llistat.clear();
         for (const seats of Object.values(data.files)) {
           for (const seat of seats) {
@@ -100,7 +93,7 @@ export const useSeientStore = defineStore("seients", {
           }
         }
       } catch {
-        this.error = "Event no trobat";
+        this.error = 'Event no trobat';
       } finally {
         this.isLoading = false;
       }
@@ -124,15 +117,15 @@ export const useSeientStore = defineStore("seients", {
 
       // Re-join the event room on every (re)connect so the server can broadcast
       // seient:canvi-estat back to this socket after automatic reconnections.
-      socket.on("connect", () => {
+      socket.on('connect', () => {
         if (this.event) {
-          socket.emit("event:unir", { eventId: this.event.id });
+          socket.emit('event:unir', { eventId: this.event.id });
         }
       });
 
       socket.connect();
 
-      socket.on("seient:canvi-estat", (payload: unknown) => {
+      socket.on('seient:canvi-estat', (payload: unknown) => {
         const p = payload as SeientCanviEstatPayload;
         this.actualitzarEstat(p.seatId, p.estat);
         if (p.estat === EstatSeient.DISPONIBLE) {
@@ -140,12 +133,12 @@ export const useSeientStore = defineStore("seients", {
         }
       });
 
-      socket.on("reserva:confirmada", (payload: unknown) => {
+      socket.on('reserva:confirmada', (payload: unknown) => {
         const p = payload as ReservaConfirmadaPayload;
         useReservaStore().confirmarReserva(p);
       });
 
-      socket.on("reserva:rebutjada", (payload: unknown) => {
+      socket.on('reserva:rebutjada', (payload: unknown) => {
         handleReservaRebutjada(payload as ReservaRebutjadaPayload);
       });
     },
@@ -157,10 +150,10 @@ export const useSeientStore = defineStore("seients", {
         disconnect: () => void;
       };
 
-      socket.off("connect");
-      socket.off("seient:canvi-estat");
-      socket.off("reserva:confirmada");
-      socket.off("reserva:rebutjada");
+      socket.off('connect');
+      socket.off('seient:canvi-estat');
+      socket.off('reserva:confirmada');
+      socket.off('reserva:rebutjada');
       socket.disconnect();
     },
   },

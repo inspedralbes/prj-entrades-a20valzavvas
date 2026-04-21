@@ -12,26 +12,24 @@ const props = defineProps<{
 
 const formattedDate = computed(() => {
   const d = new Date(props.date);
-  const weekday = new Intl.DateTimeFormat("ca-ES", { weekday: "long" }).format(
-    d,
-  );
+  const weekday = new Intl.DateTimeFormat('ca-ES', { weekday: 'long' }).format(d);
   const day = d.getDate();
-  const month = new Intl.DateTimeFormat("ca-ES", { month: "long" }).format(d);
-  const time = new Intl.DateTimeFormat("ca-ES", {
-    hour: "2-digit",
-    minute: "2-digit",
+  const month = new Intl.DateTimeFormat('ca-ES', { month: 'long' }).format(d);
+  const time = new Intl.DateTimeFormat('ca-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(d);
   return `${weekday.charAt(0).toUpperCase() + weekday.slice(1)} ${day} de ${month}, ${time}h`;
 });
 
 const badgeColor = computed(() => {
-  if (props.available_seats === 0) return "#DC2626";
-  if (props.available_seats <= 20) return "#D97706";
-  return "#16A34A";
+  if (props.available_seats === 0) return '#DC2626';
+  if (props.available_seats <= 20) return '#D97706';
+  return '#16A34A';
 });
 
 const badgeText = computed(() => {
-  if (props.available_seats === 0) return "Esgotat";
+  if (props.available_seats === 0) return 'Esgotat';
   return `${props.available_seats} seients disponibles`;
 });
 </script>
@@ -51,10 +49,7 @@ const badgeText = computed(() => {
         </p>
       </div>
       <div class="event-card__footer">
-        <span
-          class="event-card__badge"
-          :style="{ backgroundColor: badgeColor }"
-        >
+        <span class="event-card__badge" :style="{ backgroundColor: badgeColor }">
           {{ badgeText }}
         </span>
       </div>

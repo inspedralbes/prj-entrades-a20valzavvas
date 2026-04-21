@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
+import { useAuthStore } from '~/stores/auth';
 
-definePageMeta({ middleware: "admin", ssr: false });
+definePageMeta({ middleware: 'admin', ssr: false });
 
 interface AdminEvent {
   id: string;
@@ -21,7 +21,7 @@ const {
   data: events,
   pending,
   error,
-} = useFetch<AdminEvent[]>("/api/admin/events", {
+} = useFetch<AdminEvent[]>('/api/admin/events', {
   headers: {
     Authorization: `Bearer ${authStore.token}`,
   },
@@ -29,28 +29,28 @@ const {
 
 const deleteModal = reactive({
   open: false,
-  eventId: "",
-  eventName: "",
-  error: "",
+  eventId: '',
+  eventName: '',
+  error: '',
 });
 
 function openDeleteModal(event: AdminEvent) {
   deleteModal.eventId = event.id;
   deleteModal.eventName = event.nom;
-  deleteModal.error = "";
+  deleteModal.error = '';
   deleteModal.open = true;
 }
 
 function closeDeleteModal() {
   deleteModal.open = false;
-  deleteModal.error = "";
+  deleteModal.error = '';
 }
 
 async function confirmDelete() {
-  deleteModal.error = "";
+  deleteModal.error = '';
   try {
     await $fetch(`/api/admin/events/${deleteModal.eventId}`, {
-      method: "DELETE",
+      method: 'DELETE',
       headers: {
         Authorization: `Bearer ${authStore.token}`,
       },
@@ -62,34 +62,30 @@ async function confirmDelete() {
   } catch (err: unknown) {
     const status = (err as { statusCode?: number })?.statusCode;
     if (status === 422) {
-      deleteModal.error =
-        "No es pot eliminar: l'event té reserves actives o compres associades";
+      deleteModal.error = "No es pot eliminar: l'event té reserves actives o compres associades";
     } else {
       deleteModal.error = "Error inesperat en eliminar l'event.";
     }
   }
 }
 
-const toggleError = ref("");
+const toggleError = ref('');
 
 async function togglePublish(event: AdminEvent) {
-  toggleError.value = "";
+  toggleError.value = '';
   try {
-    const updated = await $fetch<{ published: boolean }>(
-      `/api/admin/events/${event.id}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-        },
-        body: { published: !event.publicat },
+    const updated = await $fetch<{ published: boolean }>(`/api/admin/events/${event.id}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${authStore.token}`,
       },
-    );
+      body: { published: !event.publicat },
+    });
     event.publicat = updated.published;
   } catch (err: unknown) {
     const status = (err as { statusCode?: number })?.statusCode;
     const code = (err as { data?: { code?: string } })?.data?.code;
-    if (status === 422 && code === "has_sold_tickets") {
+    if (status === 422 && code === 'has_sold_tickets') {
       toggleError.value = "No es pot despublicar: l'event té entrades venudes.";
     } else {
       toggleError.value = "Error en canviar l'estat de publicació de l'event.";
@@ -110,11 +106,7 @@ async function togglePublish(event: AdminEvent) {
           stroke-width="2"
           aria-hidden="true"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 4.5v15m7.5-7.5h-15"
-          />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
         Nou event
       </NuxtLink>
@@ -147,14 +139,8 @@ async function togglePublish(event: AdminEvent) {
             <td>{{ event.hora }}</td>
             <td>{{ event.recinte }}</td>
             <td>
-              <span
-                :class="
-                  event.publicat
-                    ? 'badge badge--published'
-                    : 'badge badge--draft'
-                "
-              >
-                {{ event.publicat ? "Publicat" : "Esborrany" }}
+              <span :class="event.publicat ? 'badge badge--published' : 'badge badge--draft'">
+                {{ event.publicat ? 'Publicat' : 'Esborrany' }}
               </span>
             </td>
             <td class="text-right">{{ event.seients_disponibles }}</td>
@@ -162,10 +148,7 @@ async function togglePublish(event: AdminEvent) {
             <td class="text-right">{{ event.seients_venuts }}</td>
             <td>
               <div class="row-actions">
-                <NuxtLink
-                  :to="`/admin/events/${event.id}`"
-                  class="btn-action btn-action--edit"
-                >
+                <NuxtLink :to="`/admin/events/${event.id}`" class="btn-action btn-action--edit">
                   Editar
                 </NuxtLink>
                 <button
@@ -173,7 +156,7 @@ async function togglePublish(event: AdminEvent) {
                   class="btn-action btn-action--publish"
                   @click="togglePublish(event)"
                 >
-                  {{ event.publicat ? "Despublicar" : "Publicar" }}
+                  {{ event.publicat ? 'Despublicar' : 'Publicar' }}
                 </button>
                 <button
                   type="button"
@@ -212,18 +195,10 @@ async function togglePublish(event: AdminEvent) {
           {{ deleteModal.error }}
         </p>
         <div class="modal-actions">
-          <button
-            type="button"
-            class="btn-action btn-action--delete"
-            @click="confirmDelete"
-          >
+          <button type="button" class="btn-action btn-action--delete" @click="confirmDelete">
             Confirmar
           </button>
-          <button
-            type="button"
-            class="btn-action btn-action--cancel"
-            @click="closeDeleteModal"
-          >
+          <button type="button" class="btn-action btn-action--cancel" @click="closeDeleteModal">
             Cancel·lar
           </button>
         </div>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useReservaStore } from "~/stores/reserva";
-import { useAuthStore } from "~/stores/auth";
-import { useSeientStore } from "~/stores/seients";
+import { useReservaStore } from '~/stores/reserva';
+import { useAuthStore } from '~/stores/auth';
+import { useSeientStore } from '~/stores/seients';
 
-definePageMeta({ middleware: ["auth", "buyer-only"], ssr: false });
+definePageMeta({ middleware: ['auth', 'buyer-only'], ssr: false });
 
 interface SeatDetail {
   id: string;
@@ -18,14 +18,14 @@ const authStore = useAuthStore();
 const seientStore = useSeientStore();
 
 const backUrl = computed(() =>
-  seientStore.event?.slug ? `/events/${seientStore.event.slug}` : "/",
+  seientStore.event?.slug ? `/events/${seientStore.event.slug}` : '/',
 );
 
 const seats = ref<SeatDetail[]>([]);
 const isLoadingSeats = ref(false);
 
-const nom = ref(authStore.user?.name ?? "");
-const email = ref(authStore.user?.email ?? "");
+const nom = ref(authStore.user?.name ?? '');
+const email = ref(authStore.user?.email ?? '');
 const errors = ref<{ nom?: string; email?: string; general?: string }>({});
 const isSubmitting = ref(false);
 const orderConfirmed = ref(false);
@@ -33,20 +33,18 @@ const orderId = ref<string | null>(null);
 const orderTotal = ref<string | null>(null);
 const confirmedSeats = ref<SeatDetail[]>([]);
 
-const totalPrice = computed(() =>
-  seats.value.reduce((sum, s) => sum + s.preu, 0),
-);
+const totalPrice = computed(() => seats.value.reduce((sum, s) => sum + s.preu, 0));
 
 onMounted(async () => {
   if (!reservaStore.teReservaActiva) {
-    await navigateTo("/");
+    await navigateTo('/');
     return;
   }
 
   isLoadingSeats.value = true;
   try {
     const ids = reservaStore.seatIds;
-    const query = ids.map((id) => `ids[]=${encodeURIComponent(id)}`).join("&");
+    const query = ids.map((id) => `ids[]=${encodeURIComponent(id)}`).join('&');
     seats.value = await $fetch<SeatDetail[]>(`/api/seats?${query}`, {
       headers: { Authorization: `Bearer ${authStore.token}` },
     });
@@ -58,15 +56,15 @@ onMounted(async () => {
 function validate(): boolean {
   errors.value = {};
   if (!nom.value.trim()) {
-    errors.value.nom = "El nom complet és obligatori";
+    errors.value.nom = 'El nom complet és obligatori';
   } else if (nom.value.trim().length > 100) {
-    errors.value.nom = "El nom no pot superar els 100 caràcters";
+    errors.value.nom = 'El nom no pot superar els 100 caràcters';
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email.value.trim()) {
     errors.value.email = "L'email és obligatori";
   } else if (!emailRegex.test(email.value.trim())) {
-    errors.value.email = "Introdueix un email vàlid";
+    errors.value.email = 'Introdueix un email vàlid';
   }
   return Object.keys(errors.value).length === 0;
 }
@@ -77,18 +75,15 @@ async function submit() {
   isSubmitting.value = true;
   errors.value = {};
   try {
-    const result = await $fetch<{ id: string; total_amount: string }>(
-      "/api/orders",
-      {
-        method: "POST",
-        body: {
-          nom: nom.value.trim(),
-          email: email.value.trim(),
-          seat_ids: reservaStore.seatIds,
-        },
-        headers: { Authorization: `Bearer ${authStore.token}` },
+    const result = await $fetch<{ id: string; total_amount: string }>('/api/orders', {
+      method: 'POST',
+      body: {
+        nom: nom.value.trim(),
+        email: email.value.trim(),
+        seat_ids: reservaStore.seatIds,
       },
-    );
+      headers: { Authorization: `Bearer ${authStore.token}` },
+    });
 
     orderId.value = result.id;
     orderTotal.value = result.total_amount;
@@ -97,18 +92,15 @@ async function submit() {
     const eventId = seientStore.event?.id;
     if (eventId) {
       const { $socket } = useNuxtApp();
-      ($socket as { emit: (event: string, data: unknown) => void }).emit(
-        "compra:confirmar",
-        {
-          orderId: result.id,
-          eventId,
-          seients: seats.value.map((s) => ({
-            seatId: s.id,
-            fila: s.fila,
-            numero: s.numero,
-          })),
-        },
-      );
+      ($socket as { emit: (event: string, data: unknown) => void }).emit('compra:confirmar', {
+        orderId: result.id,
+        eventId,
+        seients: seats.value.map((s) => ({
+          seatId: s.id,
+          fila: s.fila,
+          numero: s.numero,
+        })),
+      });
     }
 
     reservaStore.netejarReserva();
@@ -129,7 +121,7 @@ async function submit() {
           const seat = seats.value.find((s) => s.id === expiredId);
           return seat ? `${seat.fila}${seat.numero}` : expiredId;
         })
-        .join(", ");
+        .join(', ');
       errors.value.general = `Els seients ${expiredLabels} han expirat. Torna al mapa per escollir-ne de nous.`;
     } else {
       const serverErrors = apiError?.data?.errors ?? {};
@@ -141,8 +133,7 @@ async function submit() {
       }
       if (Object.keys(errors.value).length === 0) {
         errors.value.general =
-          apiError?.data?.error ??
-          "Ha ocorregut un error. Torna-ho a intentar.";
+          apiError?.data?.error ?? 'Ha ocorregut un error. Torna-ho a intentar.';
       }
     }
   } finally {
@@ -164,17 +155,12 @@ async function submit() {
             stroke-width="2.5"
             aria-hidden="true"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="m4.5 12.75 6 6 9-13.5"
-            />
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
           </svg>
         </div>
         <h1 class="confirmation-title">Compra confirmada!</h1>
         <p class="confirmation-text">
-          Les teves entrades han estat reservades amb èxit. T'hem enviat un
-          email de confirmació.
+          Les teves entrades han estat reservades amb èxit. T'hem enviat un email de confirmació.
         </p>
 
         <!-- Resum de seients -->
@@ -200,11 +186,7 @@ async function submit() {
               <tr class="confirmation-total-row">
                 <td colspan="3" class="total-label">Total</td>
                 <td class="text-right confirmation-total-amount">
-                  {{
-                    orderTotal
-                      ? parseFloat(orderTotal).toFixed(2)
-                      : totalPrice.toFixed(2)
-                  }}
+                  {{ orderTotal ? parseFloat(orderTotal).toFixed(2) : totalPrice.toFixed(2) }}
                   €
                 </td>
               </tr>
@@ -215,9 +197,7 @@ async function submit() {
         <p class="confirmation-order-id">Ref: {{ orderId }}</p>
 
         <div class="confirmation-actions">
-          <NuxtLink to="/entrades" class="btn-primary"
-            >Veure les meves entrades</NuxtLink
-          >
+          <NuxtLink to="/entrades" class="btn-primary">Veure les meves entrades</NuxtLink>
           <NuxtLink to="/" class="btn-secondary">Tornar als events</NuxtLink>
         </div>
       </div>
@@ -235,9 +215,7 @@ async function submit() {
         <!-- Resum de seients -->
         <div class="summary-card">
           <h2 class="summary-title">Resum de la reserva</h2>
-          <div v-if="isLoadingSeats" class="summary-loading">
-            Carregant detalls...
-          </div>
+          <div v-if="isLoadingSeats" class="summary-loading">Carregant detalls...</div>
           <table v-else class="seats-table">
             <thead>
               <tr>
@@ -258,9 +236,7 @@ async function submit() {
             <tfoot>
               <tr class="total-row">
                 <td colspan="3" class="total-label">Total</td>
-                <td class="text-right total-amount">
-                  {{ totalPrice.toFixed(2) }} €
-                </td>
+                <td class="text-right total-amount">{{ totalPrice.toFixed(2) }} €</td>
               </tr>
             </tfoot>
           </table>
@@ -285,9 +261,7 @@ async function submit() {
                 :class="{ 'input-error': errors.nom }"
                 placeholder="Introdueix el teu nom complet"
               />
-              <span v-if="errors.nom" class="error-message">{{
-                errors.nom
-              }}</span>
+              <span v-if="errors.nom" class="error-message">{{ errors.nom }}</span>
             </div>
 
             <div class="field">
@@ -300,17 +274,11 @@ async function submit() {
                 :class="{ 'input-error': errors.email }"
                 placeholder="Introdueix el teu email"
               />
-              <span v-if="errors.email" class="error-message">{{
-                errors.email
-              }}</span>
+              <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
             </div>
 
-            <button
-              type="submit"
-              class="btn-primary btn-submit"
-              :disabled="isSubmitting"
-            >
-              {{ isSubmitting ? "Processant..." : "Confirmar compra" }}
+            <button type="submit" class="btn-primary btn-submit" :disabled="isSubmitting">
+              {{ isSubmitting ? 'Processant...' : 'Confirmar compra' }}
             </button>
           </form>
         </div>

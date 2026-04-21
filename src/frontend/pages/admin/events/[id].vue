@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
+import { useAuthStore } from '~/stores/auth';
 
-definePageMeta({ middleware: "admin", ssr: false });
+definePageMeta({ middleware: 'admin', ssr: false });
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const eventId = route.params.id as string;
 
-const name = ref("");
-const slug = ref("");
-const description = ref("");
-const date = ref("");
-const venue = ref("");
+const name = ref('');
+const slug = ref('');
+const description = ref('');
+const date = ref('');
+const venue = ref('');
 const maxSeientPerUsuari = ref<number>(4);
 
 const isLoading = ref(true);
@@ -37,7 +37,7 @@ onMounted(async () => {
 
     name.value = event.name;
     slug.value = event.slug;
-    description.value = event.description ?? "";
+    description.value = event.description ?? '';
     date.value = event.date.slice(0, 16); // datetime-local format
     venue.value = event.venue;
     maxSeientPerUsuari.value = event.max_seients_per_usuari;
@@ -64,16 +64,16 @@ async function submit() {
 
   try {
     await $fetch(`/api/admin/events/${eventId}`, {
-      method: "PUT",
+      method: 'PUT',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: payload,
     });
-    await router.push("/admin/events");
+    await router.push('/admin/events');
   } catch (err: any) {
     if (err?.response?.status === 409) {
-      slugError.value = "Slug already exists";
+      slugError.value = 'Slug already exists';
     } else if (err?.response?.status === 422) {
-      serverError.value = err?.data?.message ?? "Error de validació.";
+      serverError.value = err?.data?.message ?? 'Error de validació.';
     }
   } finally {
     isSubmitting.value = false;
@@ -92,11 +92,7 @@ async function submit() {
           stroke-width="2"
           aria-hidden="true"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M15.75 19.5 8.25 12l7.5-7.5"
-          />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
         </svg>
         Tornar
       </NuxtLink>
@@ -119,12 +115,7 @@ async function submit() {
 
         <div class="field">
           <label for="slug">Slug</label>
-          <input
-            id="slug"
-            v-model="slug"
-            type="text"
-            :class="{ 'input-error': slugError }"
-          />
+          <input id="slug" v-model="slug" type="text" :class="{ 'input-error': slugError }" />
           <span v-if="slugError" class="error-message slug-error">{{ slugError }}</span>
         </div>
 
@@ -164,7 +155,7 @@ async function submit() {
       <div class="form-actions">
         <NuxtLink to="/admin/events" class="btn-cancel">Cancel·lar</NuxtLink>
         <button type="submit" class="btn-submit" :disabled="isSubmitting">
-          {{ isSubmitting ? "Desant..." : "Desar canvis" }}
+          {{ isSubmitting ? 'Desant...' : 'Desar canvis' }}
         </button>
       </div>
     </form>
@@ -316,7 +307,7 @@ async function submit() {
   border-color: var(--color-error);
 }
 
-.field input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+.field input[type='datetime-local']::-webkit-calendar-picker-indicator {
   filter: invert(0.7);
   cursor: pointer;
 }

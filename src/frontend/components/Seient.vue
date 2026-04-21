@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { EstatSeient } from "@shared/seat.types";
-import type { SeatStateWithId } from "~/stores/seients";
+import { EstatSeient } from '@shared/seat.types';
+import type { SeatStateWithId } from '~/stores/seients';
 
 const props = withDefaults(
   defineProps<{
@@ -21,34 +21,34 @@ const emit = defineEmits<{
   alliberar: [seatId: string];
 }>();
 
-const isVip = computed(() => props.categoryName?.toLowerCase() === "vip");
+const isVip = computed(() => props.categoryName?.toLowerCase() === 'vip');
 
 const stateClass = computed(() => {
-  if (props.miSeat) return "seient--seleccionat-per-mi";
+  if (props.miSeat) return 'seient--seleccionat-per-mi';
   switch (props.seat.estat) {
     case EstatSeient.DISPONIBLE:
-      return isVip.value ? "seient--vip" : "seient--disponible";
+      return isVip.value ? 'seient--vip' : 'seient--disponible';
     case EstatSeient.RESERVAT:
-      return "seient--reservat";
+      return 'seient--reservat';
     case EstatSeient.VENUT:
-      return "seient--venut";
+      return 'seient--venut';
     default:
-      return "seient--disponible";
+      return 'seient--disponible';
   }
 });
 
 const cssClass = computed(() =>
-  props.readOnly ? ["seient--readonly", stateClass.value] : stateClass.value,
+  props.readOnly ? ['seient--readonly', stateClass.value] : stateClass.value,
 );
 
 function handleClick() {
   if (props.readOnly) return;
   if (props.miSeat) {
-    emit("alliberar", props.seat.id);
+    emit('alliberar', props.seat.id);
     return;
   }
   if (props.seat.estat !== EstatSeient.DISPONIBLE) return;
-  emit("reservar", props.seat.id);
+  emit('reservar', props.seat.id);
 }
 </script>
 
@@ -58,13 +58,8 @@ function handleClick() {
     class="seient"
     :class="cssClass"
     :aria-label="`Seient ${seat.fila}${seat.numero}${categoryName ? ` — ${categoryName}` : ''}`"
-    :title="
-      categoryName ? `${categoryName} · ${seat.preu.toFixed(2)} €` : undefined
-    "
-    :disabled="
-      seat.estat === EstatSeient.VENUT ||
-      (seat.estat === EstatSeient.RESERVAT && !miSeat)
-    "
+    :title="categoryName ? `${categoryName} · ${seat.preu.toFixed(2)} €` : undefined"
+    :disabled="seat.estat === EstatSeient.VENUT || (seat.estat === EstatSeient.RESERVAT && !miSeat)"
     @click="handleClick"
   >
     {{ seat.numero }}

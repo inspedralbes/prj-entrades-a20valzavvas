@@ -6,7 +6,7 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "start": "node dist/main",
-    "lint": "echo 'lint: eslint not configured yet (US-07-05)'",
+    "lint": "eslint .",
     "test": "vitest run --passWithNoTests",
     "type-check": "tsc --noEmit"
   },

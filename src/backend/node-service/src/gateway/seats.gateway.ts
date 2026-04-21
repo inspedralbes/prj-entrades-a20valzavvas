@@ -4,12 +4,12 @@ import {
   SubscribeMessage,
   MessageBody,
   ConnectedSocket,
-} from "@nestjs/websockets";
-import { UseGuards } from "@nestjs/common";
-import { Server } from "socket.io";
-import { JwtWsGuard } from "../auth/jwt-ws.guard";
-import { AuthenticatedSocket } from "../auth/authenticated-socket.interface";
-import { LaravelClientService } from "../laravel-client/laravel-client.service";
+} from '@nestjs/websockets';
+import { UseGuards } from '@nestjs/common';
+import { Server } from 'socket.io';
+import { JwtWsGuard } from '../auth/jwt-ws.guard';
+import { AuthenticatedSocket } from '../auth/authenticated-socket.interface';
+import { LaravelClientService } from '../laravel-client/laravel-client.service';
 import type {
   SeientCanviEstatPayload,
   StatsActualitzacioPayload,
@@ -20,12 +20,12 @@ import type {
   ErrorGeneralPayload,
   CompraConfirmarPayload,
   CompraCompletadaPayload,
-} from "shared/types/socket.types";
-import { EstatSeient } from "shared/types/seat.types";
+} from 'shared/types/socket.types';
+import { EstatSeient } from 'shared/types/seat.types';
 
 @WebSocketGateway({
-  cors: { origin: "*" },
-  namespace: "/",
+  cors: { origin: '*' },
+  namespace: '/',
 })
 @UseGuards(JwtWsGuard)
 export class SeatsGateway {
@@ -34,7 +34,7 @@ export class SeatsGateway {
 
   constructor(private readonly laravelClient: LaravelClientService) {}
 
-  @SubscribeMessage("event:unir")
+  @SubscribeMessage('event:unir')
   handleUnirEvent(
     @ConnectedSocket() socket: AuthenticatedSocket,
     @MessageBody() payload: { eventId: string },
@@ -42,22 +42,19 @@ export class SeatsGateway {
     socket.join(`event:${payload.eventId}`);
   }
 
-  @SubscribeMessage("seient:reservar")
+  @SubscribeMessage('seient:reservar')
   async handleSeientReservar(
     @ConnectedSocket() socket: AuthenticatedSocket,
     @MessageBody() payload: SeientReservarPayload,
   ): Promise<void> {
-    const result = await this.laravelClient.reserveSeat(
-      payload.seatId,
-      socket.data.token,
-    );
+    const result = await this.laravelClient.reserveSeat(payload.seatId, socket.data.token);
 
     if (result.ok) {
       const confirmPayload: ReservaConfirmadaPayload = {
         seatId: payload.seatId,
         expiraEn: result.reservation.expires_at,
       };
-      socket.emit("reserva:confirmada", confirmPayload);
+      socket.emit('reserva:confirmada', confirmPayload);
 
       const canviPayload: SeientCanviEstatPayload = {
         seatId: result.seat.id,
@@ -65,12 +62,10 @@ export class SeatsGateway {
         fila: result.seat.fila,
         numero: result.seat.numero,
       };
-      const eventRoom = Array.from(socket.rooms).find((r) =>
-        r.startsWith("event:"),
-      );
+      const eventRoom = Array.from(socket.rooms).find((r) => r.startsWith('event:'));
       if (eventRoom) {
-        this.server.to(eventRoom).emit("seient:canvi-estat", canviPayload);
-        const eventId = eventRoom.replace("event:", "");
+        this.server.to(eventRoom).emit('seient:canvi-estat', canviPayload);
+        const eventId = eventRoom.replace('event:', '');
         await this.broadcastStats(eventId);
       }
     } else {
@@ -78,22 +73,19 @@ export class SeatsGateway {
         seatId: payload.seatId,
         motiu: result.motiu,
       };
-      socket.emit("reserva:rebutjada", rebutjadaPayload);
+      socket.emit('reserva:rebutjada', rebutjadaPayload);
     }
   }
 
   emitCanviEstat(eventId: string, payload: SeientCanviEstatPayload): void {
-    this.server.to(`event:${eventId}`).emit("seient:canvi-estat", payload);
+    this.server.to(`event:${eventId}`).emit('seient:canvi-estat', payload);
   }
 
-  emitStatsActualitzacio(
-    eventId: string,
-    payload: StatsActualitzacioPayload,
-  ): void {
-    this.server.to(`event:${eventId}`).emit("stats:actualitzacio", payload);
+  emitStatsActualitzacio(eventId: string, payload: StatsActualitzacioPayload): void {
+    this.server.to(`event:${eventId}`).emit('stats:actualitzacio', payload);
   }
 
-  @SubscribeMessage("compra:confirmar")
+  @SubscribeMessage('compra:confirmar')
   async handleCompraConfirmar(
     @ConnectedSocket() socket: AuthenticatedSocket,
     @MessageBody() payload: CompraConfirmarPayload,
@@ -111,19 +103,19 @@ export class SeatsGateway {
         fila: seient.fila,
         numero: seient.numero,
       };
-      this.server.to(eventRoom).emit("seient:canvi-estat", canviPayload);
+      this.server.to(eventRoom).emit('seient:canvi-estat', canviPayload);
     }
 
     const completadaPayload: CompraCompletadaPayload = {
       orderId: payload.orderId,
       seients: payload.seients.map((s) => `${s.fila}${s.numero}`),
     };
-    socket.emit("compra:completada", completadaPayload);
+    socket.emit('compra:completada', completadaPayload);
 
     await this.broadcastStats(payload.eventId);
   }
 
-  @SubscribeMessage("seient:alliberar")
+  @SubscribeMessage('seient:alliberar')
   async handleSeientAlliberar(
     @ConnectedSocket() socket: AuthenticatedSocket,
     @MessageBody() payload: SeientAlliberarPayload,
@@ -138,15 +130,13 @@ export class SeatsGateway {
       const canviPayload: SeientCanviEstatPayload = {
         seatId: payload.seatId,
         estat: EstatSeient.DISPONIBLE,
-        fila: "",
+        fila: '',
         numero: 0,
       };
-      const eventRoom = Array.from(socket.rooms).find((r) =>
-        r.startsWith("event:"),
-      );
+      const eventRoom = Array.from(socket.rooms).find((r) => r.startsWith('event:'));
       if (eventRoom) {
-        this.server.to(eventRoom).emit("seient:canvi-estat", canviPayload);
-        const eventId = eventRoom.replace("event:", "");
+        this.server.to(eventRoom).emit('seient:canvi-estat', canviPayload);
+        const eventId = eventRoom.replace('event:', '');
         await this.broadcastStats(eventId);
       }
     } else {
@@ -154,16 +144,14 @@ export class SeatsGateway {
         codi: result.motiu,
         missatge: result.motiu,
       };
-      socket.emit("error:general", errorPayload);
+      socket.emit('error:general', errorPayload);
     }
   }
 
   private async broadcastStats(eventId: string): Promise<void> {
     try {
       const stats = await this.laravelClient.getStats(eventId);
-      const sockets = await this.server
-        .in(`event:${eventId}`)
-        .fetchSockets();
+      const sockets = await this.server.in(`event:${eventId}`).fetchSockets();
       stats.usuaris = sockets.length;
       this.emitStatsActualitzacio(eventId, stats);
     } catch {
