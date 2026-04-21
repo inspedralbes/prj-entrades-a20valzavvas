@@ -98,13 +98,21 @@ services:
       - laravel-service
     restart: unless-stopped
 
-  # ── Certbot (SSL — run manually: docker compose run --rm certbot) ──────────
+  # ── Certbot (renovació automàtica SSL) ────────────────────────────────────
+  # Per obtenir el certificat per primera vegada:
+  #   docker compose -f docker-compose.prod.yml run --rm certbot certonly \
+  #     --webroot --webroot-path=/var/www/certbot \
+  #     --email YOUR_EMAIL --agree-tos \
+  #     -d salaonirica.daw.inspedralbes.cat
+  # Després descomenta el bloc HTTPS a nginx/nginx.prod.conf i executa:
+  #   docker compose -f docker-compose.prod.yml exec nginx nginx -s reload
   certbot:
     image: certbot/certbot
     volumes:
       - certbot-www:/var/www/certbot
       - certbot-conf:/etc/letsencrypt
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    restart: unless-stopped
 
 # ── Named volumes ──────────────────────────────────────────────────────────
 volumes:
