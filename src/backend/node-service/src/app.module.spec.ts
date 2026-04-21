@@ -1,8 +1,8 @@
-import { Test } from "@nestjs/testing";
-import { AppModule } from "./app.module";
+import { Test } from '@nestjs/testing';
+import { AppModule } from './app.module';
 
-describe("AppModule", () => {
-  it("should instantiate without errors", async () => {
+describe('AppModule', () => {
+  it('should instantiate without errors', async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();

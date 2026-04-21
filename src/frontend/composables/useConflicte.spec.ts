@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { setActivePinia, createPinia } from "pinia";
-import { useSeientStore } from "~/stores/seients";
-import { EstatSeient } from "@shared/seat.types";
-import { handleReservaRebutjada, useConflicte } from "./useConflicte";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { setActivePinia, createPinia } from 'pinia';
+import { useSeientStore } from '~/stores/seients';
+import { EstatSeient } from '@shared/seat.types';
+import { handleReservaRebutjada, useConflicte } from './useConflicte';
 
 function resetConflicteState() {
   // tancarConflicte clears the timer and sets conflicte.value = null
@@ -10,7 +10,7 @@ function resetConflicteState() {
   tancarConflicte();
 }
 
-describe("useConflicte / handleReservaRebutjada", () => {
+describe('useConflicte / handleReservaRebutjada', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.useFakeTimers();
@@ -23,38 +23,38 @@ describe("useConflicte / handleReservaRebutjada", () => {
   });
 
   // 4.2 — seient existent → missatge amb fila + número
-  it("reserva:rebutjada amb seient existent → conflicte.value conté fila + número", () => {
+  it('reserva:rebutjada amb seient existent → conflicte.value conté fila + número', () => {
     const seients = useSeientStore();
-    seients.llistat.set("seat-D4", {
+    seients.llistat.set('seat-D4', {
       estat: EstatSeient.DISPONIBLE,
-      fila: "D",
+      fila: 'D',
       numero: 4,
-      categoria: "cat-1",
+      categoria: 'cat-1',
       preu: 10,
     });
 
     const { conflicte } = useConflicte();
-    handleReservaRebutjada({ seatId: "seat-D4", motiu: "no_disponible" });
+    handleReservaRebutjada({ seatId: 'seat-D4', motiu: 'no_disponible' });
 
     expect(conflicte.value?.missatge).toBe(
-      "El seient D4 acaba de ser reservat. Escull un altre seient.",
+      'El seient D4 acaba de ser reservat. Escull un altre seient.',
     );
   });
 
   // 4.3 — seient no trobat → missatge genèric
-  it("reserva:rebutjada amb seient no trobat → conflicte.value conté el text genèric", () => {
+  it('reserva:rebutjada amb seient no trobat → conflicte.value conté el text genèric', () => {
     const { conflicte } = useConflicte();
-    handleReservaRebutjada({ seatId: "unknown-id", motiu: "no_disponible" });
+    handleReservaRebutjada({ seatId: 'unknown-id', motiu: 'no_disponible' });
 
     expect(conflicte.value?.missatge).toBe(
-      "Un seient acaba de ser reservat. Escull un altre seient.",
+      'Un seient acaba de ser reservat. Escull un altre seient.',
     );
   });
 
   // 4.4 — tancarConflicte() estableix conflicte.value = null immediatament
-  it("tancarConflicte() estableix conflicte.value a null immediatament", () => {
+  it('tancarConflicte() estableix conflicte.value a null immediatament', () => {
     const { conflicte, tancarConflicte } = useConflicte();
-    handleReservaRebutjada({ seatId: "seat-A1", motiu: "no_disponible" });
+    handleReservaRebutjada({ seatId: 'seat-A1', motiu: 'no_disponible' });
     expect(conflicte.value).not.toBeNull();
 
     tancarConflicte();
@@ -63,9 +63,9 @@ describe("useConflicte / handleReservaRebutjada", () => {
   });
 
   // 4.5 — auto-dismiss als 4000ms
-  it("auto-dismiss als 4000ms via fake timers", () => {
+  it('auto-dismiss als 4000ms via fake timers', () => {
     const { conflicte } = useConflicte();
-    handleReservaRebutjada({ seatId: "seat-A1", motiu: "no_disponible" });
+    handleReservaRebutjada({ seatId: 'seat-A1', motiu: 'no_disponible' });
     expect(conflicte.value).not.toBeNull();
 
     vi.advanceTimersByTime(3999);
@@ -76,34 +76,34 @@ describe("useConflicte / handleReservaRebutjada", () => {
   });
 
   // 4.6 — segon conflicte reseteja el timer i actualitza el missatge
-  it("segon conflicte reseteja el timer i actualitza el missatge", () => {
+  it('segon conflicte reseteja el timer i actualitza el missatge', () => {
     const seients = useSeientStore();
-    seients.llistat.set("seat-D4", {
+    seients.llistat.set('seat-D4', {
       estat: EstatSeient.DISPONIBLE,
-      fila: "D",
+      fila: 'D',
       numero: 4,
-      categoria: "cat-1",
+      categoria: 'cat-1',
       preu: 10,
     });
-    seients.llistat.set("seat-B2", {
+    seients.llistat.set('seat-B2', {
       estat: EstatSeient.DISPONIBLE,
-      fila: "B",
+      fila: 'B',
       numero: 2,
-      categoria: "cat-1",
+      categoria: 'cat-1',
       preu: 10,
     });
 
     const { conflicte } = useConflicte();
-    handleReservaRebutjada({ seatId: "seat-D4", motiu: "no_disponible" });
+    handleReservaRebutjada({ seatId: 'seat-D4', motiu: 'no_disponible' });
 
     // Advance 2 seconds (timer running, 2s left)
     vi.advanceTimersByTime(2000);
     expect(conflicte.value).not.toBeNull();
 
     // Second conflict arrives — should reset the 4s window
-    handleReservaRebutjada({ seatId: "seat-B2", motiu: "no_disponible" });
+    handleReservaRebutjada({ seatId: 'seat-B2', motiu: 'no_disponible' });
     expect(conflicte.value?.missatge).toBe(
-      "El seient B2 acaba de ser reservat. Escull un altre seient.",
+      'El seient B2 acaba de ser reservat. Escull un altre seient.',
     );
 
     // 3.5 more seconds: previous timer (2s remaining) would have expired — but new timer hasn't
@@ -116,44 +116,44 @@ describe("useConflicte / handleReservaRebutjada", () => {
   });
 
   // 4.7 — actualitzarEstat cridat amb RESERVAT
-  it("seients.actualitzarEstat és cridat amb (seatId, EstatSeient.RESERVAT) en rebre reserva:rebutjada", () => {
+  it('seients.actualitzarEstat és cridat amb (seatId, EstatSeient.RESERVAT) en rebre reserva:rebutjada', () => {
     const seients = useSeientStore();
-    seients.llistat.set("seat-D4", {
+    seients.llistat.set('seat-D4', {
       estat: EstatSeient.DISPONIBLE,
-      fila: "D",
+      fila: 'D',
       numero: 4,
-      categoria: "cat-1",
+      categoria: 'cat-1',
       preu: 10,
     });
 
-    const spy = vi.spyOn(seients, "actualitzarEstat");
-    handleReservaRebutjada({ seatId: "seat-D4", motiu: "no_disponible" });
+    const spy = vi.spyOn(seients, 'actualitzarEstat');
+    handleReservaRebutjada({ seatId: 'seat-D4', motiu: 'no_disponible' });
 
-    expect(spy).toHaveBeenCalledWith("seat-D4", EstatSeient.RESERVAT);
+    expect(spy).toHaveBeenCalledWith('seat-D4', EstatSeient.RESERVAT);
   });
 
   // W2 — Doble actualització idempotent: actualitzarEstat cridat amb RESERVAT fins i tot si el seient ja és RESERVAT
-  it("actualitzarEstat és cridat amb RESERVAT encara que el seient ja sigui RESERVAT (idempotent)", () => {
+  it('actualitzarEstat és cridat amb RESERVAT encara que el seient ja sigui RESERVAT (idempotent)', () => {
     const seients = useSeientStore();
-    seients.llistat.set("seat-D4", {
+    seients.llistat.set('seat-D4', {
       estat: EstatSeient.RESERVAT, // already RESERVAT — simulates broadcast arriving before the conflict event
-      fila: "D",
+      fila: 'D',
       numero: 4,
-      categoria: "cat-1",
+      categoria: 'cat-1',
       preu: 10,
     });
 
-    const spy = vi.spyOn(seients, "actualitzarEstat");
-    handleReservaRebutjada({ seatId: "seat-D4", motiu: "no_disponible" });
+    const spy = vi.spyOn(seients, 'actualitzarEstat');
+    handleReservaRebutjada({ seatId: 'seat-D4', motiu: 'no_disponible' });
 
-    expect(spy).toHaveBeenCalledWith("seat-D4", EstatSeient.RESERVAT);
-    expect(seients.llistat.get("seat-D4")?.estat).toBe(EstatSeient.RESERVAT);
+    expect(spy).toHaveBeenCalledWith('seat-D4', EstatSeient.RESERVAT);
+    expect(seients.llistat.get('seat-D4')?.estat).toBe(EstatSeient.RESERVAT);
   });
 
   // Cleanup check — tancarConflicte clears the timer
-  it("tancarConflicte cancela el timer pendent (no esborra conflicte als 4s)", () => {
+  it('tancarConflicte cancela el timer pendent (no esborra conflicte als 4s)', () => {
     const { conflicte, tancarConflicte } = useConflicte();
-    handleReservaRebutjada({ seatId: "seat-A1", motiu: "no_disponible" });
+    handleReservaRebutjada({ seatId: 'seat-A1', motiu: 'no_disponible' });
 
     tancarConflicte();
     expect(conflicte.value).toBeNull();

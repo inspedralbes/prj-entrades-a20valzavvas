@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
-import type { StatsActualitzacioPayload } from "@shared/socket.types";
+import { useAuthStore } from '~/stores/auth';
+import type { StatsActualitzacioPayload } from '@shared/socket.types';
 
-definePageMeta({ middleware: "admin", ssr: false });
+definePageMeta({ middleware: 'admin', ssr: false });
 
 interface AdminEvent {
   id: string;
@@ -38,17 +38,14 @@ const DEFAULT_STATS: StatsActualitzacioPayload = {
 
 const authStore = useAuthStore();
 
-const { data: events, pending: eventsPending } = useFetch<AdminEvent[]>(
-  "/api/admin/events",
-  { headers: { Authorization: `Bearer ${authStore.token}` } },
-);
+const { data: events, pending: eventsPending } = useFetch<AdminEvent[]>('/api/admin/events', {
+  headers: { Authorization: `Bearer ${authStore.token}` },
+});
 
 const selectedEventId = ref<string | null>(null);
 const isDropdownOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
-const selectedEvent = computed(() =>
-  events.value?.find((e) => e.id === selectedEventId.value),
-);
+const selectedEvent = computed(() => events.value?.find((e) => e.id === selectedEventId.value));
 
 function selectEvent(id: string) {
   selectedEventId.value = id;
@@ -69,10 +66,9 @@ async function loadStats(eventId: string) {
   isLoading.value = true;
   statsError.value = null;
   try {
-    const data = await $fetch<StatsActualitzacioPayload>(
-      `/api/admin/events/${eventId}/stats`,
-      { headers: { Authorization: `Bearer ${authStore.token}` } },
-    );
+    const data = await $fetch<StatsActualitzacioPayload>(`/api/admin/events/${eventId}/stats`, {
+      headers: { Authorization: `Bearer ${authStore.token}` },
+    });
     stats.value = data;
   } catch {
     statsError.value = "No s'han pogut carregar les estadístiques";
@@ -108,8 +104,8 @@ onMounted(() => {
     on: (event: string, handler: (payload: unknown) => void) => void;
   };
   if (!socket.connected) socket.connect();
-  socket.on("stats:actualitzacio", onStatsUpdate);
-  document.addEventListener("click", handleOutsideClick);
+  socket.on('stats:actualitzacio', onStatsUpdate);
+  document.addEventListener('click', handleOutsideClick);
   loadReports();
 });
 
@@ -118,21 +114,21 @@ onUnmounted(() => {
   const socket = $socket as {
     off: (event: string, handler?: (p: unknown) => void) => void;
   };
-  socket.off("stats:actualitzacio", onStatsUpdate);
-  document.removeEventListener("click", handleOutsideClick);
+  socket.off('stats:actualitzacio', onStatsUpdate);
+  document.removeEventListener('click', handleOutsideClick);
 });
 
 watch(selectedEventId, (id) => {
   if (!id) return;
   const { $socket } = useNuxtApp();
   const socket = $socket as { emit: (event: string, data: unknown) => void };
-  socket.emit("event:unir", { eventId: id });
+  socket.emit('event:unir', { eventId: id });
 });
 
 function formatCurrency(amount: number | string): string {
-  return new Intl.NumberFormat("ca-ES", {
-    style: "currency",
-    currency: "EUR",
+  return new Intl.NumberFormat('ca-ES', {
+    style: 'currency',
+    currency: 'EUR',
   }).format(Number(amount));
 }
 
@@ -144,7 +140,7 @@ async function loadReports() {
   reportsPending.value = true;
   reportsError.value = null;
   try {
-    const data = await $fetch<CategoryReportRow[]>("/api/admin/reports", {
+    const data = await $fetch<CategoryReportRow[]>('/api/admin/reports', {
       headers: { Authorization: `Bearer ${authStore.token}` },
     });
     reports.value = data;
@@ -177,11 +173,7 @@ async function loadReports() {
             @click.stop="isDropdownOpen = !isDropdownOpen"
           >
             <span class="selector-trigger__text">
-              {{
-                selectedEvent
-                  ? `${selectedEvent.nom} — ${selectedEvent.data}`
-                  : "—"
-              }}
+              {{ selectedEvent ? `${selectedEvent.nom} — ${selectedEvent.data}` : '—' }}
             </span>
             <svg
               class="selector-trigger__chevron"
@@ -238,24 +230,16 @@ async function loadReports() {
         </div>
       </header>
 
-      <div v-if="eventsPending" class="state-message">
-        Carregant esdeveniments…
-      </div>
+      <div v-if="eventsPending" class="state-message">Carregant esdeveniments…</div>
 
       <div v-else-if="!events || events.length === 0" class="state-message">
         No hi ha esdeveniments disponibles.
       </div>
 
       <Transition v-else-if="selectedEventId" name="fade-stats" mode="out-in">
-        <div v-if="isLoading" key="loading" class="state-message">
-          Carregant estadístiques…
-        </div>
+        <div v-if="isLoading" key="loading" class="state-message">Carregant estadístiques…</div>
 
-        <div
-          v-else-if="statsError"
-          key="error"
-          class="state-message state-message--error"
-        >
+        <div v-else-if="statsError" key="error" class="state-message state-message--error">
           {{ statsError }}
         </div>
 
@@ -291,9 +275,7 @@ async function loadReports() {
 
             <div class="stat-card stat-card--highlight">
               <span class="stat-label">Recaptació total</span>
-              <span class="stat-value recaptacio">{{
-                formatCurrency(stats.recaptacioTotal)
-              }}</span>
+              <span class="stat-value recaptacio">{{ formatCurrency(stats.recaptacioTotal) }}</span>
             </div>
           </div>
 
@@ -309,8 +291,7 @@ async function loadReports() {
               />
             </div>
             <p class="progress-legend">
-              <span class="dot dot--venut" /> Venuts
-              <span class="dot dot--reservat" /> Reservats
+              <span class="dot dot--venut" /> Venuts <span class="dot dot--reservat" /> Reservats
               <span class="dot dot--disponible" /> Disponibles
             </p>
           </div>
@@ -348,11 +329,7 @@ async function loadReports() {
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="row in reports"
-              :key="row.category_id"
-              class="data-table__row"
-            >
+            <tr v-for="row in reports" :key="row.category_id" class="data-table__row">
               <td class="col-primary">{{ row.nom }}</td>
               <td>{{ row.event_nom }}</td>
               <td class="text-right">{{ formatCurrency(row.preu) }}</td>

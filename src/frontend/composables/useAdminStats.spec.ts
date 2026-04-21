@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { setActivePinia, createPinia } from "pinia";
-import { mockNuxtImport } from "@nuxt/test-utils/runtime";
-import type { StatsActualitzacioPayload } from "@shared/socket.types";
-import { useAdminStats } from "./useAdminStats";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { setActivePinia, createPinia } from 'pinia';
+import { mockNuxtImport } from '@nuxt/test-utils/runtime';
+import type { StatsActualitzacioPayload } from '@shared/socket.types';
+import { useAdminStats } from './useAdminStats';
 
-const mockToken = "admin-token";
+const mockToken = 'admin-token';
 
-vi.mock("~/stores/auth", () => ({
+vi.mock('~/stores/auth', () => ({
   useAuthStore: () => ({ token: mockToken }),
 }));
 
@@ -29,19 +29,17 @@ const mockSocketConnect = vi.fn();
 const mockSocketOff = vi.fn();
 
 const useNuxtAppMock = vi.hoisted(() => vi.fn());
-mockNuxtImport("useNuxtApp", () => useNuxtAppMock);
+mockNuxtImport('useNuxtApp', () => useNuxtAppMock);
 
-describe("useAdminStats", () => {
+describe('useAdminStats', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
     Object.keys(socketHandlers).forEach((k) => delete socketHandlers[k]);
 
-    mockSocketOn.mockImplementation(
-      (event: string, handler: (payload: unknown) => void) => {
-        socketHandlers[event] = handler;
-      },
-    );
+    mockSocketOn.mockImplementation((event: string, handler: (payload: unknown) => void) => {
+      socketHandlers[event] = handler;
+    });
 
     useNuxtAppMock.mockReturnValue({
       $socket: {
@@ -54,10 +52,10 @@ describe("useAdminStats", () => {
     });
   });
 
-  it("fetchInitialStats carrega les estadístiques via $fetch", async () => {
-    vi.stubGlobal("$fetch", vi.fn().mockResolvedValue(mockStats));
+  it('fetchInitialStats carrega les estadístiques via $fetch', async () => {
+    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(mockStats));
 
-    const { stats, isLoading, fetchInitialStats } = useAdminStats("evt-123");
+    const { stats, isLoading, fetchInitialStats } = useAdminStats('evt-123');
 
     expect(isLoading.value).toBe(false);
     await fetchInitialStats();
@@ -66,9 +64,9 @@ describe("useAdminStats", () => {
   });
 
   it("stats s'actualitza en rebre stats:actualitzacio", async () => {
-    vi.stubGlobal("$fetch", vi.fn().mockResolvedValue(mockStats));
+    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(mockStats));
 
-    const { stats, initSocket } = useAdminStats("evt-123");
+    const { stats, initSocket } = useAdminStats('evt-123');
     initSocket();
 
     const updatedStats: StatsActualitzacioPayload = {
@@ -78,33 +76,27 @@ describe("useAdminStats", () => {
       recaptacioTotal: 440.0,
     };
 
-    expect(socketHandlers["stats:actualitzacio"]).toBeDefined();
-    socketHandlers["stats:actualitzacio"](updatedStats);
+    expect(socketHandlers['stats:actualitzacio']).toBeDefined();
+    socketHandlers['stats:actualitzacio'](updatedStats);
 
     expect(stats.value.venuts).toBe(22);
     expect(stats.value.disponibles).toBe(58);
     expect(stats.value.recaptacioTotal).toBe(440.0);
   });
 
-  it("registra el listener stats:actualitzacio en muntar el component", () => {
-    vi.stubGlobal("$fetch", vi.fn().mockResolvedValue(mockStats));
+  it('registra el listener stats:actualitzacio en muntar el component', () => {
+    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(mockStats));
 
-    const { initSocket } = useAdminStats("evt-456");
+    const { initSocket } = useAdminStats('evt-456');
     initSocket();
 
-    expect(mockSocketOn).toHaveBeenCalledWith(
-      "stats:actualitzacio",
-      expect.any(Function),
-    );
+    expect(mockSocketOn).toHaveBeenCalledWith('stats:actualitzacio', expect.any(Function));
   });
 
   it("error s'estableix si $fetch falla", async () => {
-    vi.stubGlobal(
-      "$fetch",
-      vi.fn().mockRejectedValue(new Error("Network error")),
-    );
+    vi.stubGlobal('$fetch', vi.fn().mockRejectedValue(new Error('Network error')));
 
-    const { error, isLoading, fetchInitialStats } = useAdminStats("evt-789");
+    const { error, isLoading, fetchInitialStats } = useAdminStats('evt-789');
 
     await fetchInitialStats();
 

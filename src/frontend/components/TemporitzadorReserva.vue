@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { useReservaStore } from "~/stores/reserva";
-import { useTemporitzador } from "~/composables/useTemporitzador";
+import { computed } from 'vue';
+import { useReservaStore } from '~/stores/reserva';
+import { useTemporitzador } from '~/composables/useTemporitzador';
 
 const reserva = useReservaStore();
 const { secondsLeft, isUrgent } = useTemporitzador();
 
-const minuts = computed(() =>
-  String(Math.floor(secondsLeft.value / 60)).padStart(2, "0"),
-);
-const segons = computed(() =>
-  String(secondsLeft.value % 60).padStart(2, "0"),
-);
+const minuts = computed(() => String(Math.floor(secondsLeft.value / 60)).padStart(2, '0'));
+const segons = computed(() => String(secondsLeft.value % 60).padStart(2, '0'));
 </script>
 
 <template>
@@ -20,9 +16,7 @@ const segons = computed(() =>
       <span class="etiqueta">Temps restant:</span>
       <span class="temps">{{ minuts }}:{{ segons }}</span>
     </div>
-    <div v-else class="expiracio">
-      La reserva ha expirat
-    </div>
+    <div v-else class="expiracio">La reserva ha expirat</div>
   </div>
 </template>
 
@@ -41,7 +35,9 @@ const segons = computed(() =>
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background 0.3s, border-color 0.3s;
+  transition:
+    background 0.3s,
+    border-color 0.3s;
 }
 
 .compte-enrere.urgencia {

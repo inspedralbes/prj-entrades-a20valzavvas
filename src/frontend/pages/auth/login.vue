@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
+import { useAuthStore } from '~/stores/auth';
 
 definePageMeta({ middleware: [] });
 
 const authStore = useAuthStore();
 const route = useRoute();
 
-const email = ref("");
-const password = ref("");
+const email = ref('');
+const password = ref('');
 const isLoading = ref(false);
 const errors = ref<Record<string, string>>({});
 
 function homeForRole() {
-  return authStore.user?.role === "admin" ? "/admin/events" : "/";
+  return authStore.user?.role === 'admin' ? '/admin/events' : '/';
 }
 
 onMounted(() => {
@@ -53,13 +53,7 @@ async function submit() {
       <form v-if="!authStore.isAuthenticated" @submit.prevent="submit">
         <div class="field">
           <label for="email">Email</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            required
-            autocomplete="email"
-          />
+          <input id="email" v-model="email" type="email" required autocomplete="email" />
           <span v-if="errors.email" class="field-error">{{ errors.email }}</span>
         </div>
         <div class="field">
@@ -71,12 +65,10 @@ async function submit() {
             required
             autocomplete="current-password"
           />
-          <span v-if="errors.password" class="field-error">{{
-            errors.password
-          }}</span>
+          <span v-if="errors.password" class="field-error">{{ errors.password }}</span>
         </div>
         <button type="submit" :disabled="isLoading">
-          {{ isLoading ? "Carregant..." : "Iniciar sessió" }}
+          {{ isLoading ? 'Carregant...' : 'Iniciar sessió' }}
         </button>
       </form>
       <template v-if="!authStore.isAuthenticated">
@@ -153,7 +145,7 @@ async function submit() {
   color: var(--color-error);
 }
 
-button[type="submit"] {
+button[type='submit'] {
   width: 100%;
   padding: 0.625rem 1rem;
   background: var(--color-accent-primary);
@@ -168,11 +160,11 @@ button[type="submit"] {
   transition: background-color 0.15s ease;
 }
 
-button[type="submit"]:hover:not(:disabled) {
+button[type='submit']:hover:not(:disabled) {
   background: var(--color-accent-primary-hover);
 }
 
-button[type="submit"]:disabled {
+button[type='submit']:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

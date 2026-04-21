@@ -1,6 +1,6 @@
-import { ref, onMounted, onUnmounted } from "vue";
-import type { StatsActualitzacioPayload } from "@shared/socket.types";
-import { useAuthStore } from "~/stores/auth";
+import { ref, onMounted, onUnmounted } from 'vue';
+import type { StatsActualitzacioPayload } from '@shared/socket.types';
+import { useAuthStore } from '~/stores/auth';
 
 const DEFAULT_STATS: StatsActualitzacioPayload = {
   disponibles: 0,
@@ -24,12 +24,9 @@ export function useAdminStats(eventId: string) {
     error.value = null;
     try {
       const authStore = useAuthStore();
-      const data = await $fetch<StatsActualitzacioPayload>(
-        `/api/admin/events/${eventId}/stats`,
-        {
-          headers: { Authorization: `Bearer ${authStore.token}` },
-        },
-      );
+      const data = await $fetch<StatsActualitzacioPayload>(`/api/admin/events/${eventId}/stats`, {
+        headers: { Authorization: `Bearer ${authStore.token}` },
+      });
       stats.value = data;
     } catch {
       error.value = "No s'han pogut carregar les estadístiques";
@@ -54,8 +51,8 @@ export function useAdminStats(eventId: string) {
     if (!socket.connected) {
       socket.connect();
     }
-    socket.emit("event:unir", { eventId });
-    socket.on("stats:actualitzacio", onStatsUpdate);
+    socket.emit('event:unir', { eventId });
+    socket.on('stats:actualitzacio', onStatsUpdate);
     return socket;
   }
 
@@ -69,7 +66,7 @@ export function useAdminStats(eventId: string) {
     const socket = $socket as {
       off: (event: string, handler?: (payload: unknown) => void) => void;
     };
-    socket.off("stats:actualitzacio", onStatsUpdate);
+    socket.off('stats:actualitzacio', onStatsUpdate);
   });
 
   return { stats, isLoading, error, fetchInitialStats, initSocket };

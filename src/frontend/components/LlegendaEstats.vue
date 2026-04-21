@@ -1,10 +1,10 @@
 <script setup lang="ts">
 const estats = [
-  { label: "Disponible", color: "#15803d" },
-  { label: "VIP", color: "#b8860b", glow: "rgba(218,165,32,0.45)" },
-  { label: "Reservat", color: "#b45309" },
-  { label: "Seleccionat per mi", color: "#7c3aed" },
-  { label: "Venut", color: "#2d3748", border: "#4b5563" },
+  { label: 'Disponible', color: '#15803d' },
+  { label: 'VIP', color: '#b8860b', glow: 'rgba(218,165,32,0.45)' },
+  { label: 'Reservat', color: '#b45309' },
+  { label: 'Seleccionat per mi', color: '#7c3aed' },
+  { label: 'Venut', color: '#2d3748', border: '#4b5563' },
 ];
 </script>
 

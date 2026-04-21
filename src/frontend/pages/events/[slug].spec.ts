@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mountSuspended, mockNuxtImport } from "@nuxt/test-utils/runtime";
-import SlugPage from "./[slug].vue";
-import ConnexioIndicador from "~/components/ConnexioIndicador.vue";
-import MapaSeients from "~/components/MapaSeients.vue";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime';
+import SlugPage from './[slug].vue';
+import ConnexioIndicador from '~/components/ConnexioIndicador.vue';
+import MapaSeients from '~/components/MapaSeients.vue';
 
-mockNuxtImport("useRoute", () =>
-  vi.fn().mockReturnValue({ params: { slug: "dune-4k-dolby-2026" } }),
+mockNuxtImport('useRoute', () =>
+  vi.fn().mockReturnValue({ params: { slug: 'dune-4k-dolby-2026' } }),
 );
 
 const mockInicialitzar = vi.fn().mockResolvedValue(undefined);
@@ -16,10 +16,10 @@ const mockSeientStore = {
   connectar: mockConnectar,
   desconnectar: mockDesconnectar,
   event: {
-    id: "evt-1",
-    nom: "Dune 4K",
-    data: "2026-06-01",
-    recinte: "Sala Onirica",
+    id: 'evt-1',
+    nom: 'Dune 4K',
+    data: '2026-06-01',
+    recinte: 'Sala Onirica',
   },
   isLoading: false,
   error: null,
@@ -29,31 +29,31 @@ const mockSeientStore = {
 const mockInicialitzarConnexio = vi.fn();
 const mockConnexioStore = {
   inicialitzar: mockInicialitzarConnexio,
-  estat: "connectat",
+  estat: 'connectat',
 };
 
-vi.mock("~/stores/seients", () => ({
+vi.mock('~/stores/seients', () => ({
   useSeientStore: vi.fn(),
 }));
 
-vi.mock("~/stores/connexio", () => ({
+vi.mock('~/stores/connexio', () => ({
   useConnexioStore: vi.fn(),
 }));
 
-vi.mock("~/stores/auth", () => ({
+vi.mock('~/stores/auth', () => ({
   useAuthStore: vi.fn(),
 }));
 
-vi.mock("~/stores/reserva", () => ({
+vi.mock('~/stores/reserva', () => ({
   useReservaStore: vi.fn(),
 }));
 
-import { useSeientStore } from "~/stores/seients";
-import { useConnexioStore } from "~/stores/connexio";
-import { useAuthStore } from "~/stores/auth";
-import { useReservaStore } from "~/stores/reserva";
+import { useSeientStore } from '~/stores/seients';
+import { useConnexioStore } from '~/stores/connexio';
+import { useAuthStore } from '~/stores/auth';
+import { useReservaStore } from '~/stores/reserva';
 
-describe("pages/events/[slug]", () => {
+describe('pages/events/[slug]', () => {
   beforeEach(() => {
     mockInicialitzar.mockReset().mockResolvedValue(undefined);
     mockConnectar.mockReset();
@@ -66,7 +66,7 @@ describe("pages/events/[slug]", () => {
       mockConnexioStore as unknown as ReturnType<typeof useConnexioStore>,
     );
     vi.mocked(useAuthStore).mockReturnValue({
-      user: { id: "1", name: "Comprador", email: "c@c.com", role: "comprador" },
+      user: { id: '1', name: 'Comprador', email: 'c@c.com', role: 'comprador' },
       isAuthenticated: true,
     } as unknown as ReturnType<typeof useAuthStore>);
     vi.mocked(useReservaStore).mockReturnValue({
@@ -78,17 +78,17 @@ describe("pages/events/[slug]", () => {
     } as unknown as ReturnType<typeof useReservaStore>);
   });
 
-  it("inicialitza la store connexio en muntar la pàgina", async () => {
+  it('inicialitza la store connexio en muntar la pàgina', async () => {
     await mountSuspended(SlugPage);
 
     expect(mockInicialitzarConnexio).toHaveBeenCalledOnce();
   });
 
-  it("crida seients.inicialitzar amb el slug en muntar la pàgina", async () => {
+  it('crida seients.inicialitzar amb el slug en muntar la pàgina', async () => {
     await mountSuspended(SlugPage);
 
     expect(mockInicialitzar).toHaveBeenCalledOnce();
-    expect(mockInicialitzar).toHaveBeenCalledWith("dune-4k-dolby-2026");
+    expect(mockInicialitzar).toHaveBeenCalledWith('dune-4k-dolby-2026');
   });
 
   it("crida seients.connectar quan l'event existeix després d'inicialitzar", async () => {
@@ -109,7 +109,7 @@ describe("pages/events/[slug]", () => {
     expect(mockConnectar).not.toHaveBeenCalled();
   });
 
-  it("crida seients.desconnectar en desmuntar la pàgina", async () => {
+  it('crida seients.desconnectar en desmuntar la pàgina', async () => {
     const wrapper = await mountSuspended(SlugPage);
 
     wrapper.unmount();
@@ -117,7 +117,7 @@ describe("pages/events/[slug]", () => {
     expect(mockDesconnectar).toHaveBeenCalledOnce();
   });
 
-  it("inclou el component ConnexioIndicador a la pàgina", async () => {
+  it('inclou el component ConnexioIndicador a la pàgina', async () => {
     const wrapper = await mountSuspended(SlugPage);
 
     expect(wrapper.findComponent(ConnexioIndicador).exists()).toBe(true);
@@ -125,7 +125,7 @@ describe("pages/events/[slug]", () => {
 
   it("quan l'usuari és admin, MapaSeients rep readOnly=true", async () => {
     vi.mocked(useAuthStore).mockReturnValue({
-      user: { id: "2", name: "Admin", email: "admin@c.com", role: "admin" },
+      user: { id: '2', name: 'Admin', email: 'admin@c.com', role: 'admin' },
       isAuthenticated: true,
     } as unknown as ReturnType<typeof useAuthStore>);
 
@@ -133,17 +133,17 @@ describe("pages/events/[slug]", () => {
 
     const mapaSeients = wrapper.findComponent(MapaSeients);
     expect(mapaSeients.exists()).toBe(true);
-    expect(mapaSeients.props("readOnly")).toBe(true);
+    expect(mapaSeients.props('readOnly')).toBe(true);
   });
 
   it("quan l'usuari és admin i teReservaActiva=true, el bloc topbar-reserva no és present", async () => {
     vi.mocked(useAuthStore).mockReturnValue({
-      user: { id: "2", name: "Admin", email: "admin@c.com", role: "admin" },
+      user: { id: '2', name: 'Admin', email: 'admin@c.com', role: 'admin' },
       isAuthenticated: true,
     } as unknown as ReturnType<typeof useAuthStore>);
     vi.mocked(useReservaStore).mockReturnValue({
       teReservaActiva: true,
-      seatIds: ["s1"],
+      seatIds: ['s1'],
       limitAssolit: false,
       esSeleccionatPerMi: () => false,
       alliberarSeient: vi.fn(),
@@ -151,6 +151,6 @@ describe("pages/events/[slug]", () => {
 
     const wrapper = await mountSuspended(SlugPage);
 
-    expect(wrapper.find(".topbar-reserva").exists()).toBe(false);
+    expect(wrapper.find('.topbar-reserva').exists()).toBe(false);
   });
 });

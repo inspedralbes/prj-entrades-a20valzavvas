@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { useOrders } from "~/composables/useOrders";
-import type { OrderWithDetails } from "~/composables/useOrders";
+import { useOrders } from '~/composables/useOrders';
+import type { OrderWithDetails } from '~/composables/useOrders';
 
-definePageMeta({ middleware: "auth", ssr: false });
+definePageMeta({ middleware: 'auth', ssr: false });
 
 const { orders, isLoading, error, fetchOrders } = useOrders();
 
 onMounted(fetchOrders);
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("ca-ES", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  return new Date(dateStr).toLocaleDateString('ca-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }
 
@@ -24,9 +24,7 @@ function eventFromOrder(order: OrderWithDetails) {
 }
 
 function seatsLabel(order: OrderWithDetails): string {
-  return order.items
-    .map((i) => `${i.seat.row}${i.seat.number}`)
-    .join(", ");
+  return order.items.map((i) => `${i.seat.row}${i.seat.number}`).join(', ');
 }
 </script>
 
@@ -49,8 +47,11 @@ function seatsLabel(order: OrderWithDetails): string {
       <div v-else-if="orders.length === 0" class="empty-state">
         <div class="empty-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a3 3 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a3 3 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z"
+            />
           </svg>
         </div>
         <p class="empty-title">Cap entrada encara</p>
@@ -60,17 +61,17 @@ function seatsLabel(order: OrderWithDetails): string {
 
       <!-- Llista de tickets -->
       <div v-else class="tickets-list">
-        <article
-          v-for="order in orders"
-          :key="order.id"
-          class="ticket-card"
-        >
+        <article v-for="order in orders" :key="order.id" class="ticket-card">
           <!-- Capçalera del ticket -->
           <div class="ticket-header">
             <div class="ticket-header-left">
-              <span class="ticket-event-name">{{ eventFromOrder(order)?.name ?? "Esdeveniment" }}</span>
-              <span class="ticket-date">{{ formatDate(eventFromOrder(order)?.date ?? order.created_at) }}</span>
-              <span class="ticket-venue">{{ eventFromOrder(order)?.venue ?? "" }}</span>
+              <span class="ticket-event-name">{{
+                eventFromOrder(order)?.name ?? 'Esdeveniment'
+              }}</span>
+              <span class="ticket-date">{{
+                formatDate(eventFromOrder(order)?.date ?? order.created_at)
+              }}</span>
+              <span class="ticket-venue">{{ eventFromOrder(order)?.venue ?? '' }}</span>
             </div>
             <span class="ticket-badge">Complet</span>
           </div>
@@ -90,7 +91,9 @@ function seatsLabel(order: OrderWithDetails): string {
             </div>
             <div class="ticket-category-info">
               <span class="ticket-label">Categoria</span>
-              <span class="ticket-category">{{ order.items[0]?.seat?.price_category?.name ?? "—" }}</span>
+              <span class="ticket-category">{{
+                order.items[0]?.seat?.price_category?.name ?? '—'
+              }}</span>
             </div>
             <div class="ticket-total-info">
               <span class="ticket-label">Total</span>
@@ -111,8 +114,8 @@ function seatsLabel(order: OrderWithDetails): string {
 <style scoped>
 .entrades-page {
   min-height: 100dvh;
-  background: #0F0F23;
-  color: #F8FAFC;
+  background: #0f0f23;
+  color: #f8fafc;
   padding: 2rem 1rem;
 }
 
@@ -135,14 +138,18 @@ function seatsLabel(order: OrderWithDetails): string {
 .ticket-skeleton {
   height: 180px;
   border-radius: 12px;
-  background: linear-gradient(90deg, #1E1B4B 25%, #2d2a5e 50%, #1E1B4B 75%);
+  background: linear-gradient(90deg, #1e1b4b 25%, #2d2a5e 50%, #1e1b4b 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Error */
@@ -168,7 +175,7 @@ function seatsLabel(order: OrderWithDetails): string {
 .empty-icon {
   width: 3.5rem;
   height: 3.5rem;
-  color: #4C4785;
+  color: #4c4785;
 }
 
 .empty-icon svg {
@@ -180,7 +187,7 @@ function seatsLabel(order: OrderWithDetails): string {
   font-size: 1.125rem;
   font-weight: 600;
   margin: 0;
-  color: #F8FAFC;
+  color: #f8fafc;
 }
 
 .empty-subtitle {
@@ -192,7 +199,7 @@ function seatsLabel(order: OrderWithDetails): string {
 .btn-primary {
   display: inline-flex;
   align-items: center;
-  background: #CA8A04;
+  background: #ca8a04;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -217,15 +224,17 @@ function seatsLabel(order: OrderWithDetails): string {
 }
 
 .ticket-card {
-  background: #1E1B4B;
-  border: 1px solid #312E81;
+  background: #1e1b4b;
+  border: 1px solid #312e81;
   border-radius: 12px;
   overflow: hidden;
   transition: box-shadow 0.2s;
 }
 
 .ticket-card:hover {
-  box-shadow: 0 0 0 1px #CA8A04, 0 4px 24px rgba(202, 138, 4, 0.12);
+  box-shadow:
+    0 0 0 1px #ca8a04,
+    0 4px 24px rgba(202, 138, 4, 0.12);
 }
 
 .ticket-header {
@@ -245,7 +254,7 @@ function seatsLabel(order: OrderWithDetails): string {
 .ticket-event-name {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #F8FAFC;
+  color: #f8fafc;
   line-height: 1.3;
 }
 
@@ -286,7 +295,7 @@ function seatsLabel(order: OrderWithDetails): string {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #0F0F23;
+  background: #0f0f23;
   flex-shrink: 0;
   position: relative;
   z-index: 1;
@@ -302,7 +311,7 @@ function seatsLabel(order: OrderWithDetails): string {
 
 .perf-line {
   flex: 1;
-  border-top: 2px dashed #312E81;
+  border-top: 2px dashed #312e81;
 }
 
 /* Cos del ticket */
@@ -333,13 +342,13 @@ function seatsLabel(order: OrderWithDetails): string {
 .ticket-category {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #F8FAFC;
+  color: #f8fafc;
 }
 
 .ticket-total {
   font-size: 1rem;
   font-weight: 700;
-  color: #CA8A04;
+  color: #ca8a04;
 }
 
 /* Peu */
@@ -364,7 +373,7 @@ function seatsLabel(order: OrderWithDetails): string {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid #312E81;
+    border-top: 1px solid #312e81;
     padding-top: 0.5rem;
     margin-top: 0.25rem;
   }

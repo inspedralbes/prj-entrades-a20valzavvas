@@ -1,7 +1,7 @@
 // Provide a functional localStorage implementation for the happy-dom test environment
 const _store: Record<string, string> = {};
 
-Object.defineProperty(globalThis, "localStorage", {
+Object.defineProperty(globalThis, 'localStorage', {
   value: {
     getItem: (key: string): string | null => _store[key] ?? null,
     setItem: (key: string, value: string) => {
@@ -16,8 +16,7 @@ Object.defineProperty(globalThis, "localStorage", {
     get length() {
       return Object.keys(_store).length;
     },
-    key: (index: number): string | null =>
-      Object.keys(_store)[index] ?? null,
+    key: (index: number): string | null => Object.keys(_store)[index] ?? null,
   },
   writable: true,
   configurable: true,

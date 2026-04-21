@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
+import { useAuthStore } from '~/stores/auth';
 
 definePageMeta({ middleware: [] });
 
 const authStore = useAuthStore();
 
-const name = ref("");
-const email = ref("");
-const password = ref("");
-const passwordConfirmation = ref("");
+const name = ref('');
+const email = ref('');
+const password = ref('');
+const passwordConfirmation = ref('');
 const isLoading = ref(false);
 const errors = ref<Record<string, string>>({});
 
 onMounted(() => {
   if (authStore.isAuthenticated) {
-    navigateTo("/");
+    navigateTo('/');
   }
 });
 
@@ -23,7 +23,7 @@ async function submit() {
 
   if (password.value !== passwordConfirmation.value) {
     errors.value = {
-      password_confirmation: "Les contrasenyes no coincideixen",
+      password_confirmation: 'Les contrasenyes no coincideixen',
     };
     return;
   }
@@ -36,7 +36,7 @@ async function submit() {
       password: password.value,
       password_confirmation: passwordConfirmation.value,
     });
-    await navigateTo("/");
+    await navigateTo('/');
   } catch (err: any) {
     const serverErrors: Record<string, string[]> = err?.data?.errors ?? {};
     const mapped: Record<string, string> = {};
@@ -62,24 +62,12 @@ async function submit() {
       <form v-if="!authStore.isAuthenticated" @submit.prevent="submit">
         <div class="field">
           <label for="name">Nom</label>
-          <input
-            id="name"
-            v-model="name"
-            type="text"
-            required
-            autocomplete="name"
-          />
+          <input id="name" v-model="name" type="text" required autocomplete="name" />
           <span v-if="errors.name" class="field-error">{{ errors.name }}</span>
         </div>
         <div class="field">
           <label for="email">Email</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            required
-            autocomplete="email"
-          />
+          <input id="email" v-model="email" type="email" required autocomplete="email" />
           <span v-if="errors.email" class="field-error">{{ errors.email }}</span>
         </div>
         <div class="field">
@@ -92,9 +80,7 @@ async function submit() {
             minlength="8"
             autocomplete="new-password"
           />
-          <span v-if="errors.password" class="field-error">{{
-            errors.password
-          }}</span>
+          <span v-if="errors.password" class="field-error">{{ errors.password }}</span>
         </div>
         <div class="field">
           <label for="password_confirmation">Confirma la contrasenya</label>
@@ -110,7 +96,7 @@ async function submit() {
           }}</span>
         </div>
         <button type="submit" :disabled="isLoading">
-          {{ isLoading ? "Carregant..." : "Registrar-se" }}
+          {{ isLoading ? 'Carregant...' : 'Registrar-se' }}
         </button>
       </form>
       <template v-if="!authStore.isAuthenticated">
@@ -187,7 +173,7 @@ async function submit() {
   color: var(--color-error);
 }
 
-button[type="submit"] {
+button[type='submit'] {
   width: 100%;
   padding: 0.625rem 1rem;
   background: var(--color-accent-primary);
@@ -202,11 +188,11 @@ button[type="submit"] {
   transition: background-color 0.15s ease;
 }
 
-button[type="submit"]:hover:not(:disabled) {
+button[type='submit']:hover:not(:disabled) {
   background: var(--color-accent-primary-hover);
 }
 
-button[type="submit"]:disabled {
+button[type='submit']:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

@@ -1,7 +1,7 @@
 export enum EstatSeient {
-  DISPONIBLE = "DISPONIBLE",
-  RESERVAT = "RESERVAT",
-  VENUT = "VENUT",
+  DISPONIBLE = 'DISPONIBLE',
+  RESERVAT = 'RESERVAT',
+  VENUT = 'VENUT',
 }
 
 export interface ISeient {

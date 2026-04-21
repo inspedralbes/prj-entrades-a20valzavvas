@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+import { defineStore } from 'pinia';
 
 export interface AuthUser {
   id: string;
@@ -12,10 +12,10 @@ interface AuthState {
   user: AuthUser | null;
 }
 
-const TOKEN_KEY = "auth_token";
-const USER_KEY = "auth_user";
+const TOKEN_KEY = 'auth_token';
+const USER_KEY = 'auth_user';
 
-export const useAuthStore = defineStore("auth", {
+export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     token: null,
     user: null,
@@ -27,13 +27,10 @@ export const useAuthStore = defineStore("auth", {
 
   actions: {
     async login(credentials: { email: string; password: string }) {
-      const data = await $fetch<{ token: string; user: AuthUser }>(
-        "/api/auth/login",
-        {
-          method: "POST",
-          body: credentials,
-        },
-      );
+      const data = await $fetch<{ token: string; user: AuthUser }>('/api/auth/login', {
+        method: 'POST',
+        body: credentials,
+      });
       this.token = data.token;
       this.user = data.user;
       if (import.meta.client) {
@@ -48,8 +45,8 @@ export const useAuthStore = defineStore("auth", {
       password: string;
       password_confirmation: string;
     }) {
-      await $fetch("/api/auth/register", {
-        method: "POST",
+      await $fetch('/api/auth/register', {
+        method: 'POST',
         body: payload,
       });
       await this.login({ email: payload.email, password: payload.password });

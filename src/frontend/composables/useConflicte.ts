@@ -1,7 +1,7 @@
-import { ref } from "vue";
-import { EstatSeient } from "@shared/seat.types";
-import type { ReservaRebutjadaPayload } from "@shared/socket.types";
-import { useSeientStore } from "~/stores/seients";
+import { ref } from 'vue';
+import { EstatSeient } from '@shared/seat.types';
+import type { ReservaRebutjadaPayload } from '@shared/socket.types';
+import { useSeientStore } from '~/stores/seients';
 
 /** Public interface exposed by useConflicte(). */
 export interface ConflicteToast {
@@ -37,7 +37,7 @@ export function handleReservaRebutjada(payload: ReservaRebutjadaPayload): void {
   const seat = seients.llistat.get(payload.seatId);
   const missatge = seat
     ? `El seient ${seat.fila}${seat.numero} acaba de ser reservat. Escull un altre seient.`
-    : "Un seient acaba de ser reservat. Escull un altre seient.";
+    : 'Un seient acaba de ser reservat. Escull un altre seient.';
 
   // Reset any running dismiss timer (second conflict restarts the 4s window)
   if (dismissTimer !== null) {

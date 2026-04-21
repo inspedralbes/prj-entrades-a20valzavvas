@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { useConnexioStore } from "~/stores/connexio";
+import { computed } from 'vue';
+import { useConnexioStore } from '~/stores/connexio';
 
 const connexio = useConnexioStore();
 
-const colorClass = computed(() =>
-  connexio.estat === "connectat" ? "bg-green-500" : "bg-red-500",
-);
+const colorClass = computed(() => (connexio.estat === 'connectat' ? 'bg-green-500' : 'bg-red-500'));
 
 const text = computed(() => {
-  if (connexio.estat === "connectat") return "Connectat";
-  if (connexio.estat === "reconnectant") return "Reconnectant…";
-  return "Desconnectat";
+  if (connexio.estat === 'connectat') return 'Connectat';
+  if (connexio.estat === 'reconnectant') return 'Reconnectant…';
+  return 'Desconnectat';
 });
 </script>
 
@@ -21,6 +19,7 @@ const text = computed(() => {
     <span
       class="text-xs font-medium"
       :class="connexio.estat === 'connectat' ? 'text-green-400' : 'text-red-400'"
-    >{{ text }}</span>
+      >{{ text }}</span
+    >
   </div>
 </template>

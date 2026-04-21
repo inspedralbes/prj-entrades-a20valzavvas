@@ -1,33 +1,25 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
+import { useAuthStore } from '~/stores/auth';
 
 const authStore = useAuthStore();
 
-const isAdmin = computed(() => authStore.user?.role === "admin");
+const isAdmin = computed(() => authStore.user?.role === 'admin');
 
 async function logout() {
   authStore.logout();
-  await navigateTo("/auth/login");
+  await navigateTo('/auth/login');
 }
 </script>
 
 <template>
   <nav class="app-navbar">
     <div class="navbar-inner">
-      <NuxtLink
-        to="/"
-        class="navbar-logo"
-        exact-active-class="navbar-logo--active"
-      >
+      <NuxtLink to="/" class="navbar-logo" exact-active-class="navbar-logo--active">
         SALA ONIRICA
       </NuxtLink>
 
       <div class="navbar-links">
-        <NuxtLink
-          to="/"
-          class="navbar-link"
-          exact-active-class="navbar-link--active"
-        >
+        <NuxtLink to="/" class="navbar-link" exact-active-class="navbar-link--active">
           Events
         </NuxtLink>
 
@@ -61,17 +53,11 @@ async function logout() {
 
           <span class="navbar-greeting">Hola, {{ authStore.user?.name }}</span>
 
-          <button class="navbar-logout" type="button" @click="logout">
-            Tancar sessió
-          </button>
+          <button class="navbar-logout" type="button" @click="logout">Tancar sessió</button>
         </template>
 
         <template v-else>
-          <NuxtLink
-            to="/auth/login"
-            class="navbar-link"
-            active-class="navbar-link--active"
-          >
+          <NuxtLink to="/auth/login" class="navbar-link" active-class="navbar-link--active">
             Iniciar sessió
           </NuxtLink>
           <NuxtLink

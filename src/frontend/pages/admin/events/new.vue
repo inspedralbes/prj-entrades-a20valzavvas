@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
+import { useAuthStore } from '~/stores/auth';
 
-definePageMeta({ middleware: "admin", ssr: false });
+definePageMeta({ middleware: 'admin', ssr: false });
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -13,14 +13,14 @@ interface PriceCategory {
   seats_per_row: number | null;
 }
 
-const name = ref("");
-const slug = ref("");
-const description = ref("");
-const date = ref("");
-const venue = ref("");
+const name = ref('');
+const slug = ref('');
+const description = ref('');
+const date = ref('');
+const venue = ref('');
 const maxSeientPerUsuari = ref<number>(4);
 const priceCategories = ref<PriceCategory[]>([
-  { name: "", price: null, rows: "", seats_per_row: null },
+  { name: '', price: null, rows: '', seats_per_row: null },
 ]);
 
 const slugError = ref<string | null>(null);
@@ -33,7 +33,7 @@ const overlappingRows = computed<Set<string>>(() => {
   const duplicates = new Set<string>();
   priceCategories.value.forEach((cat, catIdx) => {
     const rows = cat.rows
-      .split(",")
+      .split(',')
       .map((r) => r.trim().toUpperCase())
       .filter(Boolean);
     for (const row of rows) {
@@ -50,7 +50,7 @@ const overlappingRows = computed<Set<string>>(() => {
 /** Returns the overlapping rows that belong to the given category */
 function overlapsForCategory(cat: PriceCategory): string[] {
   const rows = cat.rows
-    .split(",")
+    .split(',')
     .map((r) => r.trim().toUpperCase())
     .filter(Boolean);
   return rows.filter((r) => overlappingRows.value.has(r));
@@ -65,18 +65,18 @@ watch(name, (newName) => {
 function toSlug(value: string): string {
   return value
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
     .trim()
-    .replace(/\s+/g, "-");
+    .replace(/\s+/g, '-');
 }
 
 function addCategory() {
   priceCategories.value.push({
-    name: "",
+    name: '',
     price: null,
-    rows: "",
+    rows: '',
     seats_per_row: null,
   });
 }
@@ -106,7 +106,7 @@ async function submit() {
       name: cat.name,
       price: cat.price,
       rows: cat.rows
-        .split(",")
+        .split(',')
         .map((r) => r.trim())
         .filter(Boolean),
       seats_per_row: cat.seats_per_row,
@@ -114,15 +114,15 @@ async function submit() {
   };
 
   try {
-    await $fetch("/api/admin/events", {
-      method: "POST",
+    await $fetch('/api/admin/events', {
+      method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: payload,
     });
-    await router.push("/admin/events");
+    await router.push('/admin/events');
   } catch (err: any) {
     if (err?.response?.status === 409) {
-      slugError.value = "Slug already exists";
+      slugError.value = 'Slug already exists';
     } else if (err?.response?.status === 422) {
       serverErrors.value = err?.data?.errors ?? {};
     }
@@ -143,11 +143,7 @@ async function submit() {
           stroke-width="2"
           aria-hidden="true"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M15.75 19.5 8.25 12l7.5-7.5"
-          />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
         </svg>
         Tornar
       </NuxtLink>
@@ -168,9 +164,7 @@ async function submit() {
             required
             :class="{ 'input-error': serverErrors.name }"
           />
-          <span v-if="serverErrors.name" class="error-message">{{
-            serverErrors.name[0]
-          }}</span>
+          <span v-if="serverErrors.name" class="error-message">{{ serverErrors.name[0] }}</span>
         </div>
 
         <div class="field">
@@ -205,9 +199,7 @@ async function submit() {
               required
               :class="{ 'input-error': serverErrors.date }"
             />
-            <span v-if="serverErrors.date" class="error-message">{{
-              serverErrors.date[0]
-            }}</span>
+            <span v-if="serverErrors.date" class="error-message">{{ serverErrors.date[0] }}</span>
           </div>
 
           <div class="field">
@@ -219,9 +211,7 @@ async function submit() {
               required
               :class="{ 'input-error': serverErrors.venue }"
             />
-            <span v-if="serverErrors.venue" class="error-message">{{
-              serverErrors.venue[0]
-            }}</span>
+            <span v-if="serverErrors.venue" class="error-message">{{ serverErrors.venue[0] }}</span>
           </div>
         </div>
 
@@ -235,10 +225,7 @@ async function submit() {
             required
             :class="{ 'input-error': serverErrors.max_seients_per_usuari }"
           />
-          <span
-            v-if="serverErrors.max_seients_per_usuari"
-            class="error-message"
-          >
+          <span v-if="serverErrors.max_seients_per_usuari" class="error-message">
             {{ serverErrors.max_seients_per_usuari[0] }}
           </span>
         </div>
@@ -256,21 +243,13 @@ async function submit() {
               stroke-width="2"
               aria-hidden="true"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 4.5v15m7.5-7.5h-15"
-              />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             Afegir categoria
           </button>
         </div>
 
-        <div
-          v-for="(cat, index) in priceCategories"
-          :key="index"
-          class="category-block"
-        >
+        <div v-for="(cat, index) in priceCategories" :key="index" class="category-block">
           <div class="category-block-header">
             <span class="category-index">Categoria {{ index + 1 }}</span>
             <button
@@ -299,12 +278,7 @@ async function submit() {
           <div class="field-row">
             <div class="field">
               <label>Nom *</label>
-              <input
-                v-model="cat.name"
-                type="text"
-                required
-                placeholder="ex: General, VIP..."
-              />
+              <input v-model="cat.name" type="text" required placeholder="ex: General, VIP..." />
             </div>
             <div class="field field--narrow">
               <label>Preu (€) *</label>
@@ -328,13 +302,10 @@ async function submit() {
                 placeholder="A,B,C"
                 :class="{ 'input-error': overlapsForCategory(cat).length > 0 }"
               />
-              <span
-                v-if="overlapsForCategory(cat).length > 0"
-                class="error-message"
-              >
+              <span v-if="overlapsForCategory(cat).length > 0" class="error-message">
                 Les files
-                <strong>{{ overlapsForCategory(cat).join(", ") }}</strong> ja
-                estan assignades a una altra categoria.
+                <strong>{{ overlapsForCategory(cat).join(', ') }}</strong> ja estan assignades a una
+                altra categoria.
               </span>
               <span v-else class="field-hint">Separades per comes</span>
             </div>
@@ -360,7 +331,7 @@ async function submit() {
           class="btn-submit"
           :disabled="isSubmitting || overlappingRows.size > 0"
         >
-          {{ isSubmitting ? "Creant..." : "Crear Esdeveniment" }}
+          {{ isSubmitting ? 'Creant...' : 'Crear Esdeveniment' }}
         </button>
       </div>
     </form>
@@ -504,7 +475,7 @@ async function submit() {
 }
 
 /* datetime-local color fix */
-.field input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+.field input[type='datetime-local']::-webkit-calendar-picker-indicator {
   filter: invert(0.7);
   cursor: pointer;
 }

@@ -1,10 +1,10 @@
-import { defineStore } from "pinia";
+import { defineStore } from 'pinia';
 
-type ConnexioEstat = "connectat" | "desconnectat" | "reconnectant";
+type ConnexioEstat = 'connectat' | 'desconnectat' | 'reconnectant';
 
-export const useConnexioStore = defineStore("connexio", {
+export const useConnexioStore = defineStore('connexio', {
   state: () => ({
-    estat: "desconnectat" as ConnexioEstat,
+    estat: 'desconnectat' as ConnexioEstat,
   }),
 
   actions: {
@@ -15,20 +15,20 @@ export const useConnexioStore = defineStore("connexio", {
         off: (event: string) => void;
       };
 
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.off("reconnect_attempt");
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.off('reconnect_attempt');
 
-      socket.on("connect", () => {
-        this.estat = "connectat";
+      socket.on('connect', () => {
+        this.estat = 'connectat';
       });
 
-      socket.on("disconnect", () => {
-        this.estat = "desconnectat";
+      socket.on('disconnect', () => {
+        this.estat = 'desconnectat';
       });
 
-      socket.on("reconnect_attempt", () => {
-        this.estat = "reconnectant";
+      socket.on('reconnect_attempt', () => {
+        this.estat = 'reconnectant';
       });
     },
   },

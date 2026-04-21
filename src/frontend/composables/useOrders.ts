@@ -1,4 +1,4 @@
-import { useAuthStore } from "~/stores/auth";
+import { useAuthStore } from '~/stores/auth';
 
 export interface OrderEvent {
   id: string;
@@ -41,12 +41,12 @@ export function useOrders() {
     isLoading.value = true;
     error.value = null;
     try {
-      orders.value = await $fetch<OrderWithDetails[]>("/api/orders", {
+      orders.value = await $fetch<OrderWithDetails[]>('/api/orders', {
         headers: { Authorization: `Bearer ${authStore.token}` },
       });
     } catch (err: unknown) {
       const apiError = err as { data?: { message?: string } };
-      error.value = apiError?.data?.message ?? "Error en carregar les entrades";
+      error.value = apiError?.data?.message ?? 'Error en carregar les entrades';
     } finally {
       isLoading.value = false;
     }

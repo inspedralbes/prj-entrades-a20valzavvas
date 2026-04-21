@@ -1,4 +1,4 @@
-import { EstatSeient } from "./seat.types";
+import { EstatSeient } from './seat.types';
 
 // Server → Room broadcasts
 export interface SeientCanviEstatPayload {

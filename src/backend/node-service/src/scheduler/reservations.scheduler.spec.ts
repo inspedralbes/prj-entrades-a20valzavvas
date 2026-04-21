@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ReservationsScheduler } from "./reservations.scheduler";
-import { LaravelClientService } from "../laravel-client/laravel-client.service";
-import { SeatsGateway } from "../gateway/seats.gateway";
-import { Logger } from "@nestjs/common";
-import { EstatSeient } from "shared/types/seat.types";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ReservationsScheduler } from './reservations.scheduler';
+import { LaravelClientService } from '../laravel-client/laravel-client.service';
+import { SeatsGateway } from '../gateway/seats.gateway';
+import { Logger } from '@nestjs/common';
+import { EstatSeient } from 'shared/types/seat.types';
 
 function createMockLaravelClient() {
   return {
@@ -23,7 +23,7 @@ function createMockSeatsGateway() {
   };
 }
 
-describe("ReservationsScheduler", () => {
+describe('ReservationsScheduler', () => {
   let scheduler: ReservationsScheduler;
   let laravelClient: LaravelClientService;
   let seatsGateway: SeatsGateway;
@@ -39,41 +39,41 @@ describe("ReservationsScheduler", () => {
     scheduler = new ReservationsScheduler(laravelClient, seatsGateway);
 
     // Suppress logger output in tests
-    vi.spyOn(Logger.prototype, "log").mockImplementation(() => {});
-    vi.spyOn(Logger.prototype, "error").mockImplementation(() => {});
+    vi.spyOn(Logger.prototype, 'log').mockImplementation(() => {});
+    vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
   });
 
-  it("emits seient:canvi-estat for each released seat", async () => {
+  it('emits seient:canvi-estat for each released seat', async () => {
     vi.mocked(laravelClient.releaseExpiredReservations).mockResolvedValue({
-      released: [{ seatId: "seat-A1", eventId: "event-E1" }],
+      released: [{ seatId: 'seat-A1', eventId: 'event-E1' }],
     });
 
     await scheduler.releaseExpired();
 
-    expect(toMock).toHaveBeenCalledWith("event:event-E1");
-    expect(emitMock).toHaveBeenCalledWith("seient:canvi-estat", {
-      seatId: "seat-A1",
+    expect(toMock).toHaveBeenCalledWith('event:event-E1');
+    expect(emitMock).toHaveBeenCalledWith('seient:canvi-estat', {
+      seatId: 'seat-A1',
       estat: EstatSeient.DISPONIBLE,
     });
     expect(emitMock).toHaveBeenCalledTimes(1);
   });
 
-  it("emits one broadcast per released seat across different events", async () => {
+  it('emits one broadcast per released seat across different events', async () => {
     vi.mocked(laravelClient.releaseExpiredReservations).mockResolvedValue({
       released: [
-        { seatId: "seat-B2", eventId: "event-E1" },
-        { seatId: "seat-C3", eventId: "event-E2" },
+        { seatId: 'seat-B2', eventId: 'event-E1' },
+        { seatId: 'seat-C3', eventId: 'event-E2' },
       ],
     });
 
     await scheduler.releaseExpired();
 
-    expect(toMock).toHaveBeenCalledWith("event:event-E1");
-    expect(toMock).toHaveBeenCalledWith("event:event-E2");
+    expect(toMock).toHaveBeenCalledWith('event:event-E1');
+    expect(toMock).toHaveBeenCalledWith('event:event-E2');
     expect(emitMock).toHaveBeenCalledTimes(2);
   });
 
-  it("does not call emit when no expired reservations", async () => {
+  it('does not call emit when no expired reservations', async () => {
     vi.mocked(laravelClient.releaseExpiredReservations).mockResolvedValue({
       released: [],
     });
@@ -84,13 +84,11 @@ describe("ReservationsScheduler", () => {
     expect(toMock).not.toHaveBeenCalled();
   });
 
-  it("logs error and does not rethrow when LaravelClientService throws", async () => {
+  it('logs error and does not rethrow when LaravelClientService throws', async () => {
     vi.mocked(laravelClient.releaseExpiredReservations).mockRejectedValue(
-      new Error("Laravel unreachable"),
+      new Error('Laravel unreachable'),
     );
-    const loggerErrorSpy = vi
-      .spyOn(Logger.prototype, "error")
-      .mockImplementation(() => {});
+    const loggerErrorSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
 
     await expect(scheduler.releaseExpired()).resolves.toBeUndefined();
 
