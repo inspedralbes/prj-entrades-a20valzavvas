@@ -1,0 +1,14 @@
+.env
+.env.*
+.git/
+.gitignore
+.DS_Store
+*.log
+/node_modules
+/vendor
+/public/storage
+/storage/pail
+/.phpunit.cache
+/tests
+Dockerfile
+Dockerfile.prod

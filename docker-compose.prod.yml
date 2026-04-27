@@ -53,6 +53,7 @@ services:
 
   # ── Laravel Service ────────────────────────────────────────────────────────
   laravel-service:
+    image: ghcr.io/inspedralbes/prj-entrades-a20valzavvas-laravel:latest
     build:
       context: ./src/backend/laravel-service
       dockerfile: Dockerfile
