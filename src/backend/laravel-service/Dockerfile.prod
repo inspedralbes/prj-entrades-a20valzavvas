@@ -1,0 +1,29 @@
+# Stage 1: install Composer dependencies
+FROM composer:2 AS builder
+
+WORKDIR /app
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --optimize-autoloader
+
+COPY . .
+RUN composer dump-autoload --optimize
+
+# Stage 2: lean production runtime (no Composer, no dev tools)
+FROM php:8.4-cli-alpine
+
+RUN apk add --no-cache libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql
+
+WORKDIR /var/www/html
+
+COPY --from=builder /app /var/www/html
+
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+EXPOSE 8000
+
+ENTRYPOINT ["docker-entrypoint.sh"]
